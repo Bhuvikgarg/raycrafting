@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { DatabaseSync } = require("node:sqlite");
+const { OAuth2Client } = require("google-auth-library");
 
 function loadDotEnv() {
   const file = path.join(__dirname, ".env");
@@ -28,6 +29,8 @@ const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || "";
 const SUPPORT_EMAIL = process.env.RAYCRAFTING_SUPPORT_EMAIL || "hello@raycrafting.co";
 const SUPPORT_PHONE = process.env.RAYCRAFTING_SUPPORT_PHONE || "";
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const db = new DatabaseSync(path.join(DATA_DIR, "raycrafting.sqlite"));
@@ -40,6 +43,7 @@ db.exec(`
     phone TEXT,
     password_hash TEXT NOT NULL,
     password_salt TEXT NOT NULL,
+    avatar_url TEXT,
     created_at TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS sessions (
@@ -113,6 +117,7 @@ ensureColumn("orders", "payment_method", "TEXT NOT NULL DEFAULT 'razorpay'");
 ensureColumn("orders", "failure_reason", "TEXT");
 ensureColumn("orders", "decision_reason", "TEXT");
 ensureColumn("orders", "customer_request_reason", "TEXT");
+ensureColumn("customers", "avatar_url", "TEXT");
 
 const defaultProducts = [];
 const productInsert = db.prepare(`INSERT OR IGNORE INTO products (id,name,category,price,original_price,detail,description,featured,art,image) VALUES (?,?,?,?,?,?,?,?,?,?)`);
@@ -129,7 +134,7 @@ const SECURITY_HEADERS = {
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-  "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com; frame-src https://checkout.razorpay.com https://api.razorpay.com; connect-src 'self' https://api.razorpay.com; form-action 'self'"
+  "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://accounts.google.com; frame-src https://checkout.razorpay.com https://api.razorpay.com https://accounts.google.com; connect-src 'self' https://api.razorpay.com https://accounts.google.com; form-action 'self'"
 };
 function json(res, status, data) {
   const body = JSON.stringify(data);
@@ -186,7 +191,7 @@ function customerFromRequest(req) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
   if (!token || token.length > 128) return null;
-  const row = db.prepare(`SELECT c.id,c.name,c.email,c.phone FROM sessions s JOIN customers c ON c.id=s.customer_id WHERE s.token=? AND s.expires_at>?`).get(token, now());
+  const row = db.prepare(`SELECT c.id,c.name,c.email,c.phone,c.avatar_url AS avatarUrl FROM sessions s JOIN customers c ON c.id=s.customer_id WHERE s.token=? AND s.expires_at>?`).get(token, now());
   return row ? { ...row, token } : null;
 }
 function requireAdmin(req) { return Boolean(adminTokenFromRequest(req)); }
@@ -242,7 +247,7 @@ function serveStatic(req, res, pathname) {
 
 async function api(req, res, pathname, body) {
   try {
-    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE });
+    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null });
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
@@ -263,13 +268,36 @@ async function api(req, res, pathname, body) {
       if (!name || name.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || password.length < 8 || password.length > 256) return json(res, 400, { error: "Enter a valid name, email, and password between 8 and 256 characters." });
       if (db.prepare("SELECT id FROM customers WHERE email=?").get(email)) return json(res, 409, { error: "An account with that email already exists." });
       const customerId = id("cus"); const secret = hashPassword(password); db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,created_at) VALUES (?,?,?,?,?,?,?)").run(customerId, name, email, String(body.phone || "").trim(), secret.hash, secret.salt, now());
-      return json(res, 201, { token: issueSession(customerId), customer: { id: customerId, name, email, phone: String(body.phone || "").trim() } });
+      return json(res, 201, { token: issueSession(customerId), customer: { id: customerId, name, email, phone: String(body.phone || "").trim(), avatarUrl: "" } });
     }
     if (req.method === "POST" && pathname === "/api/auth/login") {
       if (!allowRequest(req, "login", 12)) return json(res, 429, { error: "Too many login attempts. Try again later." });
       const email = String(body.email || "").trim().toLowerCase(); const row = db.prepare("SELECT * FROM customers WHERE email=?").get(email);
       if (!row || !validPassword(String(body.password || ""), row.password_salt, row.password_hash)) return json(res, 401, { error: "Email or password is incorrect." });
-      return json(res, 200, { token: issueSession(row.id), customer: { id: row.id, name: row.name, email: row.email, phone: row.phone } });
+      return json(res, 200, { token: issueSession(row.id), customer: { id: row.id, name: row.name, email: row.email, phone: row.phone, avatarUrl: row.avatar_url || "" } });
+    }
+    if (req.method === "POST" && pathname === "/api/auth/google") {
+      if (!allowRequest(req, "google-login", 12)) return json(res, 429, { error: "Too many sign-in attempts. Try again later." });
+      if (!googleClient) return json(res, 503, { error: "Google sign-in is not configured yet." });
+      const credential = String(body.credential || "");
+      if (!credential || credential.length > 20000) return json(res, 400, { error: "The Google sign-in response is invalid." });
+      let payload;
+      try { payload = (await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID })).getPayload() || {}; } catch { return json(res, 401, { error: "Google sign-in could not be verified." }); }
+      if (!payload.email || payload.email_verified !== true) return json(res, 401, { error: "Google could not verify this email address." });
+      const email = String(payload.email).trim().toLowerCase();
+      let row = db.prepare("SELECT * FROM customers WHERE email=?").get(email);
+      if (!row) {
+        const customerId = id("cus");
+        const secret = hashPassword(crypto.randomBytes(32).toString("hex"));
+        const name = String(payload.name || email.split("@")[0]).trim().slice(0, 120) || "Raycrafting customer";
+        const avatarUrl = String(payload.picture || "").slice(0, 1000);
+        db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,avatar_url,created_at) VALUES (?,?,?,?,?,?,?,?)").run(customerId, name, email, "", secret.hash, secret.salt, avatarUrl, now());
+        row = db.prepare("SELECT * FROM customers WHERE id=?").get(customerId);
+      } else if (!row.avatar_url && payload.picture) {
+        db.prepare("UPDATE customers SET avatar_url=? WHERE id=?").run(String(payload.picture).slice(0, 1000), row.id);
+        row.avatar_url = String(payload.picture).slice(0, 1000);
+      }
+      return json(res, 200, { token: issueSession(row.id), customer: { id: row.id, name: row.name, email: row.email, phone: row.phone, avatarUrl: row.avatar_url || "" } });
     }
     if (req.method === "GET" && pathname === "/api/me") { const customer = customerFromRequest(req); return customer ? json(res, 200, { customer }) : json(res, 401, { error: "Sign in required." }); }
     if (req.method === "POST" && pathname === "/api/auth/logout") { const customer = customerFromRequest(req); if (customer) db.prepare("DELETE FROM sessions WHERE token=?").run(customer.token); return json(res, 200, { ok: true }); }

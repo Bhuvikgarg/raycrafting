@@ -14,10 +14,10 @@
     <div class="announcement">Free shipping on orders over ₹45 <span aria-hidden="true">✳</span> Handmade in small batches</div>
 
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="Raycrafting home">
+      <button class="brand brand-button" id="sellerAboutButton" type="button" aria-label="About Raycrafting">
         <span class="brand-mark" aria-hidden="true"><span>R</span></span>
         <span class="brand-name">Raycrafting</span>
-      </a>
+      </button>
 
       <nav class="main-nav" aria-label="Main navigation">
         <a href="#shop">Shop</a>
@@ -29,6 +29,7 @@
         <button class="icon-button" id="searchToggle" type="button" aria-label="Open search" title="Search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg>
         </button>
+        <div class="profile-area"><button class="profile-button" id="profileButton" type="button" aria-label="Open account menu"><span class="profile-avatar" id="profileAvatar">?</span><span class="profile-label" id="profileLabel">Account</span></button><div class="profile-menu" id="profileMenu" hidden><p class="profile-menu-label" id="profileMenuLabel">Your Raycrafting account</p><button type="button" data-profile-action="account">Account overview</button><button type="button" data-profile-action="orders">My orders</button><button type="button" data-profile-action="settings">Settings & privacy</button><a href="mailto:hello@raycrafting.co?subject=Raycrafting%20support">Help & support</a><button type="button" data-profile-action="about">About the studio</button><button type="button" data-profile-action="auth" id="profileAuthAction">Sign in / create account</button></div></div>
         <button class="cart-button" id="cartToggle" type="button" aria-label="Open cart">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.6 10.2a2 2 0 0 0 2 1.8h7.8a2 2 0 0 0 1.9-1.5L21 8H7"></path><circle cx="10" cy="20" r="1.2"></circle><circle cx="18" cy="20" r="1.2"></circle></svg>
           <span>Bag</span><b id="cartCount">0</b>
