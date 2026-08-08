@@ -20,7 +20,9 @@ loadDotEnv();
 const ROOT = __dirname;
 const DATA_DIR = process.env.RAYCRAFTING_DATA_DIR || path.join(ROOT, "data");
 const PORT = Number(process.env.PORT || process.env.RAYCRAFTING_PORT || 4173);
-const ADMIN_PIN = process.env.RAYCRAFTING_ADMIN_PIN || "raycrafting";
+const ADMIN_PIN = process.env.RAYCRAFTING_ADMIN_PIN || "";
+const ADMIN_SESSIONS = new Map();
+const RATE_LIMITS = new Map();
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || "";
@@ -129,16 +131,23 @@ couponInsert.run("WELCOME15", "percent", 15, 500);
 
 function now() { return new Date().toISOString(); }
 function id(prefix) { return `${prefix}_${crypto.randomBytes(8).toString("hex")}`; }
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com; frame-src https://checkout.razorpay.com https://api.razorpay.com; connect-src 'self' https://api.razorpay.com; form-action 'self'"
+};
 function json(res, status, data) {
   const body = JSON.stringify(data);
-  res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  res.writeHead(status, { ...SECURITY_HEADERS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
   res.end(body);
 }
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let raw = "";
     req.on("data", (chunk) => { raw += chunk; if (raw.length > 1024 * 1024) reject(new Error("Request too large")); });
-    req.on("end", () => { try { req.rawBody = raw; resolve(raw ? JSON.parse(raw) : {}); } catch { reject(new Error("Invalid JSON")); } });
+    req.on("end", () => { try { req.rawBody = raw; const parsed = raw ? JSON.parse(raw) : {}; resolve(parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {}); } catch { reject(new Error("Invalid JSON")); } });
     req.on("error", reject);
   });
 }
@@ -156,14 +165,38 @@ function issueSession(customerId) {
   db.prepare("INSERT INTO sessions (token,customer_id,expires_at) VALUES (?,?,?)").run(token, customerId, expires);
   return token;
 }
+function requestIp(req) {
+  const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  return forwarded || req.socket.remoteAddress || "unknown";
+}
+function allowRequest(req, bucket, limit, windowMs = 15 * 60 * 1000) {
+  const key = bucket + ":" + requestIp(req);
+  const current = RATE_LIMITS.get(key) || { count: 0, resetAt: Date.now() + windowMs };
+  if (Date.now() > current.resetAt) { current.count = 0; current.resetAt = Date.now() + windowMs; }
+  current.count += 1;
+  RATE_LIMITS.set(key, current);
+  return current.count <= limit;
+}
+function issueAdminSession() {
+  const token = crypto.randomBytes(32).toString("hex");
+  ADMIN_SESSIONS.set(token, Date.now() + 1000 * 60 * 60 * 8);
+  return token;
+}
+function adminTokenFromRequest(req) {
+  const token = String(req.headers["x-admin-token"] || "").trim();
+  const expiresAt = ADMIN_SESSIONS.get(token);
+  if (!token || !expiresAt) return "";
+  if (Date.now() > expiresAt) { ADMIN_SESSIONS.delete(token); return ""; }
+  return token;
+}
 function customerFromRequest(req) {
   const header = req.headers.authorization || "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
-  if (!token) return null;
+  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  if (!token || token.length > 128) return null;
   const row = db.prepare(`SELECT c.id,c.name,c.email,c.phone FROM sessions s JOIN customers c ON c.id=s.customer_id WHERE s.token=? AND s.expires_at>?`).get(token, now());
   return row ? { ...row, token } : null;
 }
-function requireAdmin(req) { return req.headers["x-admin-pin"] === ADMIN_PIN; }
+function requireAdmin(req) { return Boolean(adminTokenFromRequest(req)); }
 function calculateCoupon(code, subtotal) {
   if (!code) return { code: "", discount: 0 };
   const coupon = db.prepare("SELECT * FROM coupons WHERE code=? AND active=1").get(String(code).trim().toUpperCase());
@@ -192,15 +225,25 @@ async function razorpayRequest(url, options = {}) {
   if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) throw new Error("Razorpay is not configured. Add test keys to .env first.");
   const response = await fetch(`https://api.razorpay.com/v1${url}`, { ...options, headers: { "Content-Type": "application/json", Authorization: `Basic ${Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString("base64")}`, ...(options.headers || {}) } });
   const data = await response.json();
-  if (!response.ok) { const error = new Error(data.error?.description || "Razorpay request failed."); error.status = response.status === 401 ? 401 : 500; throw error; }
+  if (!response.ok) { const error = new Error(data.error?.description || "Razorpay request failed."); error.status = response.status === 400 || response.status === 404 ? 400 : response.status === 401 ? 401 : 502; throw error; }
   return data;
+}
+async function verifyCapturedPayment(paymentId, orderId) {
+  const payment = await razorpayRequest("/payments/" + encodeURIComponent(paymentId));
+  if (payment.order_id !== orderId || payment.status !== "captured") {
+    const error = new Error("Razorpay payment was not captured for this order.");
+    error.status = 400;
+    throw error;
+  }
+  return payment;
 }
 function serveStatic(req, res, pathname) {
   const requested = pathname === "/" ? "/index.html" : pathname;
   const file = path.normalize(path.join(ROOT, requested));
-  if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return json(res, 404, { error: "Not found" });
+  const relative = path.relative(ROOT, file);
+  if (relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return json(res, 404, { error: "Not found" });
   const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".json": "application/json" };
-  res.writeHead(200, { "Content-Type": types[path.extname(file)] || "application/octet-stream" });
+  res.writeHead(200, { ...SECURITY_HEADERS, "Content-Type": types[path.extname(file)] || "application/octet-stream", "Cache-Control": "public, max-age=300" });
   fs.createReadStream(file).pipe(res);
 }
 
@@ -211,14 +254,26 @@ async function api(req, res, pathname, body) {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
     }
+    if (req.method === "POST" && pathname === "/api/admin/auth") {
+      if (!allowRequest(req, "admin-auth", 8)) return json(res, 429, { error: "Too many attempts. Try again later." });
+      if (!ADMIN_PIN) return json(res, 503, { error: "Seller access is not configured." });
+      if (!safeEqual(String(body.pin || ""), ADMIN_PIN)) return json(res, 401, { error: "That PIN is not correct." });
+      return json(res, 200, { token: issueAdminSession(), expiresIn: 8 * 60 * 60 });
+    }
+    if (req.method === "POST" && pathname === "/api/admin/logout") {
+      const token = adminTokenFromRequest(req); if (token) ADMIN_SESSIONS.delete(token);
+      return json(res, 200, { ok: true });
+    }
     if (req.method === "POST" && pathname === "/api/auth/register") {
+      if (!allowRequest(req, "register", 10)) return json(res, 429, { error: "Too many registration attempts. Try again later." });
       const name = String(body.name || "").trim(); const email = String(body.email || "").trim().toLowerCase(); const password = String(body.password || "");
-      if (!name || !email || password.length < 8) return json(res, 400, { error: "Name, email, and an 8-character password are required." });
+      if (!name || name.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || password.length < 8 || password.length > 256) return json(res, 400, { error: "Enter a valid name, email, and password between 8 and 256 characters." });
       if (db.prepare("SELECT id FROM customers WHERE email=?").get(email)) return json(res, 409, { error: "An account with that email already exists." });
       const customerId = id("cus"); const secret = hashPassword(password); db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,created_at) VALUES (?,?,?,?,?,?,?)").run(customerId, name, email, String(body.phone || "").trim(), secret.hash, secret.salt, now());
       return json(res, 201, { token: issueSession(customerId), customer: { id: customerId, name, email, phone: String(body.phone || "").trim() } });
     }
     if (req.method === "POST" && pathname === "/api/auth/login") {
+      if (!allowRequest(req, "login", 12)) return json(res, 429, { error: "Too many login attempts. Try again later." });
       const email = String(body.email || "").trim().toLowerCase(); const row = db.prepare("SELECT * FROM customers WHERE email=?").get(email);
       if (!row || !validPassword(String(body.password || ""), row.password_salt, row.password_hash)) return json(res, 401, { error: "Email or password is incorrect." });
       return json(res, 200, { token: issueSession(row.id), customer: { id: row.id, name: row.name, email: row.email, phone: row.phone } });
@@ -258,10 +313,13 @@ async function api(req, res, pathname, body) {
       return json(res, 200, { ok: true, orderId: order.id, status: action === "cancel" ? "cancel_requested" : "return_requested" });
     }
     if (req.method === "POST" && pathname === "/api/create-order") {
+      if (!customerFromRequest(req)) return json(res, 401, { error: "Sign in required." });
+      if (!allowRequest(req, "create-order", 20, 60 * 60 * 1000)) return json(res, 429, { error: "Too many payment-order attempts. Try again later." });
       const amount = Number(body.amount);
-      if (!Number.isInteger(amount) || amount < 100) return json(res, 400, { error: "Amount must be an integer of at least 100 paise." });
+      if (!Number.isInteger(amount) || amount < 100 || amount > 10000000) return json(res, 400, { error: "Amount must be an integer between 100 and 10000000 paise." });
       const currency = String(body.currency || "INR").toUpperCase();
-      const receipt = String(body.receipt || ("raycrafting_" + Date.now()));
+      if (currency !== "INR") return json(res, 400, { error: "Only INR payments are supported." });
+      const receipt = String(body.receipt || ("raycrafting_" + Date.now())).slice(0, 40);
       const paymentOrder = await razorpayRequest("/orders", { method: "POST", body: JSON.stringify({ amount, currency, receipt }) });
       return json(res, 200, { order_id: paymentOrder.id, amount: paymentOrder.amount, currency: paymentOrder.currency });
     }
@@ -276,12 +334,16 @@ async function api(req, res, pathname, body) {
       if (!safeEqual(expectedSignature, receivedSignature)) return json(res, 400, { success: false, error: "Payment signature mismatch." });
       const internalOrder = db.prepare("SELECT * FROM orders WHERE razorpay_order_id=? AND customer_id=?").get(orderId, customer.id);
       if (!internalOrder) return json(res, 404, { success: false, error: "Payment order not found." });
+      if (["paid", "processing", "shipped", "delivered", "cancelled", "returned", "declined"].includes(internalOrder.status)) return json(res, 400, { success: false, error: "This order is no longer awaiting payment." });
+      await verifyCapturedPayment(paymentId, orderId);
       db.prepare("UPDATE orders SET status='paid',payment_id=?,failure_reason=NULL,updated_at=? WHERE id=?").run(paymentId, now(), internalOrder.id);
       db.prepare("INSERT INTO payments (order_id,provider,provider_order_id,provider_payment_id,status,raw_json,created_at) VALUES (?,?,?,?,?,?,?)").run(internalOrder.id, "razorpay", orderId, paymentId, "captured", JSON.stringify(body), now());
       return json(res, 200, { success: true, orderId: internalOrder.id, status: "paid" });
     }
     if (req.method === "POST" && pathname === "/api/payments/razorpay/order") {
-      const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." }); const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(body.orderId, customer.id); if (!order) return json(res, 404, { error: "Order not found." });
+      const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." });
+      if (!allowRequest(req, "razorpay-order", 20, 60 * 60 * 1000)) return json(res, 429, { error: "Too many payment-order attempts. Try again later." });
+      const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(String(body.orderId || ""), customer.id); if (!order) return json(res, 404, { error: "Order not found." });
       if (["paid", "processing", "shipped", "delivered", "cancel_requested", "return_requested", "cancelled", "returned", "declined"].includes(order.status)) return json(res, 400, { error: "This order is no longer awaiting payment." });
       const paymentOrder = await razorpayRequest("/orders", { method: "POST", body: JSON.stringify({ amount: Math.round(order.total * 100), currency: "INR", receipt: order.id, notes: { raycrafting_order_id: order.id } }) }); db.prepare("UPDATE orders SET razorpay_order_id=?,updated_at=? WHERE id=?").run(paymentOrder.id, now(), order.id); return json(res, 200, { keyId: RAZORPAY_KEY_ID, orderId: paymentOrder.id, amount: paymentOrder.amount, currency: paymentOrder.currency });
     }
@@ -289,13 +351,21 @@ async function api(req, res, pathname, body) {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." });
       const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(String(body.orderId || ""), customer.id);
       if (!order) return json(res, 404, { error: "Order not found." });
+      if (["paid", "processing", "shipped", "delivered", "cancelled", "returned", "declined"].includes(order.status)) return json(res, 400, { error: "This order is no longer awaiting payment." });
       const reason = String(body.reason || "Payment was not completed.").slice(0, 500);
       db.prepare("UPDATE orders SET status='failed_payment',failure_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
       db.prepare("INSERT INTO payments (order_id,provider,provider_order_id,provider_payment_id,status,raw_json,created_at) VALUES (?,?,?,?,?,?,?)").run(order.id, "razorpay", order.razorpay_order_id || null, body.paymentId || null, "failed", JSON.stringify(body), now());
       return json(res, 200, { ok: true, orderId: order.id, status: "failed_payment" });
     }
     if (req.method === "POST" && pathname === "/api/payments/razorpay/verify") {
-      const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." }); const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(body.orderId, customer.id); if (!order || !order.razorpay_order_id) return json(res, 400, { error: "Payment order is not ready." }); const signature = crypto.createHmac("sha256", RAZORPAY_KEY_SECRET).update(`${order.razorpay_order_id}|${body.paymentId}`).digest("hex"); if (!safeEqual(signature, body.signature)) return json(res, 400, { error: "Payment verification failed." }); db.prepare("UPDATE orders SET status='paid',payment_id=?,failure_reason=NULL,updated_at=? WHERE id=?").run(body.paymentId, now(), order.id); db.prepare("INSERT INTO payments (order_id,provider,provider_order_id,provider_payment_id,status,raw_json,created_at) VALUES (?,?,?,?,?,?,?)").run(order.id, "razorpay", order.razorpay_order_id, body.paymentId, "captured", JSON.stringify(body), now()); return json(res, 200, { ok: true, orderId: order.id, status: "paid" });
+      const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." });
+      const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(String(body.orderId || ""), customer.id);
+      if (!order || !order.razorpay_order_id) return json(res, 400, { error: "Payment order is not ready." });
+      if (["paid", "processing", "shipped", "delivered", "cancelled", "returned", "declined"].includes(order.status)) return json(res, 400, { error: "This order is no longer awaiting payment." });
+      const paymentId = String(body.paymentId || ""); const signature = crypto.createHmac("sha256", RAZORPAY_KEY_SECRET).update(order.razorpay_order_id + "|" + paymentId).digest("hex");
+      if (!paymentId || !safeEqual(signature, body.signature)) return json(res, 400, { error: "Payment verification failed." });
+      await verifyCapturedPayment(paymentId, order.razorpay_order_id);
+      db.prepare("UPDATE orders SET status='paid',payment_id=?,failure_reason=NULL,updated_at=? WHERE id=?").run(paymentId, now(), order.id); db.prepare("INSERT INTO payments (order_id,provider,provider_order_id,provider_payment_id,status,raw_json,created_at) VALUES (?,?,?,?,?,?,?)").run(order.id, "razorpay", order.razorpay_order_id, paymentId, "captured", JSON.stringify(body), now()); return json(res, 200, { ok: true, orderId: order.id, status: "paid" });
     }
     if (req.method === "POST" && pathname === "/api/webhooks/razorpay") {
       if (!RAZORPAY_WEBHOOK_SECRET || !safeEqual(crypto.createHmac("sha256", RAZORPAY_WEBHOOK_SECRET).update(req.rawBody || JSON.stringify(body)).digest("hex"), req.headers["x-razorpay-signature"])) return json(res, 400, { error: "Invalid webhook signature." }); const entity = body.payload?.payment?.entity; if (entity?.order_id) db.prepare("UPDATE orders SET status=?,payment_id=?,updated_at=? WHERE razorpay_order_id=?").run(["payment.captured", "order.paid"].includes(body.event) ? "paid" : body.event, entity.id, now(), entity.order_id); return json(res, 200, { ok: true });
