@@ -29,6 +29,8 @@ const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || "";
 const SUPPORT_EMAIL = process.env.RAYCRAFTING_SUPPORT_EMAIL || "hello@raycrafting.co";
 const SUPPORT_PHONE = process.env.RAYCRAFTING_SUPPORT_PHONE || "";
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+const EMAIL_FROM = process.env.RAYCRAFTING_EMAIL_FROM || "";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
@@ -140,6 +142,20 @@ const SECURITY_HEADERS = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://accounts.google.com; frame-src https://checkout.razorpay.com https://api.razorpay.com https://accounts.google.com; connect-src 'self' https://api.razorpay.com https://accounts.google.com; form-action 'self'"
 };
+function htmlEscape(value = "") { return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character])); }
+async function notifyCustomerOrderStatus(order, status, reason) {
+  if (!RESEND_API_KEY || !EMAIL_FROM || !order.customer_email) return;
+  const cancelled = status === "cancelled";
+  const subject = cancelled ? `Raycrafting order ${order.id} cancelled` : `Update on your Raycrafting order ${order.id}`;
+  const heading = cancelled ? "Your order has been cancelled" : "There is an update to your order";
+  const safeName = htmlEscape(order.customer_name || "there");
+  const safeReason = htmlEscape(reason || "The seller could not fulfil this order.");
+  const html = `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#252629"><h2>${heading}</h2><p>Hi ${safeName},</p><p>Your Raycrafting order <strong>${htmlEscape(order.id)}</strong> has been marked as <strong>${htmlEscape(status.replaceAll("_", " "))}</strong>.</p><p><strong>Seller note:</strong> ${safeReason}</p><p>Please sign in to Raycrafting to view the latest order status or contact the studio for help.</p><p>— Raycrafting</p></div>`;
+  try {
+    const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` }, body: JSON.stringify({ from: EMAIL_FROM, to: [order.customer_email], subject, html }) });
+    if (!response.ok) console.error("Customer status email failed", response.status);
+  } catch (error) { console.error("Customer status email error", error.message); }
+}
 function json(res, status, data) {
   const body = JSON.stringify(data);
   res.writeHead(status, { ...SECURITY_HEADERS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
@@ -438,13 +454,15 @@ async function api(req, res, pathname, body) {
     if (req.method === "GET" && pathname === "/api/admin/orders") { if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." }); return json(res, 200, { orders: orderRows() }); }
     if (req.method === "POST" && pathname === "/api/admin/orders/status") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
-      const order = db.prepare("SELECT * FROM orders WHERE id=?").get(String(body.orderId || "")); const status = String(body.status || ""); const reason = String(body.reason || "").trim().slice(0, 500);
+      const order = db.prepare("SELECT o.*, c.name customer_name, c.email customer_email FROM orders o JOIN customers c ON c.id=o.customer_id WHERE o.id=?").get(String(body.orderId || "")); const status = String(body.status || ""); const reason = String(body.reason || "").trim().slice(0, 500);
       const statuses = ["processing", "shipped", "delivered", "declined", "cancelled", "returned"];
       if (!order) return json(res, 404, { error: "Order not found." });
       if (!statuses.includes(status)) return json(res, 400, { error: "Unsupported order status." });
       if (status === "declined" && !reason) return json(res, 400, { error: "A decline reason is required." });
+      const changed = order.status !== status;
       db.prepare("UPDATE orders SET status=?,decision_reason=?,updated_at=? WHERE id=?").run(status, reason || null, now(), order.id);
-      return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null });
+      if (changed && ["cancelled", "declined"].includes(status)) void notifyCustomerOrderStatus(order, status, reason);
+      return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null, emailNotificationConfigured: Boolean(RESEND_API_KEY && EMAIL_FROM) });
     }
     if (req.method === "POST" && pathname === "/api/admin/products/sync") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
