@@ -51,6 +51,10 @@ db.exec(`
     customer_id TEXT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
     expires_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+    email TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS products (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -247,6 +251,14 @@ function serveStatic(req, res, pathname) {
 
 async function api(req, res, pathname, body) {
   try {
+    if (req.method === "GET" && pathname === "/api/health") return json(res, 200, { ok: true, service: "raycrafting", time: now() });
+    if (req.method === "POST" && pathname === "/api/newsletter") {
+      if (!allowRequest(req, "newsletter", 5)) return json(res, 429, { error: "Too many requests. Try again later." });
+      const email = String(body.email || "").trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return json(res, 400, { error: "Enter a valid email address." });
+      db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(email, now());
+      return json(res, 200, { ok: true, message: "You’re on the list. A little brightness is on its way." });
+    }
     if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null });
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();

@@ -1,0 +1,9 @@
+{
+  "name": "Raycrafting",
+  "short_name": "Raycrafting",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ed",
+  "theme_color": "#252629",
+  "description": "Handmade flowers and little keepsakes."
+}

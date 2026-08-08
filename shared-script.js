@@ -58,7 +58,7 @@ function productMarkup(product) {
       <span class="product-tag">${escapeHtml(product.category)}</span>
       <button class="wish-button ${liked ? "active" : ""}" type="button" data-action="like" aria-label="${liked ? "Remove" : "Add"} ${escapeHtml(product.name)} ${liked ? "from" : "to"} wishlist">${liked ? "♥" : "♡"}</button>
     </div>
-    <div class="product-info"><div><h3>${escapeHtml(product.name)}</h3><p>${escapeHtml(product.detail)}</p></div><span class="product-price">${money(product.price)}</span><button class="quick-add" type="button" data-action="details">View details <span aria-hidden="true">↗</span></button></div>
+    <div class="product-info"><div><h3>${escapeHtml(product.name)}</h3><p>${escapeHtml(product.detail)}</p></div><span class="product-price">${money(product.price)}</span><div class="product-actions"><button class="quick-add" type="button" data-action="details">View details <span aria-hidden="true">↗</span></button><button class="quick-add quick-add-fill" type="button" data-action="add">Add to bag <span aria-hidden="true">+</span></button></div></div>
   </article>`;
 }
 
@@ -184,6 +184,7 @@ productGrid.addEventListener("click", (event) => {
     return;
   }
   if (event.target.closest("[data-action='details']")) openProduct(product);
+  if (event.target.closest("[data-action='add']")) { addToCart(product.id); setDrawer(true); }
 });
 
 document.querySelector("#modalAdd").addEventListener("click", () => { addToCart(selectedProduct.id); closeModal(); setDrawer(true); });
@@ -205,10 +206,16 @@ document.querySelector("#checkoutButton").addEventListener("click", () => {
   window.location.href = `mailto:hello@raycrafting.co?subject=Raycrafting%20order%20request&body=Hi%20Raycrafting,%0A%0AI'd%20like%20to%20order:%20${encodeURIComponent(order)}.%0A%0AMy%20name:%0ADelivery%20details:`;
 });
 
-document.querySelector("#newsletterForm").addEventListener("submit", (event) => {
+document.querySelector("#newsletterForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  document.querySelector("#newsletterMessage").textContent = "You’re on the list. A little brightness is on its way.";
-  event.target.reset();
+  const form = event.target; const button = form.querySelector("button"); const message = document.querySelector("#newsletterMessage");
+  button.disabled = true; message.textContent = "Saving your email…";
+  try {
+    const response = await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: document.querySelector("#newsletterEmail").value.trim() }) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Could not join the list.");
+    message.textContent = data.message || "You’re on the list. A little brightness is on its way."; form.reset();
+  } catch (error) { message.textContent = error.message; } finally { button.disabled = false; }
 });
 
 document.querySelectorAll("[data-scroll]").forEach((button) => button.addEventListener("click", () => document.querySelector(`#${button.dataset.scroll}`).scrollIntoView({ behavior: "smooth" })));
