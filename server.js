@@ -114,14 +114,7 @@ ensureColumn("orders", "failure_reason", "TEXT");
 ensureColumn("orders", "decision_reason", "TEXT");
 ensureColumn("orders", "customer_request_reason", "TEXT");
 
-const defaultProducts = [
-  ["sunbeam", "Sunbeam Stem", "Flowers", 18, 0, "one stem", "A happy yellow bloom for the corner of your desk or the friend who always brings the light.", 1, "sunbeam", ""],
-  ["coral-bloom", "Coral Bloom", "Flowers", 24, 0, "one stem", "A warm coral flower with a soft green stem, made to brighten a small shelf or bedside table.", 2, "coral", ""],
-  ["tiny-daisy", "Tiny Daisy Charm", "Keepsakes", 12, 0, "bag charm", "A pocket-sized daisy for your keys, tote, or the little hook by your front door.", 3, "daisy", ""],
-  ["meadow-bundle", "Meadow Bundle", "Bundles", 42, 0, "three stems", "A small mix of sunshine, sage, and soft pink, tied together for a ready-made gift.", 4, "meadow", ""],
-  ["lavender-loop", "Lavender Loop", "Keepsakes", 16, 0, "desk charm", "A little lavender loop that sits happily on a pinboard, monitor, or gift wrap.", 5, "lavender", ""],
-  ["sunset-trio", "Sunset Trio", "Bundles", 58, 0, "three stems", "Three warm-toned blooms bundled for a full, cheerful arrangement that never needs a vase change.", 6, "sunset", ""]
-];
+const defaultProducts = [];
 const productInsert = db.prepare(`INSERT OR IGNORE INTO products (id,name,category,price,original_price,detail,description,featured,art,image) VALUES (?,?,?,?,?,?,?,?,?,?)`);
 for (const product of defaultProducts) productInsert.run(...product);
 const couponInsert = db.prepare(`INSERT OR IGNORE INTO coupons (code,kind,amount,minimum_subtotal,active) VALUES (?,?,?,?,1)`);
@@ -381,7 +374,20 @@ async function api(req, res, pathname, body) {
       db.prepare("UPDATE orders SET status=?,decision_reason=?,updated_at=? WHERE id=?").run(status, reason || null, now(), order.id);
       return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null });
     }
-    if (req.method === "POST" && pathname === "/api/admin/products/sync") { if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." }); const products = Array.isArray(body.products) ? body.products : []; const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active) VALUES (?,?,?,?,?,?,?,?,?,?,1) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,active=1`); for (const product of products) upsert.run(String(product.id), String(product.name), String(product.category || "Other"), Number(product.price) || 0, Number(product.originalPrice) || 0, String(product.detail || ""), String(product.description || ""), Number(product.featured) || 1, String(product.art || "custom"), String(product.image || "")); return json(res, 200, { ok: true, count: products.length }); }
+    if (req.method === "POST" && pathname === "/api/admin/products/sync") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const products = Array.isArray(body.products) ? body.products : [];
+      const ids = products.map((product) => String(product.id || "")).filter(Boolean);
+      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active) VALUES (?,?,?,?,?,?,?,?,?,?,1) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,active=1`);
+      db.exec("BEGIN");
+      try {
+        if (ids.length) db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
+        else db.prepare("UPDATE products SET active=0").run();
+        for (const product of products) upsert.run(String(product.id), String(product.name || "Untitled product"), String(product.category || "Other"), Number(product.price) || 0, Number(product.originalPrice) || 0, String(product.detail || ""), String(product.description || ""), Number(product.featured) || 1, String(product.art || "custom"), String(product.image || ""));
+        db.exec("COMMIT");
+      } catch (error) { db.exec("ROLLBACK"); throw error; }
+      return json(res, 200, { ok: true, count: products.length });
+    }
     return json(res, 404, { error: "API route not found." });
   } catch (error) { console.error(error); return json(res, error.status || 400, { error: error.message || "Request failed." }); }
 }
