@@ -1,0 +1,12 @@
+{
+  "name": "raycrafting",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Raycrafting shop and local commerce backend",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "razorpay": "^2.9.8"
+  }
+}

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Raycrafting makes bright, lasting flowers and little keepsakes from pipe cleaners." />
+    <title>Raycrafting | Small things, made to stay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="announcement">Free shipping on orders over ₹45 <span aria-hidden="true">✳</span> Handmade in small batches</div>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Raycrafting home">
+        <span class="brand-mark" aria-hidden="true"><span>R</span></span>
+        <span class="brand-name">Raycrafting</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#shop">Shop</a>
+        <a href="#story">Our story</a>
+        <a href="#custom">Custom orders</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="icon-button" id="searchToggle" type="button" aria-label="Open search" title="Search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg>
+        </button>
+        <button class="cart-button" id="cartToggle" type="button" aria-label="Open cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l1.6 10.2a2 2 0 0 0 2 1.8h7.8a2 2 0 0 0 1.9-1.5L21 8H7"></path><circle cx="10" cy="20" r="1.2"></circle><circle cx="18" cy="20" r="1.2"></circle></svg>
+          <span>Bag</span><b id="cartCount">0</b>
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero section-shell">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-dot"></span> Tiny joy, thoughtfully twisted</p>
+          <h1>Flowers that<br /><em>keep their sunshine.</em></h1>
+          <p class="hero-intro">Handmade pipe-cleaner blooms and small keepsakes for desks, shelves, and the people who make your day brighter.</p>
+          <div class="hero-actions">
+            <a class="button button-dark" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a>
+            <button class="text-button" type="button" data-scroll="story">Meet the maker <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="hero-note"><span class="scribble-star" aria-hidden="true">✳</span><span>Each piece is made by hand, so no two are exactly alike.</span></div>
+        </div>
+        <div class="hero-image-wrap">
+          <div class="hero-image-frame">
+            <img src="assets/sunflower.jpeg" alt="Handmade orange sunflower in a small dark pot" />
+            <div class="image-sticker">made<br />slowly</div>
+          </div>
+          <div class="hero-caption"><span>01 / 03</span><span>the little things collection</span></div>
+        </div>
+      </section>
+
+      <section class="trust-strip section-shell" aria-label="Raycrafting promises">
+        <div><span class="trust-icon">✳</span><strong>Small-batch</strong><span>made with patience</span></div>
+        <div><span class="trust-icon">↺</span><strong>Made to last</strong><span>no watering needed</span></div>
+        <div><span class="trust-icon">♡</span><strong>Gift-ready</strong><span>packed with care</span></div>
+      </section>
+
+      <section class="shop section-shell" id="shop">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">The current collection</p>
+            <h2>Pick a little<br /><em>bright thing.</em></h2>
+          </div>
+          <p class="section-description">A rotating edit of cheerful stems, pocket-sized charms, and small gifts for the hard-to-shop-for people.</p>
+        </div>
+
+        <div class="shop-toolbar">
+          <div class="filter-group" id="filterGroup" aria-label="Filter products">
+            <button class="filter-button active" type="button" data-filter="All">All pieces</button>
+            <button class="filter-button" type="button" data-filter="Flowers">Flowers</button>
+            <button class="filter-button" type="button" data-filter="Keepsakes">Keepsakes</button>
+            <button class="filter-button" type="button" data-filter="Bundles">Bundles</button>
+          </div>
+          <label class="sort-control">Sort by
+            <select id="sortSelect" aria-label="Sort products">
+              <option value="featured">Featured</option>
+              <option value="low">Price: low to high</option>
+              <option value="high">Price: high to low</option>
+              <option value="name">Name</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="search-row" id="searchRow" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg>
+          <input id="searchInput" type="search" placeholder="Search flowers, charms, gifts..." autocomplete="off" />
+          <button id="clearSearch" type="button" aria-label="Clear search">×</button>
+        </div>
+
+        <div class="product-grid" id="productGrid"></div>
+        <p class="empty-state" id="emptyState" hidden>No little thing matches that search yet. Try another word.</p>
+      </section>
+
+      <section class="story-band section-shell" id="story">
+        <div class="story-image"><img src="assets/sunflower.jpeg" alt="Handmade orange sunflower in a small dark pot" /></div>
+        <div class="story-copy">
+          <p class="eyebrow">Why Raycrafting exists</p>
+          <h2>For the moments<br />that deserve a <em>keepsake.</em></h2>
+          <p>Raycrafting started with a handful of fuzzy stems and a question: what if a flower could stay bright through every season? Every piece is shaped, wrapped, and checked by hand in tiny batches.</p>
+          <p class="signature">made for your windowsill,<br />your work friend, or just you.</p>
+          <a class="text-button" href="#custom">Start a custom idea <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="custom-section section-shell" id="custom">
+        <div class="custom-copy">
+          <p class="eyebrow">Something in mind?</p>
+          <h2>Tell me your<br /><em>color story.</em></h2>
+          <p>Birthdays, desk buddies, wedding favors, tiny bouquets for no reason at all. Share a few details and we’ll make a little plan together.</p>
+          <a class="button button-light" href="mailto:hello@raycrafting.co?subject=Custom%20Raycrafting%20idea">Plan a custom order <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="custom-palette" aria-label="Example custom color palette">
+          <div class="palette-card palette-coral"><span>01</span><strong>sunset</strong></div>
+          <div class="palette-card palette-lilac"><span>02</span><strong>soft bloom</strong></div>
+          <div class="palette-card palette-sage"><span>03</span><strong>garden</strong></div>
+          <div class="palette-card palette-yellow"><span>04</span><strong>daylight</strong></div>
+        </div>
+      </section>
+
+      <section class="newsletter section-shell">
+        <div><p class="eyebrow">The bright note</p><h2>New drops, tiny stories,<br /><em>no inbox clutter.</em></h2></div>
+        <form class="newsletter-form" id="newsletterForm">
+          <label for="newsletterEmail">Your email address</label>
+          <div><input id="newsletterEmail" type="email" required placeholder="you@example.com" /><button class="button button-dark" type="submit">Join the note <span aria-hidden="true">→</span></button></div>
+          <p class="form-message" id="newsletterMessage" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer section-shell">
+      <div class="footer-brand"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><span>R</span></span><span class="brand-name">Raycrafting</span></a><p>Small things, made to stay.</p></div>
+      <div class="footer-links"><div><strong>Explore</strong><a href="#shop">Shop all</a><a href="#story">Our story</a><a href="#custom">Custom orders</a></div><div><strong>Say hello</strong><a href="mailto:hello@raycrafting.co">Email the studio</a><a href="#newsletterForm">Join the bright note</a><span>Instagram coming soon</span></div></div>
+      <div class="footer-bottom"><span>© 2026 Raycrafting</span><span>Handmade with a little extra sunshine</span></div>
+    </footer>
+
+    <div class="overlay" id="overlay" hidden></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping bag" aria-hidden="true">
+      <div class="drawer-header"><div><p class="eyebrow">Your little things</p><h2>Shopping bag <span id="drawerCount">(0)</span></h2></div><button class="close-button" id="cartClose" type="button" aria-label="Close shopping bag">×</button></div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-empty" id="cartEmpty"><div class="empty-flower" aria-hidden="true">✳</div><p>Your bag is waiting for something bright.</p><a class="text-button" href="#shop" id="emptyShop">Browse the collection <span aria-hidden="true">→</span></a></div>
+      <div class="drawer-footer" id="drawerFooter" hidden><div class="subtotal"><span>Subtotal</span><strong id="cartSubtotal">₹0.00</strong></div><p>Shipping and taxes are calculated at checkout.</p><button class="button button-dark checkout-button" id="checkoutButton" type="button">Continue to checkout <span aria-hidden="true">→</span></button></div>
+    </aside>
+
+    <div class="modal-wrap" id="productModal" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="close-button modal-close" type="button" aria-label="Close product details">×</button>
+        <div class="modal-art" id="modalArt"></div>
+        <div class="modal-content"><p class="eyebrow" id="modalCategory">Flowers</p><h2 id="modalTitle"></h2><p id="modalDescription"></p><div class="modal-meta"><strong id="modalPrice"></strong><span id="modalDetail"></span></div><button class="button button-dark" id="modalAdd" type="button">Add to bag <span aria-hidden="true">→</span></button></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="catalog.js?v=sunflower1"></script>
+    <script src="shared-script.js?v=sunflower2"></script>
+  <script src="commerce.js?v=upi3"></script>
+</body>
+</html>
