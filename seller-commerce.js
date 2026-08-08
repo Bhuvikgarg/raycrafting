@@ -6,7 +6,12 @@
   const money = (value) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(Number(value) || 0);
   const esc = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
   function adminToken() { return sessionStorage.getItem("raycrafting-admin-token") || ""; }
-  async function syncProducts() { try { await fetch("/api/admin/products/sync", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-token": adminToken() }, body: JSON.stringify({ products: products() }) }); } catch { /* The browser-only editor still works if the API is offline. */ } }
+  async function syncProducts() {
+    const response = await fetch("/api/admin/products/sync", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-token": adminToken() }, body: JSON.stringify({ products: products() }) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Could not update the public catalog.");
+    return data;
+  }
   function addDiscountField() {
     const price = $("productPrice"); if (!price || $("productOriginalPrice")) return;
     price.closest("label").childNodes[0].textContent = "Final price (₹)";
@@ -35,14 +40,15 @@
   function wireProductDiscount() {
     addDiscountField();
     const form = $("productForm"); if (!form) return;
-    form.addEventListener("submit", () => { const name = $("productName").value.trim(); const editingId = $("productId").value; const original = Number($("productOriginalPrice").value) || 0; setTimeout(() => { const current = products(); const product = current.find((item) => item.id === editingId) || current.find((item) => item.name === name); if (!product) return; product.originalPrice = original > Number(product.price) ? original : 0; localStorage.setItem(key, JSON.stringify(current)); syncProducts(); decorateCatalog(); }, 80); });
-    document.querySelector("#catalogList").addEventListener("click", (event) => { const edit = event.target.closest("[data-edit]"); if (!edit) return; setTimeout(() => { const product = products().find((item) => item.id === edit.dataset.edit); if ($("productOriginalPrice")) $("productOriginalPrice").value = product?.originalPrice || ""; }, 0); });
+    form.addEventListener("submit", () => { const name = $("productName").value.trim(); const editingId = $("productId").value; const original = Number($("productOriginalPrice").value) || 0; setTimeout(async () => { const current = products(); const product = current.find((item) => item.id === editingId) || current.find((item) => item.name === name); if (!product) return; product.originalPrice = original > Number(product.price) ? original : 0; localStorage.setItem(key, JSON.stringify(current)); try { await syncProducts(); $("saveStatus").textContent = "Saved to the public shop."; } catch (error) { $("saveStatus").textContent = error.message; showToast(error.message); } decorateCatalog(); }, 80); });
+    document.querySelector("#catalogList").addEventListener("click", (event) => { const edit = event.target.closest("[data-edit]"); const remove = event.target.closest("[data-delete]"); if (edit) setTimeout(() => { const product = products().find((item) => item.id === edit.dataset.edit); if ($("productOriginalPrice")) $("productOriginalPrice").value = product?.originalPrice || ""; }, 0); if (remove) setTimeout(async () => { try { await syncProducts(); $("saveStatus").textContent = "Catalog deletion synced to the public shop."; } catch (error) { $("saveStatus").textContent = error.message; showToast(error.message); } }, 100); });
     $("newProductButton").addEventListener("click", () => { if ($("productOriginalPrice")) $("productOriginalPrice").value = ""; });
-    const originalRender = window.setTimeout; setInterval(decorateCatalog, 800); syncProducts();
+    $("resetButton").addEventListener("click", () => setTimeout(async () => { try { await syncProducts(); $("saveStatus").textContent = "Demo catalog synced to the public shop."; } catch (error) { $("saveStatus").textContent = error.message; showToast(error.message); } }, 100));
+    setInterval(decorateCatalog, 800);
   }
   function init() {
     const style = document.createElement("style"); style.textContent = `.orders-panel{margin-top:20px}.order-card{border-bottom:1px solid var(--line);padding:16px 0}.order-card:last-child{border-bottom:0}.order-card p{margin:6px 0;color:var(--muted);font-size:11px}.order-card small{color:var(--muted);font-size:10px}.order-card-head{display:grid;grid-template-columns:1fr auto auto;gap:15px;align-items:start}.order-card-head p{margin:4px 0 0}.order-status{padding:4px 7px;font:9px var(--mono);text-transform:uppercase;letter-spacing:.04em;background:#f1eee8}.status-paid,.status-processing,.status-shipped,.status-delivered{background:#dfeada;color:#557351}.status-pending_payment,.status-cancel_requested,.status-return_requested{background:#fff1cf;color:#98721a}.status-failed_payment,.status-declined{background:#fbe0da;color:#a74232}.order-alert{padding:8px 10px;background:#fff1cf;color:#765d20}.order-alert.failed,.order-alert.declined{background:#fbe0da;color:#a74232}.order-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.order-actions button{border:1px solid var(--line);background:transparent;padding:8px 10px;font-size:10px}.order-actions button:hover{border-color:var(--coral);color:var(--coral-dark)}.order-actions .decline-order{color:var(--coral-dark)}@media(max-width:500px){.order-card-head{grid-template-columns:1fr auto}.order-card-head>strong:last-child{grid-column:2;grid-row:1}}`; document.head.appendChild(style);
-    document.querySelector("#accessForm")?.addEventListener("submit", () => sessionStorage.removeItem("raycrafting-admin-pin")); window.addEventListener("raycrafting-admin-unlocked", syncProducts);
+    document.querySelector("#accessForm")?.addEventListener("submit", () => sessionStorage.removeItem("raycrafting-admin-pin"));
     addDiscountField(); wireProductDiscount(); addOrdersPanel();
     $("ordersList").addEventListener("click", (event) => { const button = event.target.closest("[data-order-status]"); if (button) updateOrderStatus(button.dataset.orderId, button.dataset.orderStatus); });
   }

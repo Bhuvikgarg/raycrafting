@@ -57,7 +57,21 @@
   var renderList = function(){ el('productCount').textContent=products.length; el('catalogList').innerHTML=products.map(function(product){ return '<article class="catalog-item"><img src="' + imageFor(product) + '" alt=""><div><h3>' + product.name.replace(/[&<>]/g,'') + '</h3><p>' + product.category + ' · ' + product.detail + '</p></div><span class="catalog-price">' + money(product.price) + '</span><div class="item-actions"><button type="button" data-edit="' + product.id + '">Edit</button><button type="button" class="delete-item" data-delete="' + product.id + '">Delete</button></div></article>'; }).join(''); };
   var resizeImage = function(file){ return new Promise(function(resolve,reject){ var reader=new FileReader(); reader.onload=function(){ var image=new Image(); image.onload=function(){ var max=1200, scale=Math.min(1,max/Math.max(image.width,image.height)), canvas=document.createElement('canvas'); canvas.width=Math.round(image.width*scale); canvas.height=Math.round(image.height*scale); canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height); resolve(canvas.toDataURL('image/jpeg',.82)); }; image.onerror=reject; image.src=reader.result; }; reader.onerror=reject; reader.readAsDataURL(file); }); };
   var adminToken = sessionStorage.getItem('raycrafting-admin-token') || '';
-  var unlockStudio = function(token){ adminToken=token || adminToken; if(adminToken){ sessionStorage.setItem('raycrafting-admin-token',adminToken); sessionStorage.setItem('raycrafting-studio-unlocked','true'); el('accessModal').classList.add('unlocked'); window.dispatchEvent(new Event('raycrafting-admin-unlocked')); } };
+  var loadRemoteCatalog = async function(){
+    try {
+      var response = await fetch('/api/products', { cache: 'no-store' });
+      var data = await response.json();
+      if (!response.ok || !Array.isArray(data.products)) return;
+      products = data.products.map(function(product){ return Object.assign({}, product, { originalPrice: Number(product.originalPrice || product.original_price || 0) }); });
+      localStorage.setItem(key, JSON.stringify(products));
+      renderList();
+      resetForm();
+      el('saveStatus').textContent = 'Connected to the live shop.';
+    } catch(error) {
+      el('saveStatus').textContent = 'Could not load the live catalog.';
+    }
+  };
+  var unlockStudio = function(token){ adminToken=token || adminToken; if(adminToken){ sessionStorage.setItem('raycrafting-admin-token',adminToken); sessionStorage.setItem('raycrafting-studio-unlocked','true'); el('accessModal').classList.add('unlocked'); loadRemoteCatalog(); window.dispatchEvent(new Event('raycrafting-admin-unlocked')); } };
   el('accessForm').addEventListener('submit',async function(event){ event.preventDefault(); var button=event.submitter; button.disabled=true; el('accessError').textContent=''; try { var response=await fetch('/api/admin/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:el('pinInput').value})}); var data=await response.json(); if(!response.ok) throw new Error(data.error || 'Seller access could not be verified.'); unlockStudio(data.token); el('pinInput').value=''; } catch(error){ el('accessError').textContent=error.message; } finally { button.disabled=false; } });
   if(adminToken) unlockStudio(adminToken);
   el('logoutButton').addEventListener('click',function(){ if(adminToken) fetch('/api/admin/logout',{method:'POST',headers:{'x-admin-token':adminToken}}).catch(function(){}); adminToken=''; sessionStorage.removeItem('raycrafting-admin-token'); sessionStorage.removeItem('raycrafting-studio-unlocked'); el('accessModal').classList.remove('unlocked'); el('pinInput').value=''; });
