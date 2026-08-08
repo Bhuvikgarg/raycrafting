@@ -198,6 +198,35 @@ function customerFromRequest(req) {
   const row = db.prepare(`SELECT c.id,c.name,c.email,c.phone,c.avatar_url AS avatarUrl FROM sessions s JOIN customers c ON c.id=s.customer_id WHERE s.token=? AND s.expires_at>?`).get(token, now());
   return row ? { ...row, token } : null;
 }
+function normalizeIndianPhone(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith("0")) return digits.slice(1);
+  return digits;
+}
+function validIndianPhone(value) { return /^[6-9]\d{9}$/.test(normalizeIndianPhone(value)); }
+function validIndianPincode(value) { return /^[1-8]\d{5}$/.test(String(value || "").trim()); }
+function cleanAddress(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Enter a valid delivery address.");
+  const field = (name, max, required = true) => {
+    const value = String(input[name] || "").trim();
+    if (required && !value) throw new Error("Complete the delivery address before continuing.");
+    if (value.length > max) throw new Error("One of the address fields is too long.");
+    if (/[\u0000-\u001f\u007f]/.test(value)) throw new Error("The delivery address contains invalid characters.");
+    return value;
+  };
+  const name = field("name", 120);
+  const line1 = field("line1", 200);
+  const line2 = field("line2", 200, false);
+  const city = field("city", 80);
+  const state = field("state", 80);
+  const phone = normalizeIndianPhone(input.phone);
+  const postalCode = String(input.postalCode || "").trim();
+  if (name.length < 2 || line1.length < 5 || city.length < 2 || state.length < 2) throw new Error("Enter a complete delivery address.");
+  if (!validIndianPhone(input.phone)) throw new Error("Enter a valid 10-digit Indian mobile number starting with 6–9.");
+  if (!validIndianPincode(postalCode)) throw new Error("Enter a valid 6-digit Indian PIN code starting with 1–8.");
+  return { name, phone, line1, line2, city, state, postalCode };
+}
 function requireAdmin(req) { return Boolean(adminTokenFromRequest(req)); }
 function calculateCoupon(code, subtotal) {
   if (!code) return { code: "", discount: 0 };
@@ -276,11 +305,12 @@ async function api(req, res, pathname, body) {
     }
     if (req.method === "POST" && pathname === "/api/auth/register") {
       if (!allowRequest(req, "register", 10)) return json(res, 429, { error: "Too many registration attempts. Try again later." });
-      const name = String(body.name || "").trim(); const email = String(body.email || "").trim().toLowerCase(); const password = String(body.password || "");
-      if (!name || name.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || password.length < 8 || password.length > 256) return json(res, 400, { error: "Enter a valid name, email, and password between 8 and 256 characters." });
+      const name = String(body.name || "").trim(); const email = String(body.email || "").trim().toLowerCase(); const password = String(body.password || ""); const suppliedPhone = String(body.phone || "").trim();
+      if (!name || name.length < 2 || name.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || password.length < 8 || password.length > 256 || (suppliedPhone && !validIndianPhone(suppliedPhone))) return json(res, 400, { error: "Enter a valid name, email, password, and 10-digit Indian phone number." });
+      const phone = suppliedPhone ? normalizeIndianPhone(suppliedPhone) : "";
       if (db.prepare("SELECT id FROM customers WHERE email=?").get(email)) return json(res, 409, { error: "An account with that email already exists." });
-      const customerId = id("cus"); const secret = hashPassword(password); db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,created_at) VALUES (?,?,?,?,?,?,?)").run(customerId, name, email, String(body.phone || "").trim(), secret.hash, secret.salt, now());
-      return json(res, 201, { token: issueSession(customerId), customer: { id: customerId, name, email, phone: String(body.phone || "").trim(), avatarUrl: "" } });
+      const customerId = id("cus"); const secret = hashPassword(password); db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,created_at) VALUES (?,?,?,?,?,?,?)").run(customerId, name, email, phone, secret.hash, secret.salt, now());
+      return json(res, 201, { token: issueSession(customerId), customer: { id: customerId, name, email, phone, avatarUrl: "" } });
     }
     if (req.method === "POST" && pathname === "/api/auth/login") {
       if (!allowRequest(req, "login", 12)) return json(res, 429, { error: "Too many login attempts. Try again later." });
@@ -322,8 +352,10 @@ async function api(req, res, pathname, body) {
     }
     if (req.method === "POST" && pathname === "/api/orders") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in before placing an order." });
-      const items = Array.isArray(body.items) ? body.items : []; const address = body.address || {};
-      if (!items.length || !address.name || !address.line1 || !address.city || !address.state || !address.postalCode || !address.phone) return json(res, 400, { error: "Complete the delivery address before continuing." });
+      const items = Array.isArray(body.items) ? body.items : [];
+      let address;
+      try { address = cleanAddress(body.address); } catch (error) { return json(res, 400, { error: error.message }); }
+      if (!items.length) return json(res, 400, { error: "Your bag is empty." });
       const getProduct = db.prepare("SELECT * FROM products WHERE id=? AND active=1"); const verified = []; let subtotal = 0;
       for (const item of items) { const product = getProduct.get(String(item.id)); const quantity = Math.max(1, Math.min(99, Number(item.quantity) || 1)); if (!product) return json(res, 400, { error: "One of the products is no longer available." }); const lineTotal = Math.round(product.price * quantity * 100) / 100; subtotal += lineTotal; verified.push({ product, quantity, lineTotal }); }
       const coupon = calculateCoupon(body.couponCode, subtotal); const shipping = subtotal - coupon.discount >= 4000 ? 0 : 80; const total = Math.round((subtotal - coupon.discount + shipping) * 100) / 100; const orderId = id("ord"); const timestamp = now();
