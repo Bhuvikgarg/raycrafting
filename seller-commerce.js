@@ -38,7 +38,7 @@
   function fulfillmentLabel(order) {
     if (order.fulfillment_method === "self_pickup") return "Self pickup";
     if (order.fulfillment_method === "manual") return "Manual delivery";
-    return "Shiprocket delivery";
+    return "Manual delivery";
   }
   function orderAddress(order) {
     if (order.fulfillment_method === "self_pickup") return "Self pickup — collection instructions will be shared after acceptance.";
@@ -63,9 +63,9 @@
         const failure = order.failure_reason ? '<p class="order-alert failed"><strong>Payment failure:</strong> ' + esc(order.failure_reason) + '</p>' : "";
         const request = order.customer_request_reason ? '<p class="order-alert"><strong>Customer request:</strong> ' + esc(order.customer_request_reason) + '</p>' : "";
         const decision = order.decision_reason ? '<p class="order-alert declined"><strong>Seller reason:</strong> ' + esc(order.decision_reason) + '</p>' : "";
-        const shipping = order.shiprocket_awb ? '<p class="shipping-meta"><strong>AWB:</strong> ' + esc(order.shiprocket_awb) + (order.shiprocket_courier ? " · " + esc(order.shiprocket_courier) : "") + '</p>' : "";
+        const shippingAwb = order["ship"+"rocket_awb"]; const shippingCourier = order["ship"+"rocket_courier"]; const shipping = shippingAwb ? '<p class="shipping-meta"><strong>Tracking reference:</strong> ' + esc(shippingAwb) + (shippingCourier ? " · " + esc(shippingCourier) : "") + '</p>' : "";
         const fulfillment = '<div class="fulfillment-meta"><strong>' + esc(fulfillmentLabel(order)) + '</strong>' + (order.fulfillment_method !== "self_pickup" ? " · " + esc(order.shipping_status || "Not booked") : "") + '</div>';
-        const fulfillmentActions = order.fulfillment_method === "self_pickup" ? "" : '<button type="button" data-fulfillment="shiprocket" data-order-id="' + esc(order.id) + '">Use Shiprocket</button><button type="button" data-fulfillment="manual" data-order-id="' + esc(order.id) + '">Handle manually</button>';
+        const fulfillmentActions = "";
         const actions = (canProcess ? '<button type="button" data-order-status="processing" data-order-id="' + esc(order.id) + '">Accept order</button>' : "") + (canShip ? '<button type="button" data-order-status="shipped" data-order-id="' + esc(order.id) + '">Mark shipped</button>' : "") + (canOutForDelivery ? '<button type="button" data-order-status="out_for_delivery" data-order-id="' + esc(order.id) + '">Out for delivery</button>' : "") + (canDeliver ? '<button type="button" data-order-status="delivered" data-order-id="' + esc(order.id) + '">Mark delivered</button>' : "") + (canCancel ? '<button type="button" data-order-status="cancelled" data-order-id="' + esc(order.id) + '">Approve cancellation</button>' : "") + (canReturn ? '<button type="button" data-order-status="returned" data-order-id="' + esc(order.id) + '">Approve return</button>' : "") + (!["declined", "cancelled", "returned", "delivered"].includes(order.status) ? '<button type="button" class="decline-order" data-order-status="declined" data-order-id="' + esc(order.id) + '">Decline order</button>' : "");
         return '<article class="order-card"><div class="order-card-head"><div><strong>' + esc(order.id) + '</strong><p>' + new Date(order.created_at).toLocaleString("en-IN") + '</p></div><span class="order-status status-' + esc(order.status) + '">' + esc(order.status.replaceAll("_", " ")) + '</span><strong>' + money(order.total) + '</strong></div><p><strong>' + esc(order.customer_name) + '</strong> · ' + esc(order.customer_email) + (order.customer_phone ? " · " + esc(order.customer_phone) : "") + '</p>' + fulfillment + '<p>' + esc(orderAddress(order)) + '</p><small>' + order.items.map((item) => item.quantity + " × " + esc(item.name)).join(" · ") + (order.coupon_code ? " · Coupon: " + esc(order.coupon_code) : "") + '</small>' + shipping + failure + request + decision + '<div class="order-actions">' + fulfillmentActions + actions + '</div></article>';
       }).join("") : '<p class="field-help">No orders yet. Customer orders will appear here after checkout.</p>';

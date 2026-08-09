@@ -325,6 +325,19 @@ async function shiprocketServiceability({ deliveryPostcode, cod = false, declare
   const couriers = Array.isArray(data.data?.available_courier_companies) ? data.data.available_courier_companies : [];
   return { serviceable: couriers.length > 0, source: "shiprocket", pickupPostcode: SHIPROCKET_PICKUP_POSTCODE, deliveryPostcode: String(deliveryPostcode), couriers: couriers.slice(0, 8).map((courier) => ({ id: courier.id || null, name: courier.courier_name || courier.name || "Courier", rate: Number(courier.freight_charge || courier.rate || 0), etd: courier.etd || courier.etd_hours || null, cod: Boolean(courier.cod) })) };
 }
+async function reverseGeocode(latitude, longitude) {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+    const error = new Error("The location coordinates are invalid."); error.status = 400; throw error;
+  }
+  const params = new URLSearchParams({ format: "jsonv2", lat: String(latitude), lon: String(longitude), zoom: "18", addressdetails: "1" });
+  const response = await fetch("https://nominatim.openstreetmap.org/reverse?" + params.toString(), { headers: { Accept: "application/json", "Accept-Language": "en-IN", "User-Agent": "Raycrafting/1.0 (raywithcharm@gmail.com)" } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.address) { const error = new Error("Could not turn your location into an address. Enter it manually."); error.status = 502; throw error; }
+  const address = data.address;
+  const road = [address.house_number, address.road].filter(Boolean).join(" ").trim();
+  const area = address.neighbourhood || address.suburb || address.village || "";
+  return { line1: road || area, line2: road && area ? area : "", city: address.city || address.town || address.municipality || address.village || "", state: address.state || "", postalCode: String(address.postcode || "").trim(), displayName: String(data.display_name || "") };
+}
 function requireAdmin(req) { return Boolean(adminTokenFromRequest(req)); }
 function calculateCoupon(code, subtotal) {
   if (!code) return { code: "", discount: 0 };
@@ -386,7 +399,7 @@ async function api(req, res, pathname, body) {
       db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(email, now());
       return json(res, 200, { ok: true, message: "You’re on the list. A little brightness is on its way." });
     }
-    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, shiprocketEnabled: Boolean((shiprocketToken || (SHIPROCKET_API_EMAIL && SHIPROCKET_API_PASSWORD)) && SHIPROCKET_PICKUP_POSTCODE), selfPickupEnabled: true });
+    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, selfPickupEnabled: true });
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
@@ -448,6 +461,13 @@ async function api(req, res, pathname, body) {
     if (req.method === "POST" && pathname === "/api/coupons/validate") {
       const subtotal = Number(body.subtotal || 0); const result = calculateCoupon(body.code, subtotal); return json(res, 200, result);
     }
+    if (req.method === "POST" && pathname === "/api/location/reverse-geocode") {
+      const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in before using your location." });
+      if (!allowRequest(req, "reverse-geocode", 12, 60 * 60 * 1000)) return json(res, 429, { error: "Too many location requests. Enter the address manually." });
+      const latitude = Number(body.latitude); const longitude = Number(body.longitude);
+      const address = await reverseGeocode(latitude, longitude);
+      return json(res, 200, { address, location: { latitude, longitude } });
+    }
     if (req.method === "POST" && pathname === "/api/shipping/serviceability") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in before checking delivery." });
       const fulfillmentMethod = String(body.fulfillmentMethod || "shiprocket");
@@ -461,13 +481,11 @@ async function api(req, res, pathname, body) {
     if (req.method === "POST" && pathname === "/api/orders") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in before placing an order." });
       const items = Array.isArray(body.items) ? body.items : [];
-      const fulfillmentMethod = ["shiprocket", "manual", "self_pickup"].includes(String(body.fulfillmentMethod || "")) ? String(body.fulfillmentMethod) : "shiprocket";
+      const requestedFulfillment = String(body.fulfillmentMethod || "manual");
+      const fulfillmentMethod = requestedFulfillment === "self_pickup" ? "self_pickup" : "manual";
       let address;
       try { address = cleanAddress(body.address, fulfillmentMethod); } catch (error) { return json(res, 400, { error: error.message }); }
-      if (fulfillmentMethod === "shiprocket") {
-        try { await shiprocketServiceability({ deliveryPostcode: address.postalCode, declaredValue: Number(body.declaredValue || 0), packageDetails: shiprocketPackage(body) }); }
-        catch (error) { return json(res, error.status || 502, { error: error.message }); }
-      }
+
       if (!items.length) return json(res, 400, { error: "Your bag is empty." });
       const getProduct = db.prepare("SELECT * FROM products WHERE id=? AND active=1"); const verified = []; let subtotal = 0;
       for (const item of items) { const product = getProduct.get(String(item.id)); const quantity = Math.max(1, Math.min(99, Number(item.quantity) || 1)); if (!product) return json(res, 400, { error: "One of the products is no longer available." }); const lineTotal = Math.round(product.price * quantity * 100) / 100; subtotal += lineTotal; verified.push({ product, quantity, lineTotal }); }
