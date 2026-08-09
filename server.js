@@ -43,6 +43,7 @@ const SHIPROCKET_DEFAULT_PACKAGE = {
   height: Number(process.env.SHIPROCKET_DEFAULT_HEIGHT_CM || 10)
 };
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+console.log("Shiprocket runtime config", { tokenConfigured: Boolean(shiprocketToken), tokenLength: shiprocketToken.length, apiEmailConfigured: Boolean(SHIPROCKET_API_EMAIL), apiPasswordConfigured: Boolean(SHIPROCKET_API_PASSWORD), pickupPostcode: Boolean(SHIPROCKET_PICKUP_POSTCODE) });
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const db = new DatabaseSync(path.join(DATA_DIR, "raycrafting.sqlite"));
@@ -281,6 +282,7 @@ async function shiprocketLogin() {
   const response = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ email: SHIPROCKET_API_EMAIL, password: SHIPROCKET_API_PASSWORD }) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.token) {
+    console.error("Shiprocket login response", { status: response.status, message: data.message || null, statusCode: data.status_code || null });
     const error = new Error("Shiprocket authentication failed. Check the API-user email and password in Railway.");
     error.status = response.status === 401 || response.status === 422 ? 503 : 502;
     throw error;
