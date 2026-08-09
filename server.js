@@ -43,7 +43,6 @@ const SHIPROCKET_DEFAULT_PACKAGE = {
   height: Number(process.env.SHIPROCKET_DEFAULT_HEIGHT_CM || 10)
 };
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
-console.log("Shiprocket runtime fingerprint", { emailHash: crypto.createHash("sha256").update(SHIPROCKET_API_EMAIL).digest("hex").slice(0, 10), passwordHash: crypto.createHash("sha256").update(SHIPROCKET_API_PASSWORD).digest("hex").slice(0, 10), tokenConfigured: Boolean(shiprocketToken), pickupPostcode: Boolean(SHIPROCKET_PICKUP_POSTCODE) });
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const db = new DatabaseSync(path.join(DATA_DIR, "raycrafting.sqlite"));
