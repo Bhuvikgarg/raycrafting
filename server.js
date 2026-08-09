@@ -32,7 +32,9 @@ const SUPPORT_PHONE = process.env.RAYCRAFTING_SUPPORT_PHONE || "";
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 const EMAIL_FROM = process.env.RAYCRAFTING_EMAIL_FROM || "";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
-const SHIPROCKET_API_TOKEN = process.env.SHIPROCKET_API_TOKEN || "";
+let shiprocketToken = process.env.SHIPROCKET_API_TOKEN || "";
+const SHIPROCKET_API_EMAIL = process.env.SHIPROCKET_API_EMAIL || "";
+const SHIPROCKET_API_PASSWORD = process.env.SHIPROCKET_API_PASSWORD || "";
 const SHIPROCKET_PICKUP_POSTCODE = String(process.env.SHIPROCKET_PICKUP_POSTCODE || "").trim();
 const SHIPROCKET_DEFAULT_PACKAGE = {
   weight: Number(process.env.SHIPROCKET_DEFAULT_WEIGHT_KG || 0.5),
@@ -270,9 +272,25 @@ function cleanAddress(input, fulfillmentMethod = "shiprocket") {
   return { name, phone, line1, line2, city, state, postalCode };
 }
 function shiprocketConfigError() {
-  const error = new Error("Shiprocket delivery is not configured yet. The seller must add the pickup PIN.");
+  const error = new Error("Shiprocket delivery is not configured yet. Add Shiprocket API credentials and the seller pickup PIN.");
   error.status = 503;
   return error;
+}
+async function shiprocketLogin() {
+  if (!SHIPROCKET_API_EMAIL || !SHIPROCKET_API_PASSWORD) throw shiprocketConfigError();
+  const response = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ email: SHIPROCKET_API_EMAIL, password: SHIPROCKET_API_PASSWORD }) });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.token) {
+    const error = new Error("Shiprocket authentication failed. Check the API-user email and password in Railway.");
+    error.status = response.status === 401 || response.status === 422 ? 503 : 502;
+    throw error;
+  }
+  shiprocketToken = String(data.token);
+  return shiprocketToken;
+}
+async function shiprocketAccessToken(forceLogin = false) {
+  if (!forceLogin && shiprocketToken) return shiprocketToken;
+  return shiprocketLogin();
 }
 function shiprocketPackage(body = {}) {
   const source = body.package && typeof body.package === "object" ? body.package : {};
@@ -288,32 +306,23 @@ function shiprocketPackage(body = {}) {
   };
 }
 async function shiprocketServiceability({ deliveryPostcode, cod = false, declaredValue = 0, packageDetails = SHIPROCKET_DEFAULT_PACKAGE }) {
-  if (!SHIPROCKET_API_TOKEN || !SHIPROCKET_PICKUP_POSTCODE) throw shiprocketConfigError();
-  const params = new URLSearchParams({
-    pickup_postcode: SHIPROCKET_PICKUP_POSTCODE,
-    delivery_postcode: String(deliveryPostcode),
-    cod: cod ? "1" : "0",
-    weight: String(packageDetails.weight),
-    length: String(packageDetails.length),
-    breadth: String(packageDetails.breadth),
-    height: String(packageDetails.height),
-    declared_value: String(Math.max(0, Number(declaredValue) || 0))
-  });
-  const response = await fetch("https://apiv2.shiprocket.in/v1/external/courier/serviceability/?" + params.toString(), { headers: { Accept: "application/json", Authorization: "Bearer " + SHIPROCKET_API_TOKEN } });
+  if ((!shiprocketToken && (!SHIPROCKET_API_EMAIL || !SHIPROCKET_API_PASSWORD)) || !SHIPROCKET_PICKUP_POSTCODE) throw shiprocketConfigError();
+  const params = new URLSearchParams({ pickup_postcode: SHIPROCKET_PICKUP_POSTCODE, delivery_postcode: String(deliveryPostcode), cod: cod ? "1" : "0", weight: String(packageDetails.weight), length: String(packageDetails.length), breadth: String(packageDetails.breadth), height: String(packageDetails.height), declared_value: String(Math.max(0, Number(declaredValue) || 0)) });
+  async function request(token) {
+    return fetch("https://apiv2.shiprocket.in/v1/external/courier/serviceability/?" + params.toString(), { headers: { Accept: "application/json", Authorization: "Bearer " + token } });
+  }
+  let response = await request(await shiprocketAccessToken());
+  if ((response.status === 401 || response.status === 403) && SHIPROCKET_API_EMAIL && SHIPROCKET_API_PASSWORD) {
+    response = await request(await shiprocketAccessToken(true));
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data.message || data.error || "Shiprocket could not check this PIN code.");
-    error.status = response.status === 401 || response.status === 403 ? 502 : response.status >= 400 && response.status < 500 ? 400 : 502;
+    const error = new Error(response.status === 401 || response.status === 403 ? "Shiprocket authentication failed. The API user credentials need attention." : (data.message || data.error || "Shiprocket could not check this PIN code."));
+    error.status = response.status === 401 || response.status === 403 ? 503 : response.status >= 400 && response.status < 500 ? 400 : 502;
     throw error;
   }
   const couriers = Array.isArray(data.data?.available_courier_companies) ? data.data.available_courier_companies : [];
-  return {
-    serviceable: couriers.length > 0,
-    source: "shiprocket",
-    pickupPostcode: SHIPROCKET_PICKUP_POSTCODE,
-    deliveryPostcode: String(deliveryPostcode),
-    couriers: couriers.slice(0, 8).map((courier) => ({ id: courier.id || null, name: courier.courier_name || courier.name || "Courier", rate: Number(courier.freight_charge || courier.rate || 0), etd: courier.etd || courier.etd_hours || null, cod: Boolean(courier.cod) }))
-  };
+  return { serviceable: couriers.length > 0, source: "shiprocket", pickupPostcode: SHIPROCKET_PICKUP_POSTCODE, deliveryPostcode: String(deliveryPostcode), couriers: couriers.slice(0, 8).map((courier) => ({ id: courier.id || null, name: courier.courier_name || courier.name || "Courier", rate: Number(courier.freight_charge || courier.rate || 0), etd: courier.etd || courier.etd_hours || null, cod: Boolean(courier.cod) })) };
 }
 function requireAdmin(req) { return Boolean(adminTokenFromRequest(req)); }
 function calculateCoupon(code, subtotal) {
@@ -376,7 +385,7 @@ async function api(req, res, pathname, body) {
       db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(email, now());
       return json(res, 200, { ok: true, message: "You’re on the list. A little brightness is on its way." });
     }
-    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, shiprocketEnabled: Boolean(SHIPROCKET_API_TOKEN && SHIPROCKET_PICKUP_POSTCODE), selfPickupEnabled: true });
+    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, shiprocketEnabled: Boolean((shiprocketToken || (SHIPROCKET_API_EMAIL && SHIPROCKET_API_PASSWORD)) && SHIPROCKET_PICKUP_POSTCODE), selfPickupEnabled: true });
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
@@ -547,7 +556,7 @@ async function api(req, res, pathname, body) {
       const order = db.prepare("SELECT * FROM orders WHERE id=?").get(orderId);
       if (!order) return json(res, 404, { error: "Order not found." });
       if (!["shiprocket", "manual"].includes(fulfillmentMethod)) return json(res, 400, { error: "Choose Shiprocket delivery or manual delivery." });
-      if (fulfillmentMethod === "shiprocket" && (!SHIPROCKET_API_TOKEN || !SHIPROCKET_PICKUP_POSTCODE)) return json(res, 503, { error: "Shiprocket is not configured. Add the API token and seller pickup PIN first." });
+      if (fulfillmentMethod === "shiprocket" && ((!shiprocketToken && (!SHIPROCKET_API_EMAIL || !SHIPROCKET_API_PASSWORD)) || !SHIPROCKET_PICKUP_POSTCODE)) return json(res, 503, { error: "Shiprocket is not configured. Add API credentials and the seller pickup PIN first." });
       db.prepare("UPDATE orders SET fulfillment_method=?,updated_at=? WHERE id=?").run(fulfillmentMethod, now(), order.id);
       return json(res, 200, { ok: true, orderId: order.id, fulfillmentMethod });
     }
