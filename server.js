@@ -152,7 +152,7 @@ async function notifyCustomerOrderStatus(order, status, reason) {
   const safeReason = htmlEscape(reason || "The seller could not fulfil this order.");
   const html = `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#252629"><h2>${heading}</h2><p>Hi ${safeName},</p><p>Your Raycrafting order <strong>${htmlEscape(order.id)}</strong> has been marked as <strong>${htmlEscape(status.replaceAll("_", " "))}</strong>.</p><p><strong>Seller note:</strong> ${safeReason}</p><p>Please sign in to Raycrafting to view the latest order status or contact the studio for help.</p><p>— Raycrafting</p></div>`;
   try {
-    const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` }, body: JSON.stringify({ from: EMAIL_FROM, to: [order.customer_email], subject, html }) });
+    const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` }, body: JSON.stringify({ from: EMAIL_FROM, reply_to: SUPPORT_EMAIL, to: [order.customer_email], subject, html }) });
     if (!response.ok) console.error("Customer status email failed", response.status);
   } catch (error) { console.error("Customer status email error", error.message); }
 }
