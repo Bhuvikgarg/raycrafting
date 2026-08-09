@@ -32,6 +32,14 @@ const SUPPORT_PHONE = process.env.RAYCRAFTING_SUPPORT_PHONE || "";
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 const EMAIL_FROM = process.env.RAYCRAFTING_EMAIL_FROM || "";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const SHIPROCKET_API_TOKEN = process.env.SHIPROCKET_API_TOKEN || "";
+const SHIPROCKET_PICKUP_POSTCODE = String(process.env.SHIPROCKET_PICKUP_POSTCODE || "").trim();
+const SHIPROCKET_DEFAULT_PACKAGE = {
+  weight: Number(process.env.SHIPROCKET_DEFAULT_WEIGHT_KG || 0.5),
+  length: Number(process.env.SHIPROCKET_DEFAULT_LENGTH_CM || 20),
+  breadth: Number(process.env.SHIPROCKET_DEFAULT_BREADTH_CM || 15),
+  height: Number(process.env.SHIPROCKET_DEFAULT_HEIGHT_CM || 10)
+};
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -123,6 +131,12 @@ ensureColumn("orders", "payment_method", "TEXT NOT NULL DEFAULT 'razorpay'");
 ensureColumn("orders", "failure_reason", "TEXT");
 ensureColumn("orders", "decision_reason", "TEXT");
 ensureColumn("orders", "customer_request_reason", "TEXT");
+ensureColumn("orders", "fulfillment_method", "TEXT NOT NULL DEFAULT 'shiprocket'");
+ensureColumn("orders", "shiprocket_order_id", "TEXT");
+ensureColumn("orders", "shiprocket_shipment_id", "TEXT");
+ensureColumn("orders", "shiprocket_awb", "TEXT");
+ensureColumn("orders", "shiprocket_courier", "TEXT");
+ensureColumn("orders", "shipping_status", "TEXT");
 ensureColumn("customers", "avatar_url", "TEXT");
 
 const defaultProducts = [];
@@ -139,7 +153,7 @@ const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(self)",
   "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://accounts.google.com; frame-src https://checkout.razorpay.com https://api.razorpay.com https://accounts.google.com; connect-src 'self' https://api.razorpay.com https://accounts.google.com; form-action 'self'"
 };
 function htmlEscape(value = "") { return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character])); }
@@ -231,7 +245,7 @@ function normalizeIndianPhone(value) {
 }
 function validIndianPhone(value) { return /^[6-9]\d{9}$/.test(normalizeIndianPhone(value)); }
 function validIndianPincode(value) { return /^[1-8]\d{5}$/.test(String(value || "").trim()); }
-function cleanAddress(input) {
+function cleanAddress(input, fulfillmentMethod = "shiprocket") {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Enter a valid delivery address.");
   const field = (name, max, required = true) => {
     const value = String(input[name] || "").trim();
@@ -241,16 +255,65 @@ function cleanAddress(input) {
     return value;
   };
   const name = field("name", 120);
+  const phone = normalizeIndianPhone(input.phone);
+  if (name.length < 2) throw new Error("Enter your full name.");
+  if (!validIndianPhone(input.phone)) throw new Error("Enter a valid 10-digit Indian mobile number starting with 6–9.");
+  if (fulfillmentMethod === "self_pickup") return { name, phone, line1: "", line2: "", city: "", state: "", postalCode: "" };
   const line1 = field("line1", 200);
   const line2 = field("line2", 200, false);
   const city = field("city", 80);
   const state = field("state", 80);
-  const phone = normalizeIndianPhone(input.phone);
   const postalCode = String(input.postalCode || "").trim();
   if (name.length < 2 || line1.length < 5 || city.length < 2 || state.length < 2) throw new Error("Enter a complete delivery address.");
   if (!validIndianPhone(input.phone)) throw new Error("Enter a valid 10-digit Indian mobile number starting with 6–9.");
   if (!validIndianPincode(postalCode)) throw new Error("Enter a valid 6-digit Indian PIN code starting with 1–8.");
   return { name, phone, line1, line2, city, state, postalCode };
+}
+function shiprocketConfigError() {
+  const error = new Error("Shiprocket delivery is not configured yet. The seller must add the pickup PIN.");
+  error.status = 503;
+  return error;
+}
+function shiprocketPackage(body = {}) {
+  const source = body.package && typeof body.package === "object" ? body.package : {};
+  const value = (name, fallback) => {
+    const candidate = Number(source[name]);
+    return Number.isFinite(candidate) && candidate > 0 ? candidate : fallback;
+  };
+  return {
+    weight: value("weight", SHIPROCKET_DEFAULT_PACKAGE.weight),
+    length: value("length", SHIPROCKET_DEFAULT_PACKAGE.length),
+    breadth: value("breadth", SHIPROCKET_DEFAULT_PACKAGE.breadth),
+    height: value("height", SHIPROCKET_DEFAULT_PACKAGE.height)
+  };
+}
+async function shiprocketServiceability({ deliveryPostcode, cod = false, declaredValue = 0, packageDetails = SHIPROCKET_DEFAULT_PACKAGE }) {
+  if (!SHIPROCKET_API_TOKEN || !SHIPROCKET_PICKUP_POSTCODE) throw shiprocketConfigError();
+  const params = new URLSearchParams({
+    pickup_postcode: SHIPROCKET_PICKUP_POSTCODE,
+    delivery_postcode: String(deliveryPostcode),
+    cod: cod ? "1" : "0",
+    weight: String(packageDetails.weight),
+    length: String(packageDetails.length),
+    breadth: String(packageDetails.breadth),
+    height: String(packageDetails.height),
+    declared_value: String(Math.max(0, Number(declaredValue) || 0))
+  });
+  const response = await fetch("https://apiv2.shiprocket.in/v1/external/courier/serviceability/?" + params.toString(), { headers: { Accept: "application/json", Authorization: "Bearer " + SHIPROCKET_API_TOKEN } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.message || data.error || "Shiprocket could not check this PIN code.");
+    error.status = response.status === 401 || response.status === 403 ? 502 : response.status >= 400 && response.status < 500 ? 400 : 502;
+    throw error;
+  }
+  const couriers = Array.isArray(data.data?.available_courier_companies) ? data.data.available_courier_companies : [];
+  return {
+    serviceable: couriers.length > 0,
+    source: "shiprocket",
+    pickupPostcode: SHIPROCKET_PICKUP_POSTCODE,
+    deliveryPostcode: String(deliveryPostcode),
+    couriers: couriers.slice(0, 8).map((courier) => ({ id: courier.id || null, name: courier.courier_name || courier.name || "Courier", rate: Number(courier.freight_charge || courier.rate || 0), etd: courier.etd || courier.etd_hours || null, cod: Boolean(courier.cod) }))
+  };
 }
 function requireAdmin(req) { return Boolean(adminTokenFromRequest(req)); }
 function calculateCoupon(code, subtotal) {
@@ -313,7 +376,7 @@ async function api(req, res, pathname, body) {
       db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(email, now());
       return json(res, 200, { ok: true, message: "You’re on the list. A little brightness is on its way." });
     }
-    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null });
+    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, shiprocketEnabled: Boolean(SHIPROCKET_API_TOKEN && SHIPROCKET_PICKUP_POSTCODE), selfPickupEnabled: true });
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
@@ -375,17 +438,32 @@ async function api(req, res, pathname, body) {
     if (req.method === "POST" && pathname === "/api/coupons/validate") {
       const subtotal = Number(body.subtotal || 0); const result = calculateCoupon(body.code, subtotal); return json(res, 200, result);
     }
+    if (req.method === "POST" && pathname === "/api/shipping/serviceability") {
+      const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in before checking delivery." });
+      const fulfillmentMethod = String(body.fulfillmentMethod || "shiprocket");
+      if (fulfillmentMethod === "self_pickup") return json(res, 200, { serviceable: true, source: "self_pickup", fulfillmentMethod });
+      if (fulfillmentMethod !== "shiprocket") return json(res, 400, { error: "Customer delivery must be checked by Shiprocket." });
+      const postalCode = String(body.postalCode || "").trim();
+      if (!validIndianPincode(postalCode)) return json(res, 400, { error: "Enter a valid 6-digit Indian PIN code starting with 1–8." });
+      const result = await shiprocketServiceability({ deliveryPostcode: postalCode, cod: Boolean(body.cod), declaredValue: Number(body.declaredValue || 0), packageDetails: shiprocketPackage(body) });
+      return json(res, 200, { ...result, fulfillmentMethod });
+    }
     if (req.method === "POST" && pathname === "/api/orders") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in before placing an order." });
       const items = Array.isArray(body.items) ? body.items : [];
+      const fulfillmentMethod = ["shiprocket", "manual", "self_pickup"].includes(String(body.fulfillmentMethod || "")) ? String(body.fulfillmentMethod) : "shiprocket";
       let address;
-      try { address = cleanAddress(body.address); } catch (error) { return json(res, 400, { error: error.message }); }
+      try { address = cleanAddress(body.address, fulfillmentMethod); } catch (error) { return json(res, 400, { error: error.message }); }
+      if (fulfillmentMethod === "shiprocket") {
+        try { await shiprocketServiceability({ deliveryPostcode: address.postalCode, declaredValue: Number(body.declaredValue || 0), packageDetails: shiprocketPackage(body) }); }
+        catch (error) { return json(res, error.status || 502, { error: error.message }); }
+      }
       if (!items.length) return json(res, 400, { error: "Your bag is empty." });
       const getProduct = db.prepare("SELECT * FROM products WHERE id=? AND active=1"); const verified = []; let subtotal = 0;
       for (const item of items) { const product = getProduct.get(String(item.id)); const quantity = Math.max(1, Math.min(99, Number(item.quantity) || 1)); if (!product) return json(res, 400, { error: "One of the products is no longer available." }); const lineTotal = Math.round(product.price * quantity * 100) / 100; subtotal += lineTotal; verified.push({ product, quantity, lineTotal }); }
-      const coupon = calculateCoupon(body.couponCode, subtotal); const shipping = subtotal - coupon.discount >= 4000 ? 0 : 80; const total = Math.round((subtotal - coupon.discount + shipping) * 100) / 100; const orderId = id("ord"); const timestamp = now();
-      db.exec("BEGIN"); try { db.prepare("INSERT INTO orders (id,customer_id,status,subtotal,discount,shipping,total,currency,coupon_code,address_json,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer.id, "pending_payment", subtotal, coupon.discount, shipping, total, "INR", coupon.code || null, JSON.stringify(address), timestamp, timestamp); const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total) VALUES (?,?,?,?,?,?)"); for (const item of verified) insert.run(orderId, item.product.id, item.product.name, item.product.price, item.quantity, item.lineTotal); db.exec("COMMIT"); } catch (error) { db.exec("ROLLBACK"); throw error; }
-      return json(res, 201, { orderId, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: "pending_payment" });
+      const coupon = calculateCoupon(body.couponCode, subtotal); const shipping = fulfillmentMethod === "self_pickup" ? 0 : (subtotal - coupon.discount >= 4000 ? 0 : 80); const total = Math.round((subtotal - coupon.discount + shipping) * 100) / 100; const orderId = id("ord"); const timestamp = now();
+      db.exec("BEGIN"); try { db.prepare("INSERT INTO orders (id,customer_id,status,subtotal,discount,shipping,total,currency,coupon_code,address_json,fulfillment_method,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer.id, "pending_payment", subtotal, coupon.discount, shipping, total, "INR", coupon.code || null, JSON.stringify(address), fulfillmentMethod, timestamp, timestamp); const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total) VALUES (?,?,?,?,?,?)"); for (const item of verified) insert.run(orderId, item.product.id, item.product.name, item.product.price, item.quantity, item.lineTotal); db.exec("COMMIT"); } catch (error) { db.exec("ROLLBACK"); throw error; }
+      return json(res, 201, { orderId, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: "pending_payment", fulfillmentMethod });
     }
     if (req.method === "POST" && pathname === "/api/orders/action") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in to manage your orders." });
@@ -463,6 +541,16 @@ async function api(req, res, pathname, body) {
       if (!RAZORPAY_WEBHOOK_SECRET || !safeEqual(crypto.createHmac("sha256", RAZORPAY_WEBHOOK_SECRET).update(req.rawBody || JSON.stringify(body)).digest("hex"), req.headers["x-razorpay-signature"])) return json(res, 400, { error: "Invalid webhook signature." }); const entity = body.payload?.payment?.entity; if (entity?.order_id) db.prepare("UPDATE orders SET status=?,payment_id=?,updated_at=? WHERE razorpay_order_id=?").run(["payment.captured", "order.paid"].includes(body.event) ? "paid" : body.event, entity.id, now(), entity.order_id); return json(res, 200, { ok: true });
     }
     if (req.method === "GET" && pathname === "/api/admin/orders") { if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." }); return json(res, 200, { orders: orderRows() }); }
+    if (req.method === "POST" && pathname === "/api/admin/orders/fulfillment") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const orderId = String(body.orderId || ""); const fulfillmentMethod = String(body.fulfillmentMethod || "");
+      const order = db.prepare("SELECT * FROM orders WHERE id=?").get(orderId);
+      if (!order) return json(res, 404, { error: "Order not found." });
+      if (!["shiprocket", "manual"].includes(fulfillmentMethod)) return json(res, 400, { error: "Choose Shiprocket delivery or manual delivery." });
+      if (fulfillmentMethod === "shiprocket" && (!SHIPROCKET_API_TOKEN || !SHIPROCKET_PICKUP_POSTCODE)) return json(res, 503, { error: "Shiprocket is not configured. Add the API token and seller pickup PIN first." });
+      db.prepare("UPDATE orders SET fulfillment_method=?,updated_at=? WHERE id=?").run(fulfillmentMethod, now(), order.id);
+      return json(res, 200, { ok: true, orderId: order.id, fulfillmentMethod });
+    }
     if (req.method === "POST" && pathname === "/api/admin/orders/status") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const order = db.prepare("SELECT o.*, c.name customer_name, c.email customer_email FROM orders o JOIN customers c ON c.id=o.customer_id WHERE o.id=?").get(String(body.orderId || "")); const status = String(body.status || ""); const reason = String(body.reason || "").trim().slice(0, 500);
