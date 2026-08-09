@@ -142,7 +142,7 @@
     return { valid: !failed, value, error: failed?.[1] || "" };
   }
   function loadRazorpay() { return new Promise((resolve, reject) => { if (window.Razorpay) return resolve(); const script = document.createElement("script"); script.src = "https://checkout.razorpay.com/v1/checkout.js"; script.onload = resolve; script.onerror = () => reject(new Error("Could not load Razorpay Checkout.")); document.head.appendChild(script); }); }
-  function statusLabel(status) { return ({ pending_payment: "Pending payment", failed_payment: "Payment failed", paid: "Paid", processing: "Processing", shipped: "Shipped", delivered: "Delivered", cancel_requested: "Cancellation requested", return_requested: "Return requested", cancelled: "Cancelled", returned: "Returned", declined: "Declined" }[status] || status.replaceAll("_", " ")); }
+  function statusLabel(status) { return ({ pending_payment: "Pending payment", failed_payment: "Payment failed", paid: "Paid", processing: "Processing", shipped: "Shipped", out_for_delivery: "Out for delivery", delivered: "Delivered", cancel_requested: "Cancellation requested", return_requested: "Return requested", cancelled: "Cancelled", returned: "Returned", declined: "Declined" }[status] || status.replaceAll("_", " ")); }
   function renderOrders(orders) {
     const target = $("#ordersList");
     if (!orders.length) { target.innerHTML = `<p class="commerce-note">You have no orders yet. Your next bright thing will appear here.</p>`; return; }
@@ -150,7 +150,7 @@
       const items = order.items.map((item) => `${item.quantity} × ${esc(item.name)} (${money(item.line_total)})`).join(" · ");
       const reasons = order.failure_reason ? `<p class="order-history-reason"><strong>Payment issue:</strong> ${esc(order.failure_reason)}</p>` : order.decision_reason ? `<p class="order-history-reason"><strong>Seller note:</strong> ${esc(order.decision_reason)}</p>` : order.customer_request_reason ? `<p class="order-history-reason"><strong>Your request:</strong> ${esc(order.customer_request_reason)}</p>` : "";
       const canCancel = ["pending_payment", "paid", "processing", "shipped"].includes(order.status);
-      const canReturn = ["paid", "processing", "shipped", "delivered"].includes(order.status);
+      const canReturn = ["paid", "processing", "shipped", "out_for_delivery", "delivered"].includes(order.status);
       return `<article class="order-history-card"><div class="order-history-head"><div><h3>${esc(order.id)}</h3><p class="order-history-meta">${new Date(order.created_at).toLocaleString("en-IN")} · ${money(order.total)}</p></div><span class="order-history-status ${esc(order.status)}">${esc(statusLabel(order.status))}</span></div><div class="order-history-items">${items}</div>${reasons}${(canCancel || canReturn) ? `<div class="order-history-actions">${canCancel ? `<button type="button" data-order-action="cancel" data-order-id="${esc(order.id)}">Request cancellation</button>` : ""}${canReturn ? `<button type="button" data-order-action="return" data-order-id="${esc(order.id)}">Request return</button>` : ""}</div>` : ""}</article>`;
     }).join("");
   }

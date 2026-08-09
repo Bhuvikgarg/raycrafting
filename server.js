@@ -145,12 +145,21 @@ const SECURITY_HEADERS = {
 function htmlEscape(value = "") { return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character])); }
 async function notifyCustomerOrderStatus(order, status, reason) {
   if (!RESEND_API_KEY || !EMAIL_FROM || !order.customer_email) return;
-  const cancelled = status === "cancelled";
-  const subject = cancelled ? `Raycrafting order ${order.id} cancelled` : `Update on your Raycrafting order ${order.id}`;
-  const heading = cancelled ? "Your order has been cancelled" : "There is an update to your order";
+  const copy = {
+    paid: ["Payment received", "Your payment was received and your order is confirmed."],
+    processing: ["Order accepted", "The seller accepted your order and is preparing it."],
+    shipped: ["Order shipped", "Your order has been dispatched."],
+    out_for_delivery: ["Out for delivery", "Your order is with the delivery partner and should reach you soon."],
+    delivered: ["Order delivered", "Your order has been marked as delivered."],
+    cancelled: ["Order cancelled", "Your order has been cancelled."],
+    declined: ["Order declined", "The seller could not fulfil your order."],
+    returned: ["Return completed", "Your order has been marked as returned."],
+    failed_payment: ["Payment not completed", "Your payment was not completed. You can retry from My orders."]
+  }[status] || ["Order update", "Your order status is now " + status.replaceAll("_", " ") + "."];
+  const subject = `Raycrafting: ${copy[0]} — ${order.id}`;
   const safeName = htmlEscape(order.customer_name || "there");
-  const safeReason = htmlEscape(reason || "The seller could not fulfil this order.");
-  const html = `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#252629"><h2>${heading}</h2><p>Hi ${safeName},</p><p>Your Raycrafting order <strong>${htmlEscape(order.id)}</strong> has been marked as <strong>${htmlEscape(status.replaceAll("_", " "))}</strong>.</p><p><strong>Seller note:</strong> ${safeReason}</p><p>Please sign in to Raycrafting to view the latest order status or contact the studio for help.</p><p>— Raycrafting</p></div>`;
+  const safeReason = reason ? `<p><strong>Seller note:</strong> ${htmlEscape(reason)}</p>` : "";
+  const html = `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#252629"><h2>${copy[0]}</h2><p>Hi ${safeName},</p><p>${copy[1]}</p><p>Order: <strong>${htmlEscape(order.id)}</strong></p>${safeReason}<p>Sign in to Raycrafting to view the latest status or contact the studio for help.</p><p>— Raycrafting</p></div>`;
   try {
     const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` }, body: JSON.stringify({ from: EMAIL_FROM, reply_to: SUPPORT_EMAIL, to: [order.customer_email], subject, html }) });
     if (!response.ok) console.error("Customer status email failed", response.status);
@@ -388,7 +397,7 @@ async function api(req, res, pathname, body) {
         if (!["pending_payment", "paid", "processing", "shipped"].includes(order.status)) return json(res, 400, { error: "This order cannot be cancelled in its current status." });
         db.prepare("UPDATE orders SET status='cancel_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
       } else if (action === "return") {
-        if (!["paid", "processing", "shipped", "delivered"].includes(order.status)) return json(res, 400, { error: "A return request is not available for this order yet." });
+        if (!["paid", "processing", "shipped", "out_for_delivery", "delivered"].includes(order.status)) return json(res, 400, { error: "A return request is not available for this order yet." });
         db.prepare("UPDATE orders SET status='return_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
       } else return json(res, 400, { error: "Unsupported order action." });
       return json(res, 200, { ok: true, orderId: order.id, status: action === "cancel" ? "cancel_requested" : "return_requested" });
@@ -415,9 +424,10 @@ async function api(req, res, pathname, body) {
       if (!safeEqual(expectedSignature, receivedSignature)) return json(res, 400, { success: false, error: "Payment signature mismatch." });
       const internalOrder = db.prepare("SELECT * FROM orders WHERE razorpay_order_id=? AND customer_id=?").get(orderId, customer.id);
       if (!internalOrder) return json(res, 404, { success: false, error: "Payment order not found." });
-      if (["paid", "processing", "shipped", "delivered", "cancelled", "returned", "declined"].includes(internalOrder.status)) return json(res, 400, { success: false, error: "This order is no longer awaiting payment." });
+      if (["paid", "processing", "shipped", "out_for_delivery", "delivered", "cancelled", "returned", "declined"].includes(internalOrder.status)) return json(res, 400, { success: false, error: "This order is no longer awaiting payment." });
       await verifyCapturedPayment(paymentId, orderId);
       db.prepare("UPDATE orders SET status='paid',payment_id=?,failure_reason=NULL,updated_at=? WHERE id=?").run(paymentId, now(), internalOrder.id);
+      void notifyCustomerOrderStatus({ ...internalOrder, customer_name: customer.name, customer_email: customer.email }, "paid", "");
       db.prepare("INSERT INTO payments (order_id,provider,provider_order_id,provider_payment_id,status,raw_json,created_at) VALUES (?,?,?,?,?,?,?)").run(internalOrder.id, "razorpay", orderId, paymentId, "captured", JSON.stringify(body), now());
       return json(res, 200, { success: true, orderId: internalOrder.id, status: "paid" });
     }
@@ -432,9 +442,10 @@ async function api(req, res, pathname, body) {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." });
       const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(String(body.orderId || ""), customer.id);
       if (!order) return json(res, 404, { error: "Order not found." });
-      if (["paid", "processing", "shipped", "delivered", "cancelled", "returned", "declined"].includes(order.status)) return json(res, 400, { error: "This order is no longer awaiting payment." });
+      if (["paid", "processing", "shipped", "out_for_delivery", "delivered", "cancelled", "returned", "declined"].includes(order.status)) return json(res, 400, { error: "This order is no longer awaiting payment." });
       const reason = String(body.reason || "Payment was not completed.").slice(0, 500);
       db.prepare("UPDATE orders SET status='failed_payment',failure_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
+      void notifyCustomerOrderStatus({ ...order, customer_name: customer.name, customer_email: customer.email }, "failed_payment", reason);
       db.prepare("INSERT INTO payments (order_id,provider,provider_order_id,provider_payment_id,status,raw_json,created_at) VALUES (?,?,?,?,?,?,?)").run(order.id, "razorpay", order.razorpay_order_id || null, body.paymentId || null, "failed", JSON.stringify(body), now());
       return json(res, 200, { ok: true, orderId: order.id, status: "failed_payment" });
     }
@@ -455,13 +466,13 @@ async function api(req, res, pathname, body) {
     if (req.method === "POST" && pathname === "/api/admin/orders/status") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const order = db.prepare("SELECT o.*, c.name customer_name, c.email customer_email FROM orders o JOIN customers c ON c.id=o.customer_id WHERE o.id=?").get(String(body.orderId || "")); const status = String(body.status || ""); const reason = String(body.reason || "").trim().slice(0, 500);
-      const statuses = ["processing", "shipped", "delivered", "declined", "cancelled", "returned"];
+      const statuses = ["processing", "shipped", "out_for_delivery", "delivered", "declined", "cancelled", "returned"];
       if (!order) return json(res, 404, { error: "Order not found." });
       if (!statuses.includes(status)) return json(res, 400, { error: "Unsupported order status." });
       if (status === "declined" && !reason) return json(res, 400, { error: "A decline reason is required." });
       const changed = order.status !== status;
       db.prepare("UPDATE orders SET status=?,decision_reason=?,updated_at=? WHERE id=?").run(status, reason || null, now(), order.id);
-      if (changed && ["cancelled", "declined"].includes(status)) void notifyCustomerOrderStatus(order, status, reason);
+      if (changed) void notifyCustomerOrderStatus(order, status, reason);
       return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null, emailNotificationConfigured: Boolean(RESEND_API_KEY && EMAIL_FROM) });
     }
     if (req.method === "POST" && pathname === "/api/admin/products/sync") {
