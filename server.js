@@ -281,7 +281,8 @@ async function shiprocketLogin() {
   const response = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ email: SHIPROCKET_API_EMAIL, password: SHIPROCKET_API_PASSWORD }) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.token) {
-    const error = new Error("Shiprocket authentication failed. Check the API-user email and password in Railway.");
+    const message = response.status === 403 ? "Shiprocket rejected API access from this server (HTTP 403). Check API-user modules/access restrictions or contact Shiprocket integration support." : "Shiprocket authentication failed. Check the API-user email and password in Railway.";
+    const error = new Error(message);
     error.status = response.status === 401 || response.status === 422 ? 503 : 502;
     throw error;
   }
