@@ -159,8 +159,6 @@
   async function detectLocation() {
     const button = $("#locationButton"); const message = $("#locationMessage");
     if (!navigator.geolocation) { if (message) message.textContent = "Location is not available in this browser. Enter the address manually."; return; }
-    const permission = await geolocationPermission();
-    if (permission === "denied" && message) message.textContent = "Requesting location again…";
     button.disabled = true; button.textContent = "Finding your address…"; if (message) message.textContent = "Please allow location access when your browser asks.";
     navigator.geolocation.getCurrentPosition(async (position) => {
       detectedLocation = { latitude: Number(position.coords.latitude.toFixed(6)), longitude: Number(position.coords.longitude.toFixed(6)), accuracy: Math.round(position.coords.accuracy || 0) };
