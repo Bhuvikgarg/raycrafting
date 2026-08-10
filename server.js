@@ -32,6 +32,10 @@ const SUPPORT_PHONE = process.env.RAYCRAFTING_SUPPORT_PHONE || "";
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 const EMAIL_FROM = process.env.RAYCRAFTING_EMAIL_FROM || "";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || "";
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || "";
+const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID || "";
+const PHONE_OTP_ENABLED = Boolean(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_VERIFY_SERVICE_SID);
 let shiprocketToken = process.env.SHIPROCKET_API_TOKEN || "";
 const SHIPROCKET_API_EMAIL = process.env.SHIPROCKET_API_EMAIL || "";
 const SHIPROCKET_API_PASSWORD = process.env.SHIPROCKET_API_PASSWORD || "";
@@ -196,6 +200,12 @@ function readBody(req) {
 }
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
   return { salt, hash: crypto.scryptSync(password, salt, 64).toString("hex") };
+}
+function phoneCustomerEmail(phone) { return "phone_" + phone + "@accounts.raycrafting.local"; }
+function maskedPhone(phone) { return "+91 " + phone.slice(0, 2) + "******" + phone.slice(-2); }
+async function twilioVerifyRequest(pathname, params) {
+  const auth = Buffer.from(TWILIO_ACCOUNT_SID + ":" + TWILIO_AUTH_TOKEN).toString("base64");
+  return fetch("https://verify.twilio.com/v2/Services/" + encodeURIComponent(TWILIO_VERIFY_SERVICE_SID) + "/" + pathname, { method: "POST", headers: { Authorization: "Basic " + auth, "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" }, body: new URLSearchParams(params) });
 }
 function validPassword(password, salt, expected) {
   const actual = crypto.scryptSync(password, salt, 64);
@@ -399,7 +409,7 @@ async function api(req, res, pathname, body) {
       db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(email, now());
       return json(res, 200, { ok: true, message: "You’re on the list. A little brightness is on its way." });
     }
-    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, selfPickupEnabled: true });
+    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), phoneOtpEnabled: PHONE_OTP_ENABLED, razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, selfPickupEnabled: true });
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
@@ -427,6 +437,38 @@ async function api(req, res, pathname, body) {
       if (!allowRequest(req, "login", 12)) return json(res, 429, { error: "Too many login attempts. Try again later." });
       const email = String(body.email || "").trim().toLowerCase(); const row = db.prepare("SELECT * FROM customers WHERE email=?").get(email);
       if (!row || !validPassword(String(body.password || ""), row.password_salt, row.password_hash)) return json(res, 401, { error: "Email or password is incorrect." });
+      return json(res, 200, { token: issueSession(row.id), customer: { id: row.id, name: row.name, email: row.email, phone: row.phone, avatarUrl: row.avatar_url || "" } });
+    }
+    if (req.method === "POST" && pathname === "/api/auth/phone/request") {
+      if (!PHONE_OTP_ENABLED) return json(res, 503, { error: "Phone OTP sign-in is not configured yet. Please use Google or email sign-in." });
+      if (!allowRequest(req, "phone-otp-request", 5, 15 * 60 * 1000)) return json(res, 429, { error: "Too many OTP requests. Try again later." });
+      const phone = normalizeIndianPhone(body.phone);
+      if (!validIndianPhone(phone)) return json(res, 400, { error: "Enter a valid 10-digit Indian mobile number starting with 6–9." });
+      let response;
+      try { response = await twilioVerifyRequest("Verifications", { To: "+91" + phone, Channel: "sms" }); } catch { return json(res, 502, { error: "The OTP service is temporarily unavailable. Try again later." }); }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.status !== "pending") return json(res, response.status === 429 ? 429 : 502, { error: "We could not send the OTP. Check the number and try again." });
+      return json(res, 200, { ok: true, phone: maskedPhone(phone), message: "OTP sent to " + maskedPhone(phone) + "." });
+    }
+    if (req.method === "POST" && pathname === "/api/auth/phone/verify") {
+      if (!PHONE_OTP_ENABLED) return json(res, 503, { error: "Phone OTP sign-in is not configured yet. Please use Google or email sign-in." });
+      if (!allowRequest(req, "phone-otp-verify", 10, 15 * 60 * 1000)) return json(res, 429, { error: "Too many OTP attempts. Try again later." });
+      const phone = normalizeIndianPhone(body.phone);
+      const code = String(body.code || "").replace(/\D/g, "");
+      const suppliedName = String(body.name || "").trim();
+      if (!validIndianPhone(phone) || !/^\d{6}$/.test(code)) return json(res, 400, { error: "Enter the 6-digit OTP and a valid mobile number." });
+      let response;
+      try { response = await twilioVerifyRequest("VerificationCheck", { To: "+91" + phone, Code: code }); } catch { return json(res, 502, { error: "The OTP service is temporarily unavailable. Try again later." }); }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.status !== "approved") return json(res, 401, { error: "That OTP is incorrect or expired. Request a new one." });
+      let row = db.prepare("SELECT * FROM customers WHERE phone=? ORDER BY created_at ASC LIMIT 1").get(phone);
+      if (!row) {
+        const customerId = id("cus"); const name = suppliedName.length >= 2 && suppliedName.length <= 120 ? suppliedName : "Raycrafting customer"; const secret = hashPassword(crypto.randomBytes(32).toString("hex"));
+        db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,created_at) VALUES (?,?,?,?,?,?,?)").run(customerId, name, phoneCustomerEmail(phone), phone, secret.hash, secret.salt, now());
+        row = db.prepare("SELECT * FROM customers WHERE id=?").get(customerId);
+      } else if (suppliedName.length >= 2 && row.name === "Raycrafting customer") {
+        db.prepare("UPDATE customers SET name=? WHERE id=?").run(suppliedName.slice(0, 120), row.id); row.name = suppliedName.slice(0, 120);
+      }
       return json(res, 200, { token: issueSession(row.id), customer: { id: row.id, name: row.name, email: row.email, phone: row.phone, avatarUrl: row.avatar_url || "" } });
     }
     if (req.method === "POST" && pathname === "/api/auth/google") {
