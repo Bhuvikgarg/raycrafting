@@ -150,22 +150,11 @@
     return { valid: !failed, value, error: failed?.[1] || "" };
   }
   async function geolocationPermission() { if (!navigator.permissions?.query) return "prompt"; try { return (await navigator.permissions.query({ name: "geolocation" })).state; } catch { return "prompt"; } }
-  function ensureLocationPermissionPrompt() {
-    if ($("#locationPermissionModal")) return;
-    const modal = document.createElement("div"); modal.className = "commerce-modal"; modal.id = "locationPermissionModal"; modal.hidden = true;
-    modal.innerHTML = "<div class=\"commerce-panel\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"locationPermissionTitle\"><div class=\"commerce-head\"><div><p class=\"eyebrow\">Delivery address</p><h2 id=\"locationPermissionTitle\">Use your location?</h2><p>We can fill your address, city, state, and PIN automatically. You can review and edit everything before ordering.</p></div><button class=\"commerce-close\" id=\"locationPermissionClose\" type=\"button\" aria-label=\"Close\">×</button></div><p class=\"commerce-note\" id=\"locationPermissionHelp\">Your browser will ask for permission next.</p><button class=\"commerce-action\" id=\"locationPermissionAllow\" type=\"button\">Allow location access <span>→</span></button><button class=\"text-button\" id=\"locationPermissionManual\" type=\"button\">Enter address manually</button></div>";
-    document.body.append(modal);
-    $("#locationPermissionClose").addEventListener("click", () => { modal.hidden = true; });
-    $("#locationPermissionManual").addEventListener("click", () => { modal.hidden = true; $("#locationMessage").textContent = "You can enter the address manually."; });
-    $("#locationPermissionAllow").addEventListener("click", () => { modal.hidden = true; detectLocation(); });
-  }
   async function maybePromptLocationAccess() {
     if (!navigator.geolocation || selectedFulfillment() === "self_pickup") return;
-    const permission = await geolocationPermission(); if (permission === "granted") return;
-    ensureLocationPermissionPrompt();
-    const help = $("#locationPermissionHelp"); const allow = $("#locationPermissionAllow");
-    if (permission === "denied") { help.textContent = "Location is currently blocked for this site. Choose Location → Allow from the lock/settings icon beside the web address, then try again."; allow.textContent = "Try location again →"; } else { help.textContent = "Click Allow location access below, then choose Allow in your browser’s permission dialog."; allow.innerHTML = "Allow location access <span>→</span>"; }
-    $("#locationPermissionModal").hidden = false;
+    const permission = await geolocationPermission();
+    if (permission === "denied") { const message = $("#locationMessage"); if (message) message.textContent = "Location access is blocked for this site. Enable Location → Allow from the lock/settings icon beside the web address, then use the location button."; return; }
+    detectLocation();
   }
   async function detectLocation() {
     const button = $("#locationButton"); const message = $("#locationMessage");
