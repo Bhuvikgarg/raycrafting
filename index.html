@@ -38,7 +38,7 @@
       <nav class="main-nav" aria-label="Main navigation">
         <a href="#shop">Shop</a>
         <a href="#story">Our story</a>
-        <a href="#custom">Custom orders</a>
+        <a href="#custom">Custom gifts</a>
       </nav>
 
       <div class="header-actions">
@@ -72,12 +72,26 @@
               <img class="hero-slide" data-caption="pink lily pot" src="assets/pink-lily-pot.png" alt="Handmade pink lily flower in a small dark pot" aria-hidden="true" />
               <img class="hero-slide" data-caption="pink rose pot" src="assets/pink-rose-pot.png" alt="Handmade pink rose flower in a small dark pot" aria-hidden="true" />
             </div>
-            <button class="hero-control hero-prev" id="heroPrevious" type="button" aria-label="Previous photo">‹</button>
-            <button class="hero-control hero-next" id="heroNext" type="button" aria-label="Next photo">›</button>
             <div class="image-sticker">made<br />slowly</div>
           </div>
           <div class="hero-caption"><span id="heroCounter">01 / 03</span><span id="heroCaption">the little things collection</span></div>
         </div>
+      </section>
+
+      <section class="custom-teaser section-shell" aria-labelledby="customTeaserTitle">
+        <div><p class="eyebrow">Made just for you</p><h2 id="customTeaserTitle">Create a <em>custom gift.</em></h2><p>Have a flower, colour, memory, or person in mind? Share an image or describe it and we’ll turn the idea into something handmade.</p></div>
+        <a class="button button-dark" href="#custom">Start your idea <span aria-hidden="true">↓</span></a>
+      </section>
+
+      <section class="note-section section-shell" id="note-for-you" aria-labelledby="noteTitle">
+        <div class="note-intro"><p class="eyebrow">A little something for you</p><h2 id="noteTitle">Note <em>for you.</em></h2><p>Send a love poem, an original shayari, or a few words from the heart. Tell us your preferred language and where you’re writing from.</p><p class="field-help">Please share words you have permission to use — or write something of your own and we’ll keep it heartfelt.</p></div>
+        <form class="soft-form note-form" id="noteForm">
+          <div class="form-grid"><label>Your name <span class="optional">optional</span><input id="noteName" name="name" autocomplete="name" placeholder="A name to sign it with"></label><label>Email address<input id="noteEmail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label></div>
+          <label>Your note<textarea id="noteMessage" name="message" required rows="5" maxlength="2500" placeholder="Write your poem, shayari, dedication, or anything you want to say..."></textarea></label>
+          <div class="form-grid"><label>Preferred language<select id="noteLanguage" name="language" required><option value="">Choose a language</option></select></label><label>State / Union Territory<select id="noteState" name="state" required><option value="">Choose a state</option></select></label></div>
+          <label>City / town<select id="noteCity" name="city" required><option value="">Choose a city</option></select></label>
+          <div class="form-actions"><button class="button button-dark" type="submit">Send the note <span aria-hidden="true">♡</span></button><p class="form-message" id="noteMessageStatus" role="status"></p></div>
+        </form>
       </section>
 
       <section class="trust-strip section-shell" aria-label="Raycrafting promises">
@@ -133,21 +147,18 @@
         </div>
       </section>
 
-      <section class="custom-section section-shell" id="custom">
-        <div class="custom-copy">
-          <p class="eyebrow">Something in mind?</p>
-          <h2>Tell me your<br /><em>color story.</em></h2>
-          <p>Birthdays, desk buddies, wedding favors, tiny bouquets for no reason at all. Share a few details and we’ll make a little plan together.</p>
-          <a class="button button-light" href="mailto:hello@raycrafting.co?subject=Custom%20Raycrafting%20idea">Plan a custom order <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="custom-palette" aria-label="Example custom color palette">
-          <div class="palette-card palette-coral"><span>01</span><strong>sunset</strong></div>
-          <div class="palette-card palette-lilac"><span>02</span><strong>soft bloom</strong></div>
-          <div class="palette-card palette-sage"><span>03</span><strong>garden</strong></div>
-          <div class="palette-card palette-yellow"><span>04</span><strong>daylight</strong></div>
-        </div>
+      <section class="custom-section section-shell" id="custom" aria-labelledby="customTitle">
+        <div class="custom-copy"><p class="eyebrow">Custom orders</p><h2 id="customTitle">Bring me your <em>idea.</em></h2><p>If you want a custom order, give us any similar image and we’ll review it — or just write a description. An image is better, but your words are welcome too.</p><p class="custom-promise">We’ll review your request and contact you within 1 hour.</p></div>
+        <form class="custom-form soft-form" id="customOrderForm">
+          <div class="form-grid"><label>Your name<input id="customName" name="name" required autocomplete="name" placeholder="Your name"></label><label>Email address<input id="customEmail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label></div>
+          <div class="form-grid"><label>Phone <span class="optional">optional</span><input id="customPhone" name="phone" type="tel" autocomplete="tel" placeholder="10-digit Indian number"></label><label>City <span class="optional">optional</span><input id="customCity" name="city" placeholder="Your city"></label></div>
+          <label>State / Union Territory <span class="optional">optional</span><select id="customState" name="state"><option value="">Choose a state</option></select></label>
+          <label>Tell us your idea<textarea id="customDescription" name="description" rows="4" maxlength="3000" placeholder="Colours, flowers, size, occasion, name, budget — anything that helps..."></textarea></label>
+          <label class="upload-box">Reference image <span class="optional">recommended</span><input id="customImage" type="file" accept="image/png,image/jpeg,image/webp"><small>Upload a similar image and we’ll review it. JPG, PNG, or WebP; maximum 5 MB before resizing.</small></label>
+          <div class="custom-upload-preview" id="customImagePreview" hidden><img id="customPreviewImage" alt="Your reference image preview"><button type="button" id="removeCustomImage">Remove image</button></div>
+          <div class="form-actions"><button class="button button-light" type="submit">Send custom idea <span aria-hidden="true">↗</span></button><p class="form-message" id="customOrderStatus" role="status"></p></div>
+        </form>
       </section>
-
 
       <section class="good-to-know section-shell" id="good-to-know">
         <div class="section-heading">
@@ -172,7 +183,7 @@
 
     <footer class="site-footer section-shell">
       <div class="footer-brand"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><span>R</span></span><span class="brand-name">Raycrafting</span></a><p>Small things, made to stay.</p></div>
-      <div class="footer-links"><div><strong>Explore</strong><a href="#shop">Shop all</a><a href="#story">Our story</a><a href="#custom">Custom orders</a><a href="#good-to-know">Good to know</a></div><div><strong>Say hello</strong><a href="mailto:hello@raycrafting.co">Email the studio</a><a href="#newsletterForm">Join the bright note</a><span>Instagram coming soon</span></div></div>
+      <div class="footer-links"><div><strong>Explore</strong><a href="#shop">Shop all</a><a href="#story">Our story</a><a href="#custom">Custom gifts</a><a href="#note-for-you">Note for you</a><a href="#good-to-know">Good to know</a></div><div><strong>Say hello</strong><a href="mailto:hello@raycrafting.co">Email the studio</a><a href="#newsletterForm">Join the bright note</a><span>Instagram coming soon</span></div></div>
       <div class="footer-bottom"><span>© 2026 Raycrafting</span><span>Handmade with a little extra sunshine</span></div>
     </footer>
 
@@ -194,7 +205,8 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="catalog.js?v=sunflower1"></script>
-    <script src="shared-script.js?v=hero3"></script>
+    <script src="shared-script.js?v=custom2"></script>
+    <script src="custom-requests.js?v=custom2"></script>
   <script src="commerce.js?v=upi3"></script>
 </body>
 </html>

@@ -71,6 +71,33 @@ db.exec(`
     email TEXT PRIMARY KEY,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS custom_orders (
+    id TEXT PRIMARY KEY,
+    customer_id TEXT REFERENCES customers(id) ON DELETE SET NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    city TEXT,
+    state TEXT,
+    description TEXT NOT NULL,
+    reference_image TEXT,
+    status TEXT NOT NULL DEFAULT "new",
+    seller_note TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS note_requests (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    email TEXT NOT NULL,
+    message TEXT NOT NULL,
+    language TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT "new",
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS products (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -369,6 +396,12 @@ function customerOrderRows(customerId) {
     return safeOrder;
   });
 }
+function customOrderRows() {
+  return db.prepare("SELECT * FROM custom_orders ORDER BY created_at DESC").all();
+}
+function noteRequestRows() {
+  return db.prepare("SELECT * FROM note_requests ORDER BY created_at DESC").all();
+}
 function safeEqual(a, b) {
   const left = Buffer.from(a || "", "utf8"); const right = Buffer.from(b || "", "utf8");
   return left.length === right.length && crypto.timingSafeEqual(left, right);
@@ -408,6 +441,37 @@ async function api(req, res, pathname, body) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return json(res, 400, { error: "Enter a valid email address." });
       db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(email, now());
       return json(res, 200, { ok: true, message: "You’re on the list. A little brightness is on its way." });
+    }
+    if (req.method === "POST" && pathname === "/api/custom-orders") {
+      if (!allowRequest(req, "custom-order", 6, 15 * 60 * 1000)) return json(res, 429, { error: "Too many requests. Please try again later." });
+      const name = String(body.name || "").trim().slice(0, 120);
+      const email = String(body.email || "").trim().toLowerCase().slice(0, 254);
+      const suppliedPhone = String(body.phone || "").trim();
+      const phone = suppliedPhone ? normalizeIndianPhone(suppliedPhone) : "";
+      const city = String(body.city || "").trim().slice(0, 100);
+      const state = String(body.state || "").trim().slice(0, 100);
+      const description = String(body.description || "").trim().slice(0, 3000);
+      const referenceImage = String(body.referenceImage || "");
+      if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || (phone && !validIndianPhone(phone))) return json(res, 400, { error: "Enter your name, a valid email, and a valid Indian phone number if provided." });
+      if (!description && !referenceImage) return json(res, 400, { error: "Please add a short description or a reference image." });
+      if (referenceImage && (!/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(referenceImage) || referenceImage.length > 900000)) return json(res, 400, { error: "That image is too large. Please choose a smaller JPG, PNG, or WebP image." });
+      const customer = customerFromRequest(req);
+      const orderId = id("custom");
+      db.prepare("INSERT INTO custom_orders (id,customer_id,name,email,phone,city,state,description,reference_image,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer ? customer.id : null, name, email, phone, city, state, description || "Reference image supplied.", referenceImage || null, "new", now(), now());
+      return json(res, 201, { ok: true, customOrderId: orderId, message: "Your custom idea is with the studio. We’ll review it and contact you within 1 hour." });
+    }
+    if (req.method === "POST" && pathname === "/api/note-requests") {
+      if (!allowRequest(req, "note-request", 8, 15 * 60 * 1000)) return json(res, 429, { error: "Too many requests. Please try again later." });
+      const name = String(body.name || "").trim().slice(0, 120);
+      const email = String(body.email || "").trim().toLowerCase().slice(0, 254);
+      const message = String(body.message || "").trim().slice(0, 2500);
+      const language = String(body.language || "").trim().slice(0, 80);
+      const city = String(body.city || "").trim().slice(0, 100);
+      const state = String(body.state || "").trim().slice(0, 100);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.length < 2 || !language || !city || !state) return json(res, 400, { error: "Please add your email, note, preferred language, city, and state." });
+      const noteId = id("note");
+      db.prepare("INSERT INTO note_requests (id,name,email,message,language,city,state,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)").run(noteId, name, email, message, language, city, state, "new", now(), now());
+      return json(res, 201, { ok: true, noteId, message: "Your note has been sent to the studio. Thank you for sharing something heartfelt." });
     }
     if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), phoneOtpEnabled: PHONE_OTP_ENABLED, razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, selfPickupEnabled: true });
     if (req.method === "GET" && pathname === "/api/products") {
@@ -609,6 +673,36 @@ async function api(req, res, pathname, body) {
     }
     if (req.method === "POST" && pathname === "/api/webhooks/razorpay") {
       if (!RAZORPAY_WEBHOOK_SECRET || !safeEqual(crypto.createHmac("sha256", RAZORPAY_WEBHOOK_SECRET).update(req.rawBody || JSON.stringify(body)).digest("hex"), req.headers["x-razorpay-signature"])) return json(res, 400, { error: "Invalid webhook signature." }); const entity = body.payload?.payment?.entity; if (entity?.order_id) db.prepare("UPDATE orders SET status=?,payment_id=?,updated_at=? WHERE razorpay_order_id=?").run(["payment.captured", "order.paid"].includes(body.event) ? "paid" : body.event, entity.id, now(), entity.order_id); return json(res, 200, { ok: true });
+    }
+    if (req.method === "GET" && pathname === "/api/admin/custom-orders") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      return json(res, 200, { customOrders: customOrderRows() });
+    }
+    if (req.method === "POST" && pathname === "/api/admin/custom-orders/status") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const orderId = String(body.orderId || "");
+      const status = String(body.status || "");
+      const sellerNote = String(body.sellerNote || "").trim().slice(0, 1000);
+      const statuses = ["new", "reviewing", "contacted", "accepted", "in_progress", "ready", "completed", "declined"];
+      const order = db.prepare("SELECT * FROM custom_orders WHERE id=?").get(orderId);
+      if (!order) return json(res, 404, { error: "Custom order not found." });
+      if (!statuses.includes(status)) return json(res, 400, { error: "Unsupported custom order status." });
+      db.prepare("UPDATE custom_orders SET status=?,seller_note=?,updated_at=? WHERE id=?").run(status, sellerNote || null, now(), orderId);
+      return json(res, 200, { ok: true, customOrderId: orderId, status, sellerNote: sellerNote || null });
+    }
+    if (req.method === "GET" && pathname === "/api/admin/note-requests") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      return json(res, 200, { noteRequests: noteRequestRows() });
+    }
+    if (req.method === "POST" && pathname === "/api/admin/note-requests/status") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const noteId = String(body.noteId || "");
+      const status = String(body.status || "");
+      if (!["new", "read", "replied", "archived"].includes(status)) return json(res, 400, { error: "Unsupported note status." });
+      const note = db.prepare("SELECT id FROM note_requests WHERE id=?").get(noteId);
+      if (!note) return json(res, 404, { error: "Note not found." });
+      db.prepare("UPDATE note_requests SET status=?,updated_at=? WHERE id=?").run(status, now(), noteId);
+      return json(res, 200, { ok: true, noteId, status });
     }
     if (req.method === "GET" && pathname === "/api/admin/orders") { if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." }); return json(res, 200, { orders: orderRows() }); }
     if (req.method === "POST" && pathname === "/api/admin/orders/fulfillment") {

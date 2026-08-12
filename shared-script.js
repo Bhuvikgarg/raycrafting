@@ -234,8 +234,6 @@ const heroSlides = Array.from(document.querySelectorAll(".hero-slide"));
 const heroCounter = document.querySelector("#heroCounter");
 const heroCaption = document.querySelector("#heroCaption");
 let activeHeroSlide = 0;
-let heroTimer;
-
 function showHeroSlide(index) {
   if (!heroSlides.length) return;
   activeHeroSlide = (index + heroSlides.length) % heroSlides.length;
@@ -247,24 +245,7 @@ function showHeroSlide(index) {
   if (heroCounter) heroCounter.textContent = String(activeHeroSlide + 1).padStart(2, "0") + " / " + String(heroSlides.length).padStart(2, "0");
   if (heroCaption) heroCaption.textContent = heroSlides[activeHeroSlide].dataset.caption || "the little things collection";
 }
-
-function restartHeroTimer() {
-  clearInterval(heroTimer);
-  if (heroSlides.length > 1) heroTimer = setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
-}
-
 if (heroFrame && heroSlides.length > 1) {
-  document.querySelector("#heroPrevious").addEventListener("click", () => { showHeroSlide(activeHeroSlide - 1); restartHeroTimer(); });
-  document.querySelector("#heroNext").addEventListener("click", () => { showHeroSlide(activeHeroSlide + 1); restartHeroTimer(); });
-  let touchStartX = null;
-  heroFrame.addEventListener("touchstart", (event) => { touchStartX = event.changedTouches[0].clientX; }, { passive: true });
-  heroFrame.addEventListener("touchend", (event) => {
-    if (touchStartX === null) return;
-    const distance = event.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(distance) > 45) showHeroSlide(activeHeroSlide + (distance < 0 ? 1 : -1));
-    touchStartX = null;
-    restartHeroTimer();
-  }, { passive: true });
   showHeroSlide(0);
-  restartHeroTimer();
+  setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
 }
