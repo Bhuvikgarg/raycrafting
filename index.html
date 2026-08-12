@@ -66,11 +66,17 @@
           <div class="hero-note"><span class="scribble-star" aria-hidden="true">✳</span><span>Each piece is made by hand, so no two are exactly alike.</span></div>
         </div>
         <div class="hero-image-wrap">
-          <div class="hero-image-frame">
-            <img src="assets/sunflower.jpeg" alt="Handmade orange sunflower in a small dark pot" />
+          <div class="hero-image-frame" id="heroSlideshow" role="region" aria-roledescription="carousel" aria-label="Raycrafting product photos">
+            <div class="hero-slides">
+              <img class="hero-slide is-active" data-caption="the little things collection" src="assets/sunflower.jpeg" alt="Handmade orange sunflower in a small dark pot" />
+              <img class="hero-slide" data-caption="pink lily pot" src="assets/pink-lily-pot.png" alt="Handmade pink lily flower in a small dark pot" aria-hidden="true" />
+              <img class="hero-slide" data-caption="pink rose pot" src="assets/pink-rose-pot.png" alt="Handmade pink rose flower in a small dark pot" aria-hidden="true" />
+            </div>
+            <button class="hero-control hero-prev" id="heroPrevious" type="button" aria-label="Previous photo">‹</button>
+            <button class="hero-control hero-next" id="heroNext" type="button" aria-label="Next photo">›</button>
             <div class="image-sticker">made<br />slowly</div>
           </div>
-          <div class="hero-caption"><span>01 / 03</span><span>the little things collection</span></div>
+          <div class="hero-caption"><span id="heroCounter">01 / 03</span><span id="heroCaption">the little things collection</span></div>
         </div>
       </section>
 
@@ -188,7 +194,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="catalog.js?v=sunflower1"></script>
-    <script src="shared-script.js?v=sunflower2"></script>
+    <script src="shared-script.js?v=hero3"></script>
   <script src="commerce.js?v=upi3"></script>
 </body>
 </html>
