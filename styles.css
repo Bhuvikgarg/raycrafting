@@ -301,3 +301,68 @@ h1 em, h2 em { color: var(--coral); font-style: italic; }
 .about-story img { width: 150px; height: 180px; object-fit: cover; background: var(--sage); }
 .about-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 @media (max-width: 560px) { .profile-label { display: none; } .profile-menu { right: -8px; } .account-card, .about-card { padding: 24px; } .account-details, .about-story { grid-template-columns: 1fr; } .about-story img { width: 100%; height: 220px; } }
+
+/* Raycrafting blush-pink visual polish */
+:root {
+  --ink: #4b3740;
+  --muted: #8b707b;
+  --paper: #fff6f8;
+  --white: #fffdfd;
+  --coral: #e58da5;
+  --coral-dark: #c45f7c;
+  --yellow: #f3c86f;
+  --sage: #d9e9df;
+  --lilac: #ead8e8;
+  --line: rgba(105, 67, 82, .16);
+  --shadow: 0 22px 55px rgba(137, 75, 101, .14);
+}
+body { background: linear-gradient(180deg, #fff9fa 0%, var(--paper) 48%, #fffaf6 100%); color: var(--ink); }
+.announcement { background: #6a4657; color: #fff7fa; }
+.brand-mark { border-color: var(--coral-dark); background: #ffe5ec; color: var(--coral-dark); }
+.brand-mark::before, .brand-mark::after { background: var(--coral-dark); }
+.site-header { border-bottom: 1px solid rgba(196, 95, 124, .12); }
+.main-nav a:hover, .footer-links a:hover, .icon-button:hover, .cart-button:hover { color: var(--coral-dark); }
+.profile-menu button:hover, .profile-menu a:hover { background: #fff0f4; color: var(--coral-dark); }
+.profile-button { border-color: rgba(196, 95, 124, .22); border-radius: 999px; background: rgba(255, 253, 253, .55); }
+.profile-avatar { background: #f7d1dc; color: var(--coral-dark); }
+.cart-button b { background: var(--coral-dark); }
+.eyebrow { color: var(--coral-dark); }
+.eyebrow-dot { background: var(--coral); box-shadow: 0 0 0 4px rgba(229, 141, 165, .15); }
+h1 em, h2 em { color: var(--coral-dark); }
+.button { border-radius: 999px; }
+.button-dark { background: #6a4657; }
+.button-dark:hover { background: var(--coral-dark); }
+.text-button:hover { color: var(--coral-dark); }
+.scribble-star, .trust-icon, .empty-flower { color: var(--coral); }
+.hero-image-frame { background: #f6dce5; border: 1px solid rgba(196, 95, 124, .16); border-radius: 30px 30px 30px 8px; box-shadow: var(--shadow); }
+.image-sticker { background: #f4bfd0; box-shadow: 0 8px 20px rgba(137, 75, 101, .14); }
+.trust-strip, .shop-toolbar, .faq-list, .faq-list details, .site-footer, .footer-bottom { border-color: rgba(196, 95, 124, .18); }
+.filter-button.active { border-color: var(--coral); border-radius: 999px; background: #ffe9ef; color: var(--coral-dark); }
+.search-row, .newsletter-form > div { border-color: var(--coral); }
+.product-image { background: #f5dce5; border-radius: 22px 22px 22px 6px; box-shadow: 0 10px 24px rgba(137, 75, 101, .08); }
+.product-image .product-tag { background: rgba(255,253,253,.9); border-radius: 999px; color: var(--coral-dark); }
+.product-image .wish-button { background: rgba(255,253,253,.9); color: var(--coral-dark); box-shadow: 0 4px 10px rgba(137, 75, 101, .1); }
+.quick-add { border-color: rgba(196, 95, 124, .42); }
+.quick-add-fill, .seller-link, .footer-links strong { color: var(--coral-dark); }
+.story-image { border-radius: 28px 28px 28px 7px; box-shadow: var(--shadow); }
+.custom-section { background: linear-gradient(135deg, #df86a1, #c96d8b); border-radius: 30px; box-shadow: var(--shadow); }
+.custom-section .eyebrow { color: #ffe4eb; }
+.palette-coral { background: #f5b1c2; }
+.palette-lilac { background: #f4dfec; }
+.palette-sage { background: #d9e9df; }
+.palette-yellow { background: #f6d58b; }
+.newsletter-form .button { background: var(--coral-dark); }
+.overlay, .modal-wrap, .account-modal, .about-modal { background: rgba(74, 45, 60, .42); }
+.modal, .account-card, .about-card { border: 1px solid rgba(196, 95, 124, .14); border-radius: 26px; }
+.modal-art { background: #f5dce5; }
+.close-button { border-color: rgba(196, 95, 124, .24); color: var(--coral-dark); }
+.close-button:hover { background: var(--coral-dark); color: var(--white); }
+.cart-drawer { background: #fffafb; box-shadow: -20px 0 60px rgba(137,75,101,.16); }
+.toast { background: #6a4657; border-radius: 999px; box-shadow: 0 10px 25px rgba(137, 75, 101, .18); }
+.account-detail { background: #fff0f4; border-radius: 14px; }
+.about-story img { border-radius: 18px 18px 18px 5px; }
+@media (max-width: 560px) {
+  .custom-section { border-radius: 22px; }
+  .hero-image-frame { border-radius: 24px 24px 24px 7px; }
+  .product-image { border-radius: 17px 17px 17px 5px; }
+}
