@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://raycrafting-production.up.railway.app/api/:path*"
+      "destination": "https://raycrafting-production-8b2d.up.railway.app/api/:path*"
     }
   ],
   "headers": [
