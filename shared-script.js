@@ -25,6 +25,10 @@ function productImage(product) {
   return product.image || window.RAYCRAFTING_DEFAULT_IMAGE;
 }
 
+function isProductActive(product) {
+  return product && product.active !== false && product.active !== 0;
+}
+
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
 }
@@ -37,7 +41,7 @@ const money = (value) =>
 
 function getVisibleProducts() {
   const query = searchInput.value.trim().toLowerCase();
-  const visible = products.filter((product) => {
+  const visible = products.filter(isProductActive).filter((product) => {
     const matchesFilter = activeFilter === "All" || product.category === activeFilter;
     const matchesSearch = !query || `${product.name} ${product.category} ${product.detail}`.toLowerCase().includes(query);
     return matchesFilter && matchesSearch;
@@ -78,7 +82,7 @@ function cartQuantity() {
 }
 
 function addToCart(productId) {
-  const product = products.find((item) => item.id === productId);
+  const product = products.find((item) => item.id === productId && isProductActive(item));
   if (!product) return;
   const existing = cart.find((item) => item.id === productId);
   if (existing) existing.quantity += 1;
@@ -96,7 +100,7 @@ function updateQuantity(productId, change) {
 }
 
 function renderCart() {
-  cart = cart.filter((item) => products.some((product) => product.id === item.id));
+  cart = cart.filter((item) => products.some((product) => product.id === item.id && isProductActive(product)));
   const quantity = cartQuantity();
   document.querySelector("#cartCount").textContent = quantity;
   document.querySelector("#drawerCount").textContent = `(${quantity})`;
@@ -115,7 +119,7 @@ async function loadPublicProducts() {
     const response = await fetch("/api/products", { cache: "no-store" });
     if (!response.ok) return;
     const data = await response.json();
-    if (!Array.isArray(data.products) || !data.products.length) return;
+    if (!Array.isArray(data.products)) return;
     products = data.products;
     window.RAYCRAFTING_PRODUCTS = products;
     renderProducts();
@@ -175,7 +179,7 @@ document.querySelector("#clearSearch").addEventListener("click", () => { searchI
 productGrid.addEventListener("click", (event) => {
   const card = event.target.closest("[data-product-id]");
   if (!card) return;
-  const product = products.find((item) => item.id === card.dataset.productId);
+  const product = products.find((item) => item.id === card.dataset.productId && isProductActive(item));
   if (!product) return;
   if (event.target.closest("[data-action='like']")) {
     const liked = localStorage.getItem(`raycrafting-like-${product.id}`) === "true";

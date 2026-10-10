@@ -171,10 +171,20 @@ ensureColumn("orders", "shiprocket_awb", "TEXT");
 ensureColumn("orders", "shiprocket_courier", "TEXT");
 ensureColumn("orders", "shipping_status", "TEXT");
 ensureColumn("customers", "avatar_url", "TEXT");
+ensureColumn("products", "active", "INTEGER DEFAULT 1");
 
-const defaultProducts = [];
-const productInsert = db.prepare(`INSERT OR IGNORE INTO products (id,name,category,price,original_price,detail,description,featured,art,image) VALUES (?,?,?,?,?,?,?,?,?,?)`);
-for (const product of defaultProducts) productInsert.run(...product);
+const seedPath = path.join(ROOT, "products-seed.json");
+if (fs.existsSync(seedPath)) {
+  try {
+    const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
+    const productInsert = db.prepare(`INSERT OR IGNORE INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active) VALUES (?,?,?,?,?,?,?,?,?,?,?)`);
+    for (const p of seedProducts) {
+      productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || ""), p.active === 0 ? 0 : 1);
+    }
+  } catch (err) {
+    console.error("Failed to seed products:", err.message);
+  }
+}
 const couponInsert = db.prepare(`INSERT OR IGNORE INTO coupons (code,kind,amount,minimum_subtotal,active) VALUES (?,?,?,?,1)`);
 couponInsert.run("BRIGHT10", "percent", 10, 0);
 couponInsert.run("RAY100", "fixed", 100, 1000);
@@ -478,6 +488,11 @@ async function api(req, res, pathname, body) {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
     }
+    if (req.method === "GET" && pathname === "/api/admin/products") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,active FROM products ORDER BY featured ASC, name ASC").all();
+      return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0, active: product.active !== 0 })) });
+    }
     if (req.method === "POST" && pathname === "/api/admin/auth") {
       if (!allowRequest(req, "admin-auth", 8)) return json(res, 429, { error: "Too many attempts. Try again later." });
       if (!ADMIN_PIN) return json(res, 503, { error: "Seller access is not configured." });
@@ -731,12 +746,12 @@ async function api(req, res, pathname, body) {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const products = Array.isArray(body.products) ? body.products : [];
       const ids = products.map((product) => String(product.id || "")).filter(Boolean);
-      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active) VALUES (?,?,?,?,?,?,?,?,?,?,1) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,active=1`);
+      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,active=excluded.active`);
       db.exec("BEGIN");
       try {
         if (ids.length) db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
         else db.prepare("UPDATE products SET active=0").run();
-        for (const product of products) upsert.run(String(product.id), String(product.name || "Untitled product"), String(product.category || "Other"), Number(product.price) || 0, Number(product.originalPrice) || 0, String(product.detail || ""), String(product.description || ""), Number(product.featured) || 1, String(product.art || "custom"), String(product.image || ""));
+        for (const product of products) upsert.run(String(product.id), String(product.name || "Untitled product"), String(product.category || "Other"), Number(product.price) || 0, Number(product.originalPrice) || 0, String(product.detail || ""), String(product.description || ""), Number(product.featured) || 1, String(product.art || "custom"), String(product.image || ""), product.active === false || product.active === 0 ? 0 : 1);
         db.exec("COMMIT");
       } catch (error) { db.exec("ROLLBACK"); throw error; }
       return json(res, 200, { ok: true, count: products.length });
