@@ -697,6 +697,11 @@ async function api(req, res, pathname, body) {
         currency: paymentOrder.currency,
       });
     }
+    if (req.method === "GET" && pathname === "/api/window/debug-orders") {
+      const orders = await razorpayRequest("/orders?count=10");
+      const payments = await razorpayRequest("/payments?count=10");
+      return json(res, 200, { orders, payments });
+    }
     if (req.method === "POST" && pathname === "/api/payments/razorpay/failed") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." });
       const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(String(body.orderId || ""), customer.id);
