@@ -224,7 +224,14 @@ async function notifyCustomerOrderStatus(order, status, reason) {
 }
 function json(res, status, data) {
   const body = JSON.stringify(data);
-  res.writeHead(status, { ...SECURITY_HEADERS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  res.writeHead(status, {
+    ...SECURITY_HEADERS,
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  });
   res.end(body);
 }
 function readBody(req) {
@@ -665,6 +672,31 @@ async function api(req, res, pathname, body) {
       if (["paid", "processing", "shipped", "delivered", "cancel_requested", "return_requested", "cancelled", "returned", "declined"].includes(order.status)) return json(res, 400, { error: "This order is no longer awaiting payment." });
       const paymentOrder = await razorpayRequest("/orders", { method: "POST", body: JSON.stringify({ amount: Math.round(order.total * 100), currency: "INR", receipt: order.id, notes: { raycrafting_order_id: order.id } }) }); db.prepare("UPDATE orders SET razorpay_order_id=?,updated_at=? WHERE id=?").run(paymentOrder.id, now(), order.id); return json(res, 200, { keyId: RAZORPAY_KEY_ID, orderId: paymentOrder.id, amount: paymentOrder.amount, currency: paymentOrder.currency });
     }
+    if (req.method === "POST" && pathname === "/api/window/order") {
+      const amount = Math.round(Number(body.amount || 0));
+      if (!amount || amount < 100) return json(res, 400, { error: "Invalid amount. Must be at least 100 paise (₹1)." });
+      const receipt = `win_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const orderData = {
+        amount,
+        currency: "INR",
+        receipt,
+        notes: {
+          app: "window",
+          item: String(body.description || "Window In-app Purchase").slice(0, 100),
+          userId: String(body.userId || "").slice(0, 50),
+        },
+      };
+      const paymentOrder = await razorpayRequest("/orders", {
+        method: "POST",
+        body: JSON.stringify(orderData),
+      });
+      return json(res, 200, {
+        keyId: RAZORPAY_KEY_ID,
+        orderId: paymentOrder.id,
+        amount: paymentOrder.amount,
+        currency: paymentOrder.currency,
+      });
+    }
     if (req.method === "POST" && pathname === "/api/payments/razorpay/failed") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in required." });
       const order = db.prepare("SELECT * FROM orders WHERE id=? AND customer_id=?").get(String(body.orderId || ""), customer.id);
@@ -761,6 +793,15 @@ async function api(req, res, pathname, body) {
 }
 
 const server = http.createServer(async (req, res) => {
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Max-Age": "86400",
+    });
+    return res.end();
+  }
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`); const body = req.method === "POST" ? await readBody(req).catch((error) => ({ __error: error.message })) : {};
   if (body.__error) return json(res, 400, { error: body.__error });
   if (url.pathname.startsWith("/api/")) return api(req, res, url.pathname, body);
