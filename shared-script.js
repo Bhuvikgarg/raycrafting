@@ -33,17 +33,27 @@ function escapeHtml(value = "") {
   return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
 }
 
-const money = (value) =>
-  new Intl.NumberFormat("en-IN", {
+const money = (value) => {
+  const num = Number(value);
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "INR"
-  }).format(Number(value));
+    currency: "INR",
+    maximumFractionDigits: num % 1 === 0 ? 0 : 2
+  }).format(num);
+};
 
 function getVisibleProducts() {
   const query = searchInput.value.trim().toLowerCase();
   const visible = products.filter(isProductActive).filter((product) => {
-    const matchesFilter = activeFilter === "All" || product.category === activeFilter;
-    const matchesSearch = !query || `${product.name} ${product.category} ${product.detail}`.toLowerCase().includes(query);
+    let matchesFilter = true;
+    if (activeFilter === "All") matchesFilter = true;
+    else if (activeFilter === "Flowers") matchesFilter = product.category === "Flowers";
+    else if (activeFilter === "Keepsakes") matchesFilter = product.category === "Keepsakes";
+    else if (activeFilter === "Bundles") matchesFilter = product.category === "Bundles";
+    else if (activeFilter === "Under200") matchesFilter = product.price < 200;
+    else if (activeFilter === "Bestsellers") matchesFilter = product.badge === "Bestseller" || product.badge === "Trending" || product.featured <= 4;
+
+    const matchesSearch = !query || `${product.name} ${product.category} ${product.detail} ${product.description || ""} ${product.badge || ""}`.toLowerCase().includes(query);
     return matchesFilter && matchesSearch;
   });
   return visible.sort((a, b) => {
@@ -56,13 +66,47 @@ function getVisibleProducts() {
 
 function productMarkup(product) {
   const liked = localStorage.getItem(`raycrafting-like-${product.id}`) === "true";
+  const badge = product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : "";
+  const orig = Number(product.original_price || product.originalPrice || 0);
+  const oldPriceHtml = orig > product.price ? `<span class="product-price-old">${money(orig)}</span>` : "";
+
+  let discountPill = "";
+  if (orig > product.price) {
+    const pct = Math.round(((orig - product.price) / orig) * 100);
+    if (pct >= 5) {
+      discountPill = `<span class="product-discount-pill">${pct}% OFF</span>`;
+    }
+  }
+
   return `<article class="product-card" data-product-id="${escapeHtml(product.id)}">
-    <div class="product-image art-${escapeHtml(product.art || "default")}">
+    <div class="product-image art-${escapeHtml(product.art || "default")}" data-action="details">
       <img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)}, a handmade ${escapeHtml(product.category.toLowerCase())}" loading="lazy" />
       <span class="product-tag">${escapeHtml(product.category)}</span>
+      ${badge}
+      ${discountPill}
       <button class="wish-button ${liked ? "active" : ""}" type="button" data-action="like" aria-label="${liked ? "Remove" : "Add"} ${escapeHtml(product.name)} ${liked ? "from" : "to"} wishlist">${liked ? "♥" : "♡"}</button>
+      <div class="product-quick-view-overlay" data-action="details">
+        <span class="quick-view-btn">Quick View 👁</span>
+      </div>
     </div>
-    <div class="product-info"><div><h3>${escapeHtml(product.name)}</h3><p>${escapeHtml(product.detail)}</p></div><span class="product-price">${money(product.price)}</span><div class="product-actions"><button class="quick-add" type="button" data-action="details">View details <span aria-hidden="true">↗</span></button><button class="quick-add quick-add-fill" type="button" data-action="add">Add to bag <span aria-hidden="true">+</span></button></div></div>
+    <div class="product-info">
+      <div class="product-heading">
+        <h3 data-action="details">${escapeHtml(product.name)}</h3>
+        <p>${escapeHtml(product.detail)}</p>
+      </div>
+      <div class="product-price-box">
+        <span class="product-price">${money(product.price)}</span>
+        ${oldPriceHtml}
+      </div>
+      <div class="product-actions-grid">
+        <button class="action-btn action-btn-bag" type="button" data-action="add" aria-label="Add ${escapeHtml(product.name)} to bag">
+          <span>Add to bag +</span>
+        </button>
+        <button class="action-btn action-btn-buy" type="button" data-action="buy-now" aria-label="Buy ${escapeHtml(product.name)} now">
+          <span>Buy now ⚡</span>
+        </button>
+      </div>
+    </div>
   </article>`;
 }
 
@@ -81,14 +125,14 @@ function cartQuantity() {
   return cart.reduce((total, item) => total + item.quantity, 0);
 }
 
-function addToCart(productId) {
+function addToCart(productId, notify = true) {
   const product = products.find((item) => item.id === productId && isProductActive(item));
   if (!product) return;
   const existing = cart.find((item) => item.id === productId);
   if (existing) existing.quantity += 1;
   else cart.push({ id: productId, quantity: 1 });
   saveCart();
-  showToast(`${product.name} added to your bag.`);
+  if (notify) showToast(`${product.name} added to your bag.`);
 }
 
 function updateQuantity(productId, change) {
@@ -112,6 +156,24 @@ function renderCart() {
   }).join("");
   const subtotal = cart.reduce((total, item) => total + products.find((product) => product.id === item.id).price * item.quantity, 0);
   document.querySelector("#cartSubtotal").textContent = money(subtotal);
+
+  const FREE_SHIPPING_THRESHOLD = 499;
+  const shippingBarWrap = document.querySelector("#drawerShippingBar");
+  if (shippingBarWrap) {
+    if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+      shippingBarWrap.innerHTML = `
+        <div class="shipping-bar-text shipping-unlocked">🎉 <strong>You've unlocked FREE Delivery!</strong></div>
+        <div class="shipping-progress-track"><div class="shipping-progress-fill unlocked" style="width: 100%"></div></div>
+      `;
+    } else {
+      const diff = FREE_SHIPPING_THRESHOLD - subtotal;
+      const pct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
+      shippingBarWrap.innerHTML = `
+        <div class="shipping-bar-text">Add <strong>${money(diff)}</strong> more for <strong>FREE delivery</strong>! 🚚</div>
+        <div class="shipping-progress-track"><div class="shipping-progress-fill" style="width: ${pct}%"></div></div>
+      `;
+    }
+  }
 }
 
 async function loadPublicProducts() {
@@ -149,8 +211,19 @@ function openProduct(product) {
   document.querySelector("#modalTitle").textContent = product.name;
   document.querySelector("#modalCategory").textContent = product.category;
   document.querySelector("#modalDescription").textContent = product.description;
-  document.querySelector("#modalPrice").textContent = money(product.price);
+  const orig = Number(product.original_price || product.originalPrice || 0);
+  const oldPriceHtml = orig > product.price ? ` <span class="product-price-old">${money(orig)}</span>` : "";
+  document.querySelector("#modalPrice").innerHTML = `${money(product.price)}${oldPriceHtml}`;
   document.querySelector("#modalDetail").textContent = product.detail;
+  const specs = document.querySelector("#modalSpecs");
+  if (specs) {
+    specs.innerHTML = `
+      <div class="modal-spec-row"><span>📏 <strong>Size</strong></span><span>${escapeHtml(product.dimensions || "~14-16 cm tall")}</span></div>
+      <div class="modal-spec-row"><span>🌿 <strong>Craft Materials</strong></span><span>${escapeHtml(product.materials || "Velvety chenille stems & craft pot")}</span></div>
+      <div class="modal-spec-row"><span>✨ <strong>Care &amp; Longevity</strong></span><span>${escapeHtml(product.care || "Everlasting bloom · Never withers · Zero watering")}</span></div>
+      <div class="modal-spec-row"><span>📦 <strong>Gift Ready</strong></span><span>Dispatched in 24-48h in crush-proof box</span></div>
+    `;
+  }
   document.querySelector("#productModal").hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -181,17 +254,69 @@ productGrid.addEventListener("click", (event) => {
   if (!card) return;
   const product = products.find((item) => item.id === card.dataset.productId && isProductActive(item));
   if (!product) return;
+
   if (event.target.closest("[data-action='like']")) {
     const liked = localStorage.getItem(`raycrafting-like-${product.id}`) === "true";
     localStorage.setItem(`raycrafting-like-${product.id}`, String(!liked));
     renderProducts();
     return;
   }
-  if (event.target.closest("[data-action='details']")) openProduct(product);
-  if (event.target.closest("[data-action='add']")) { addToCart(product.id); setDrawer(true); }
+
+  if (event.target.closest("[data-action='buy-now']")) {
+    addToCart(product.id, false);
+    if (typeof window.raycraftingOpenCheckout === "function") {
+      window.raycraftingOpenCheckout();
+    } else {
+      setDrawer(true);
+    }
+    return;
+  }
+
+  const addBtn = event.target.closest("[data-action='add']");
+  if (addBtn) {
+    addToCart(product.id);
+    const originalHtml = addBtn.innerHTML;
+    addBtn.innerHTML = `<span>Added! 🌸</span>`;
+    addBtn.classList.add("added-feedback");
+    setTimeout(() => {
+      addBtn.innerHTML = originalHtml;
+      addBtn.classList.remove("added-feedback");
+    }, 1200);
+
+    const cartToggle = document.querySelector("#cartToggle");
+    if (cartToggle) {
+      cartToggle.classList.remove("cart-bump");
+      void cartToggle.offsetWidth;
+      cartToggle.classList.add("cart-bump");
+    }
+    return;
+  }
+
+  if (event.target.closest("[data-action='details']") || event.target.closest(".product-image") || event.target.closest("h3")) {
+    openProduct(product);
+  }
 });
 
-document.querySelector("#modalAdd").addEventListener("click", () => { addToCart(selectedProduct.id); closeModal(); setDrawer(true); });
+document.querySelector("#modalAdd").addEventListener("click", () => {
+  if (!selectedProduct) return;
+  addToCart(selectedProduct.id);
+  closeModal();
+  setDrawer(true);
+});
+
+const modalBuyNow = document.querySelector("#modalBuyNow");
+if (modalBuyNow) {
+  modalBuyNow.addEventListener("click", () => {
+    if (!selectedProduct) return;
+    addToCart(selectedProduct.id, false);
+    closeModal();
+    if (typeof window.raycraftingOpenCheckout === "function") {
+      window.raycraftingOpenCheckout();
+    } else {
+      setDrawer(true);
+    }
+  });
+}
 document.querySelectorAll(".modal-close").forEach((button) => button.addEventListener("click", closeModal));
 document.querySelector("#cartToggle").addEventListener("click", () => setDrawer(true));
 document.querySelector("#cartClose").addEventListener("click", () => setDrawer(false));
@@ -204,11 +329,39 @@ cartItems.addEventListener("click", (event) => {
   if (quantityButton) updateQuantity(quantityButton.dataset.id, Number(quantityButton.dataset.quantity));
   if (removeButton) { cart = cart.filter((item) => item.id !== removeButton.dataset.remove); saveCart(); }
 });
+const giftCheck = document.querySelector("#giftNoteCheck");
+const giftBox = document.querySelector("#giftNoteBox");
+const giftInput = document.querySelector("#giftNoteInput");
+if (giftCheck && giftBox && giftInput) {
+  const savedNote = localStorage.getItem("raycrafting-gift-note") || "";
+  if (savedNote) {
+    giftCheck.checked = true;
+    giftBox.hidden = false;
+    giftInput.value = savedNote;
+  }
+  giftCheck.addEventListener("change", () => {
+    giftBox.hidden = !giftCheck.checked;
+    if (!giftCheck.checked) {
+      localStorage.removeItem("raycrafting-gift-note");
+      giftInput.value = "";
+    } else {
+      giftInput.focus();
+    }
+  });
+  giftInput.addEventListener("input", () => {
+    localStorage.setItem("raycrafting-gift-note", giftInput.value.trim());
+  });
+}
 
-document.querySelector("#checkoutButton").addEventListener("click", () => {
-  const order = cart.map((item) => `${item.quantity} x ${products.find((product) => product.id === item.id).name}`).join(", ");
-  window.location.href = `mailto:hello@raycrafting.co?subject=Raycrafting%20order%20request&body=Hi%20Raycrafting,%0A%0AI'd%20like%20to%20order:%20${encodeURIComponent(order)}.%0A%0AMy%20name:%0ADelivery%20details:`;
-});
+fetch("/api/config").then((r) => r.json()).then((cfg) => {
+  const wa = document.querySelector("#whatsappFloat");
+  if (wa && cfg.supportPhone) {
+    const cleanPhone = String(cfg.supportPhone).replace(/\D/g, "");
+    wa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi Raycrafting! I'm browsing your online shop and had a question about custom flowers/orders.")}`;
+    wa.target = "_blank";
+    wa.rel = "noopener noreferrer";
+  }
+}).catch(() => {});
 
 document.querySelector("#newsletterForm").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -253,3 +406,125 @@ if (heroFrame && heroSlides.length > 1) {
   showHeroSlide(0);
   setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
 }
+
+// ==========================================
+// Floating Daisies & Fairy Glitter Atmosphere
+// ==========================================
+function initFairyAtmosphere() {
+  const container = document.querySelector("#fairyBackground");
+  if (!container) return;
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReducedMotion) return;
+
+  const DAISY_SVG = `
+    <svg viewBox="0 0 40 40" class="fairy-daisy-svg" aria-hidden="true">
+      <g transform="translate(20,20)">
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" />
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(45)" />
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(90)" />
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(135)" />
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(180)" />
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(225)" />
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(270)" />
+        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(315)" />
+        <circle cx="0" cy="0" r="5" fill="#f8c850" />
+        <circle cx="-1.5" cy="-1.5" r="1.5" fill="#ffeaa7" opacity="0.85" />
+      </g>
+    </svg>
+  `;
+
+  const SPARKLE_SVG = `
+    <svg viewBox="0 0 24 24" class="fairy-sparkle-svg" aria-hidden="true">
+      <path d="M12 0 C12 6.6 17.4 12 24 12 C17.4 12 12 17.4 12 24 C12 17.4 6.6 12 0 12 C6.6 12 12 6.6 12 0 Z" />
+    </svg>
+  `;
+
+  const isMobile = window.innerWidth < 768;
+  const daisyCount = isMobile ? 8 : 16;
+  const sparkleCount = isMobile ? 12 : 24;
+
+  const fragment = document.createDocumentFragment();
+
+  for (let i = 0; i < daisyCount; i++) {
+    const daisy = document.createElement("div");
+    daisy.className = "floating-daisy";
+    daisy.innerHTML = DAISY_SVG;
+
+    const size = Math.floor(Math.random() * 14) + 16;
+    const left = (Math.random() * 96 + 2).toFixed(1);
+    const duration = (Math.random() * 12 + 14).toFixed(1);
+    const delay = -(Math.random() * 25).toFixed(1);
+    const sway = (Math.random() * 60 - 30).toFixed(0) + "px";
+    const opacity = (Math.random() * 0.35 + 0.45).toFixed(2);
+
+    daisy.style.setProperty("--size", `${size}px`);
+    daisy.style.setProperty("--left", `${left}%`);
+    daisy.style.setProperty("--duration", `${duration}s`);
+    daisy.style.setProperty("--delay", `${delay}s`);
+    daisy.style.setProperty("--sway-x", sway);
+    daisy.style.setProperty("--target-opacity", opacity);
+
+    fragment.appendChild(daisy);
+  }
+
+  for (let i = 0; i < sparkleCount; i++) {
+    const sparkle = document.createElement("div");
+    sparkle.className = "glitter-sparkle";
+    sparkle.innerHTML = SPARKLE_SVG;
+
+    const size = Math.floor(Math.random() * 9) + 8;
+    const left = (Math.random() * 96 + 2).toFixed(1);
+    const top = (Math.random() * 96 + 2).toFixed(1);
+    const duration = (Math.random() * 3 + 2.5).toFixed(1);
+    const delay = -(Math.random() * 5).toFixed(1);
+    const opacity = (Math.random() * 0.45 + 0.35).toFixed(2);
+    const color = i % 2 === 0 ? "rgba(240, 191, 72, 0.85)" : "rgba(231, 110, 89, 0.75)";
+
+    sparkle.style.setProperty("--size", `${size}px`);
+    sparkle.style.setProperty("--left", `${left}%`);
+    sparkle.style.setProperty("--top", `${top}%`);
+    sparkle.style.setProperty("--duration", `${duration}s`);
+    sparkle.style.setProperty("--delay", `${delay}s`);
+    sparkle.style.setProperty("--glitter-opacity", opacity);
+    sparkle.style.color = color;
+
+    fragment.appendChild(sparkle);
+  }
+
+  container.appendChild(fragment);
+
+  // Delightful interactive click / tap sparkle burst
+  document.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("input, textarea, select")) return;
+    createSparkleBurst(e.clientX, e.clientY);
+  }, { passive: true });
+}
+
+function createSparkleBurst(x, y) {
+  if (!x || !y) return;
+  const count = 5;
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement("div");
+    star.className = "click-sparkle";
+    star.innerHTML = `✦`;
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * 35 + 15;
+    const destX = Math.cos(angle) * distance;
+    const destY = Math.sin(angle) * distance;
+    const color = ["#f0bf48", "#e76e59", "#ff9a8b", "#ffd166"][Math.floor(Math.random() * 4)];
+
+    star.style.left = `${x}px`;
+    star.style.top = `${y}px`;
+    star.style.color = color;
+    star.style.setProperty("--dx", `${destX}px`);
+    star.style.setProperty("--dy", `${destY}px`);
+
+    document.body.appendChild(star);
+    setTimeout(() => star.remove(), 700);
+  }
+}
+
+initFairyAtmosphere();
+

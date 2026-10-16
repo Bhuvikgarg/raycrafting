@@ -27,7 +27,8 @@
     </script>
   </head>
   <body>
-    <div class="announcement">Free shipping on orders over ₹45 <span aria-hidden="true">✳</span> Handmade in small batches</div>
+    <div class="fairy-background" id="fairyBackground" aria-hidden="true"></div>
+    <div class="announcement">Free delivery on orders over ₹499 <span aria-hidden="true">✳</span> 100% Handcrafted with patience <span aria-hidden="true">✳</span> Free handwritten gift note available</div>
 
     <header class="site-header">
       <button class="brand brand-button" id="sellerAboutButton" type="button" aria-label="About Raycrafting">
@@ -68,9 +69,9 @@
         <div class="hero-image-wrap">
           <div class="hero-image-frame" id="heroSlideshow" role="region" aria-roledescription="carousel" aria-label="Raycrafting product photos">
             <div class="hero-slides">
-              <img class="hero-slide is-active" data-caption="the little things collection" src="assets/sunflower.jpeg" alt="Handmade orange sunflower in a small dark pot" />
-              <img class="hero-slide" data-caption="pink lily pot" src="assets/pink-lily-pot.png" alt="Handmade pink lily flower in a small dark pot" aria-hidden="true" />
-              <img class="hero-slide" data-caption="pink rose pot" src="assets/pink-rose-pot.png" alt="Handmade pink rose flower in a small dark pot" aria-hidden="true" />
+              <img class="hero-slide is-active" data-caption="the little things collection" src="assets/sunflower.webp" alt="Handmade orange sunflower in a small dark pot" />
+              <img class="hero-slide" data-caption="pink lily pot" src="assets/pink-lily-pot.webp" alt="Handmade pink lily flower in a small dark pot" aria-hidden="true" />
+              <img class="hero-slide" data-caption="pink rose pot" src="assets/pink-rose-pot.webp" alt="Handmade pink rose flower in a small dark pot" aria-hidden="true" />
             </div>
             <div class="image-sticker">made<br />slowly</div>
           </div>
@@ -78,15 +79,11 @@
         </div>
       </section>
 
-      <section class="custom-teaser section-shell" aria-labelledby="customTeaserTitle">
-        <div><p class="eyebrow">Made just for you</p><h2 id="customTeaserTitle">Create a <em>custom gift.</em></h2><p>Have a flower, colour, memory, or person in mind? Share an image or describe it and we’ll turn the idea into something handmade.</p></div>
-        <a class="button button-dark" href="#custom">Start your idea <span aria-hidden="true">↓</span></a>
-      </section>
-
       <section class="trust-strip section-shell" aria-label="Raycrafting promises">
-        <div><span class="trust-icon">✳</span><strong>Small-batch</strong><span>made with patience</span></div>
-        <div><span class="trust-icon">↺</span><strong>Made to last</strong><span>no watering needed</span></div>
-        <div><span class="trust-icon">♡</span><strong>Gift-ready</strong><span>packed with care</span></div>
+        <div><span class="trust-icon">✳</span><strong>100% Handcrafted</strong><span>shaped with patience</span></div>
+        <div><span class="trust-icon">↺</span><strong>Everlasting Blooms</strong><span>never wither or fade</span></div>
+        <div><span class="trust-icon">📦</span><strong>Crush-Proof Box</strong><span>packed gift-ready</span></div>
+        <div><span class="trust-icon">🔒</span><strong>Secure UPI Checkout</strong><span>quick &amp; 100% safe</span></div>
       </section>
 
       <section class="shop section-shell" id="shop">
@@ -104,6 +101,8 @@
             <button class="filter-button" type="button" data-filter="Flowers">Flowers</button>
             <button class="filter-button" type="button" data-filter="Keepsakes">Keepsakes</button>
             <button class="filter-button" type="button" data-filter="Bundles">Bundles</button>
+            <button class="filter-button" type="button" data-filter="Under200">Under ₹200</button>
+            <button class="filter-button" type="button" data-filter="Bestsellers">Bestsellers ★</button>
           </div>
           <label class="sort-control">Sort by
             <select id="sortSelect" aria-label="Sort products">
@@ -123,6 +122,42 @@
 
         <div class="product-grid" id="productGrid"></div>
         <p class="empty-state" id="emptyState" hidden>No little thing matches that search yet. Try another word.</p>
+      </section>
+
+      <section class="reviews-section section-shell" id="reviews" aria-labelledby="reviewsTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Real craft buyer love</p>
+            <h2 id="reviewsTitle">Made to bring<br /><em>real smiles.</em></h2>
+          </div>
+          <div class="reviews-rating-badge">
+            <span class="stars">★★★★★</span>
+            <strong>4.9 / 5 Rating</strong>
+            <small>from craft lovers across India</small>
+          </div>
+        </div>
+        <div class="reviews-grid">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p>"The sunflower pot is sitting on my study table right now and it instantly cheers up my workspace. The fuzzy twisting is so neat and it looks even cuter in person!"</p>
+            <div class="review-author"><strong>Ananya S.</strong><span>New Delhi · Verified Buyer</span></div>
+          </div>
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p>"Ordered the pink rose pot as a birthday surprise for my best friend. The packaging was completely crush-proof and the handwritten note made it extra special."</p>
+            <div class="review-author"><strong>Rohan M.</strong><span>Bengaluru · Verified Buyer</span></div>
+          </div>
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <p>"Better than real flowers because these never die! I got the bunny companion and strawberry keychain. The quality is amazing. 10/10 recommend Raycrafting."</p>
+            <div class="review-author"><strong>Priya K.</strong><span>Mumbai · Verified Buyer</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="custom-teaser section-shell" aria-labelledby="customTeaserTitle">
+        <div><p class="eyebrow">Made just for you</p><h2 id="customTeaserTitle">Create a <em>custom gift.</em></h2><p>Have a flower, colour, memory, or person in mind? Share an image or describe it and we’ll turn the idea into something handmade.</p></div>
+        <a class="button button-dark" href="#custom">Start your idea <span aria-hidden="true">↓</span></a>
       </section>
 
       <section class="story-band section-shell" id="story">
@@ -179,23 +214,61 @@
     <div class="overlay" id="overlay" hidden></div>
     <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping bag" aria-hidden="true">
       <div class="drawer-header"><div><p class="eyebrow">Your little things</p><h2>Shopping bag <span id="drawerCount">(0)</span></h2></div><button class="close-button" id="cartClose" type="button" aria-label="Close shopping bag">×</button></div>
+      <div class="drawer-shipping-bar" id="drawerShippingBar">
+        <div class="shipping-bar-text">Add items to unlock <strong>FREE Delivery</strong>! 🚚</div>
+        <div class="shipping-progress-track"><div class="shipping-progress-fill" style="width: 0%"></div></div>
+      </div>
       <div class="cart-items" id="cartItems"></div>
       <div class="cart-empty" id="cartEmpty"><div class="empty-flower" aria-hidden="true">✳</div><p>Your bag is waiting for something bright.</p><a class="text-button" href="#shop" id="emptyShop">Browse the collection <span aria-hidden="true">→</span></a></div>
-      <div class="drawer-footer" id="drawerFooter" hidden><div class="subtotal"><span>Subtotal</span><strong id="cartSubtotal">₹0.00</strong></div><p>Shipping and taxes are calculated at checkout.</p><button class="button button-dark checkout-button" id="checkoutButton" type="button">Continue to checkout <span aria-hidden="true">→</span></button></div>
+      <div class="drawer-footer" id="drawerFooter" hidden>
+        <div class="drawer-gift-note">
+          <label><input type="checkbox" id="giftNoteCheck"> <span>💌 Add a free handwritten gift note</span></label>
+          <div id="giftNoteBox" hidden>
+            <textarea id="giftNoteInput" rows="2" maxlength="250" placeholder="Write your sweet gift message for the recipient..."></textarea>
+          </div>
+        </div>
+        <div class="subtotal"><span>Subtotal</span><strong id="cartSubtotal">₹0.00</strong></div>
+        <p class="drawer-shipping-note">Free delivery on orders over ₹499 · Calculated at checkout</p>
+        <button class="button button-dark checkout-button" id="checkoutButton" type="button">Continue to checkout <span aria-hidden="true">→</span></button>
+        <div class="drawer-trust-icons">
+          <span>🔒 100% Safe Payments</span>
+          <span>⚡ 24-48h Dispatch</span>
+          <span>📦 Crush-Proof Box</span>
+        </div>
+      </div>
     </aside>
 
     <div class="modal-wrap" id="productModal" hidden>
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <button class="close-button modal-close" type="button" aria-label="Close product details">×</button>
         <div class="modal-art" id="modalArt"></div>
-        <div class="modal-content"><p class="eyebrow" id="modalCategory">Flowers</p><h2 id="modalTitle"></h2><p id="modalDescription"></p><div class="modal-meta"><strong id="modalPrice"></strong><span id="modalDetail"></span></div><button class="button button-dark" id="modalAdd" type="button">Add to bag <span aria-hidden="true">→</span></button></div>
+        <div class="modal-content">
+          <p class="eyebrow" id="modalCategory">Flowers</p>
+          <h2 id="modalTitle"></h2>
+          <p id="modalDescription"></p>
+          <div class="modal-meta"><strong id="modalPrice"></strong><span id="modalDetail"></span></div>
+          <div class="modal-specs" id="modalSpecs"></div>
+          <div class="modal-actions-row">
+            <button class="button button-dark modal-add-btn" id="modalAdd" type="button">Add to bag <span aria-hidden="true">+</span></button>
+            <button class="button button-buy-now" id="modalBuyNow" type="button">Buy now ⚡</button>
+          </div>
+          <div class="modal-trust-pill">
+            <span>🔒 Safe UPI / Cards</span>
+            <span>🚚 Free delivery over ₹499</span>
+          </div>
+        </div>
       </div>
     </div>
 
+    <a class="whatsapp-float" id="whatsappFloat" href="#custom" aria-label="Chat with maker on WhatsApp or send custom request">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      <span>Chat with Maker</span>
+    </a>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="catalog.js?v=sunflower1"></script>
-    <script src="shared-script.js?v=custom2"></script>
+    <script src="catalog.js?v=sunflower2"></script>
+    <script src="shared-script.js?v=ux3"></script>
     <script src="custom-requests.js?v=custom2"></script>
-  <script src="commerce.js?v=upi3"></script>
+  <script src="commerce.js?v=upi4"></script>
 </body>
 </html>

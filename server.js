@@ -172,20 +172,26 @@ ensureColumn("orders", "shiprocket_courier", "TEXT");
 ensureColumn("orders", "shipping_status", "TEXT");
 ensureColumn("customers", "avatar_url", "TEXT");
 ensureColumn("products", "active", "INTEGER DEFAULT 1");
+ensureColumn("products", "badge", "TEXT");
+ensureColumn("products", "dimensions", "TEXT");
+ensureColumn("products", "materials", "TEXT");
+ensureColumn("products", "care", "TEXT");
+ensureColumn("orders", "gift_message", "TEXT");
 
 const seedPath = path.join(ROOT, "products-seed.json");
 if (fs.existsSync(seedPath)) {
   try {
     const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
-    const productInsert = db.prepare(`INSERT OR IGNORE INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active) VALUES (?,?,?,?,?,?,?,?,?,?,?)`);
+    const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, category=excluded.category, price=excluded.price, original_price=excluded.original_price, detail=excluded.detail, description=excluded.description, featured=excluded.featured, art=excluded.art, image=CASE WHEN excluded.image != '' THEN excluded.image ELSE products.image END, active=excluded.active, badge=excluded.badge, dimensions=excluded.dimensions, materials=excluded.materials, care=excluded.care`);
     for (const p of seedProducts) {
-      productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || ""), p.active === 0 ? 0 : 1);
+      productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || ""), p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
     }
   } catch (err) {
     console.error("Failed to seed products:", err.message);
   }
 }
 const couponInsert = db.prepare(`INSERT OR IGNORE INTO coupons (code,kind,amount,minimum_subtotal,active) VALUES (?,?,?,?,1)`);
+couponInsert.run("WELCOME10", "percent", 10, 0);
 couponInsert.run("BRIGHT10", "percent", 10, 0);
 couponInsert.run("RAY100", "fixed", 100, 1000);
 couponInsert.run("WELCOME15", "percent", 15, 500);
@@ -617,8 +623,8 @@ async function api(req, res, pathname, body) {
       if (!items.length) return json(res, 400, { error: "Your bag is empty." });
       const getProduct = db.prepare("SELECT * FROM products WHERE id=? AND active=1"); const verified = []; let subtotal = 0;
       for (const item of items) { const product = getProduct.get(String(item.id)); const quantity = Math.max(1, Math.min(99, Number(item.quantity) || 1)); if (!product) return json(res, 400, { error: "One of the products is no longer available." }); const lineTotal = Math.round(product.price * quantity * 100) / 100; subtotal += lineTotal; verified.push({ product, quantity, lineTotal }); }
-      const coupon = calculateCoupon(body.couponCode, subtotal); const shipping = fulfillmentMethod === "self_pickup" ? 0 : (subtotal - coupon.discount >= 4000 ? 0 : 80); const total = Math.round((subtotal - coupon.discount + shipping) * 100) / 100; const orderId = id("ord"); const timestamp = now();
-      db.exec("BEGIN"); try { db.prepare("INSERT INTO orders (id,customer_id,status,subtotal,discount,shipping,total,currency,coupon_code,address_json,fulfillment_method,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer.id, "pending_payment", subtotal, coupon.discount, shipping, total, "INR", coupon.code || null, JSON.stringify(address), fulfillmentMethod, timestamp, timestamp); const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total) VALUES (?,?,?,?,?,?)"); for (const item of verified) insert.run(orderId, item.product.id, item.product.name, item.product.price, item.quantity, item.lineTotal); db.exec("COMMIT"); } catch (error) { db.exec("ROLLBACK"); throw error; }
+      const coupon = calculateCoupon(body.couponCode, subtotal); const shipping = fulfillmentMethod === "self_pickup" ? 0 : (subtotal - coupon.discount >= 499 ? 0 : 60); const total = Math.round((subtotal - coupon.discount + shipping) * 100) / 100; const orderId = id("ord"); const timestamp = now(); const giftMessage = String(body.giftMessage || "").trim().slice(0, 500);
+      db.exec("BEGIN"); try { db.prepare("INSERT INTO orders (id,customer_id,status,subtotal,discount,shipping,total,currency,coupon_code,address_json,fulfillment_method,gift_message,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer.id, "pending_payment", subtotal, coupon.discount, shipping, total, "INR", coupon.code || null, JSON.stringify(address), fulfillmentMethod, giftMessage || null, timestamp, timestamp); const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total) VALUES (?,?,?,?,?,?)"); for (const item of verified) insert.run(orderId, item.product.id, item.product.name, item.product.price, item.quantity, item.lineTotal); db.exec("COMMIT"); } catch (error) { db.exec("ROLLBACK"); throw error; }
       return json(res, 201, { orderId, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: "pending_payment", fulfillmentMethod });
     }
     if (req.method === "POST" && pathname === "/api/orders/action") {
