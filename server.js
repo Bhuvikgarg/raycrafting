@@ -498,12 +498,12 @@ async function api(req, res, pathname, body) {
     }
     if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), phoneOtpEnabled: PHONE_OTP_ENABLED, razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, selfPickupEnabled: true });
     if (req.method === "GET" && pathname === "/api/products") {
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
     }
     if (req.method === "GET" && pathname === "/api/admin/products") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,active FROM products ORDER BY featured ASC, name ASC").all();
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0, active: product.active !== 0 })) });
     }
     if (req.method === "POST" && pathname === "/api/admin/auth") {
