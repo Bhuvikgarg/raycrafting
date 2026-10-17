@@ -474,8 +474,9 @@ function serveStatic(req, res, pathname) {
   fs.createReadStream(file).pipe(res);
 }
 
-async function api(req, res, pathname, body) {
+async function api(req, res, pathname, body, url) {
   try {
+    const requestUrl = url || new URL(req.url, `http://${req.headers.host || "localhost"}`);
     if (req.method === "GET" && pathname === "/api/health") return json(res, 200, { ok: true, service: "raycrafting", time: now() });
     if (req.method === "POST" && pathname === "/api/newsletter") {
       if (!allowRequest(req, "newsletter", 5)) return json(res, 429, { error: "Too many requests. Try again later." });
@@ -647,7 +648,24 @@ async function api(req, res, pathname, body) {
       return json(res, 200, { ...result, fulfillmentMethod });
     }
     if (req.method === "POST" && pathname === "/api/orders") {
-      const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in before placing an order." });
+      let customer = customerFromRequest(req);
+      if (!customer) {
+        const phone = normalizeIndianPhone(body.phone || body.address?.phone);
+        const name = String(body.name || body.address?.name || "Raycrafting Customer").trim();
+        const email = String(body.email || body.address?.email || (phone ? phoneCustomerEmail(phone) : "")).trim().toLowerCase();
+        if (phone && validIndianPhone(phone)) {
+          let row = db.prepare("SELECT id, name, email, phone FROM customers WHERE phone=? ORDER BY created_at ASC LIMIT 1").get(phone);
+          if (!row) {
+            const customerId = id("cus");
+            const secret = hashPassword(crypto.randomBytes(32).toString("hex"));
+            db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,created_at) VALUES (?,?,?,?,?,?,?)").run(customerId, name, email, phone, secret.hash, secret.salt, now());
+            row = { id: customerId, name, email, phone };
+          }
+          const token = issueSession(row.id);
+          customer = { ...row, token };
+        }
+      }
+      if (!customer) return json(res, 401, { error: "Please enter your mobile number and address." });
       const items = Array.isArray(body.items) ? body.items : [];
       const requestedFulfillment = String(body.fulfillmentMethod || "manual");
       const fulfillmentMethod = requestedFulfillment === "self_pickup" ? "self_pickup" : "manual";
@@ -673,7 +691,7 @@ async function api(req, res, pathname, body) {
         void notifyCustomerOrderStatus({ id: orderId, total, items: verified, customer_name: customer.name, customer_email: customer.email }, "processing", "Pay on Delivery confirmed");
       }
 
-      return json(res, 201, { orderId, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: initialStatus, paymentMethod, fulfillmentMethod });
+      return json(res, 201, { orderId, token: customer.token, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: initialStatus, paymentMethod, fulfillmentMethod });
     }
     if (req.method === "POST" && pathname === "/api/orders/action") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in to manage your orders." });
@@ -812,7 +830,7 @@ async function api(req, res, pathname, body) {
     }
     if (req.method === "GET" && pathname === "/api/admin/orders") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
-      const view = url.searchParams.get("view") || "confirmed";
+      const view = requestUrl.searchParams.get("view") || "confirmed";
       const confirmedCount = db.prepare("SELECT COUNT(*) as count FROM orders WHERE (status NOT IN ('pending_payment', 'failed_payment') OR payment_method = 'cod')").get().count;
       const unpaidCount = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status IN ('pending_payment', 'failed_payment') AND (payment_method IS NULL OR payment_method != 'cod')").get().count;
       return json(res, 200, {
@@ -889,7 +907,7 @@ const server = http.createServer(async (req, res) => {
   }
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`); const body = req.method === "POST" ? await readBody(req).catch((error) => ({ __error: error.message })) : {};
   if (body.__error) return json(res, 400, { error: body.__error });
-  if (url.pathname.startsWith("/api/")) return api(req, res, url.pathname, body);
+  if (url.pathname.startsWith("/api/")) return api(req, res, url.pathname, body, url);
   return serveStatic(req, res, url.pathname);
 });
 server.listen(PORT, () => console.log(`Raycrafting server running at http://127.0.0.1:${PORT}`));
