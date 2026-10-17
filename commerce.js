@@ -170,6 +170,10 @@
       .quote-whatsapp-link{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#25d366;text-decoration:none;font-weight:600;padding:8px 10px;border:1px solid rgba(37,211,102,.3);border-radius:2px}
       .quote-whatsapp-link:hover{background:rgba(37,211,102,.08)}
       .custom-accepted-box{margin-top:12px;padding:10px 14px;background:#dfeada;border-radius:4px;color:#557351;font-size:11.5px;line-height:1.5}
+      .return-panel{max-width:520px!important}
+      .return-policy-box{background:#fff8f6;border:1px solid rgba(231,110,89,.3);border-radius:4px;padding:12px 14px;font-size:11.5px;color:var(--ink);line-height:1.5;margin-bottom:14px}
+      .return-window-note{display:block;margin-top:5px;font-size:10.5px;color:#557351;font-weight:600}
+      .return-window-note.expired{color:#a74232;font-weight:400}
     `;
     document.head.appendChild(ordersStyle);
   }
@@ -420,6 +424,47 @@
             <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with Bhuvik on WhatsApp</a>
             <button class="orders-button" id="confirmCloseBtn" type="button" style="margin-top:6px">Back to Shop</button>
           </div>
+        </div>
+      </div>`
+    );
+
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div class="commerce-modal" id="returnModal" hidden>
+        <div class="commerce-panel return-panel" role="dialog" aria-modal="true" aria-labelledby="returnTitle">
+          <div class="commerce-head">
+            <div>
+              <p class="eyebrow">Raycrafting Studio Policy</p>
+              <h2 id="returnTitle">Request a Return</h2>
+              <p>Handmade pieces are eligible for return only for defective or damaged items within 3 days of delivery.</p>
+            </div>
+            <button class="commerce-close" id="returnClose" type="button" aria-label="Close return modal">×</button>
+          </div>
+          <div class="return-policy-box">
+            🌸 <strong>Handmade Studio Quality Guarantee:</strong> Every piece is hand-twisted with care by Bhuvik. If your order arrived broken, damaged during transit, or with a craftsmanship defect, we will arrange a replacement or refund within 3 days of delivery.
+          </div>
+          <form class="commerce-form" id="returnForm">
+            <input type="hidden" id="returnOrderId" value="">
+            <label>Genuine Reason for Return <span style="color:var(--coral-dark)">*</span>
+              <select id="returnCategory" required>
+                <option value="" disabled selected>Select genuine reason...</option>
+                <option value="Defective / Damaged Piece">Defective / Damaged piece received</option>
+                <option value="Broken in Transit">Broken or crushed during courier transit</option>
+                <option value="Wrong Item Received">Wrong item or incorrect color received</option>
+                <option value="Missing Item / Parts">Missing flower, stem, pot, or accessories</option>
+                <option value="Craftsmanship Flaw">Major craftsmanship defect</option>
+              </select>
+            </label>
+            <label>Describe the Defect or Damage <span style="color:var(--coral-dark)">*</span>
+              <textarea id="returnDetail" required minlength="10" maxlength="500" rows="3" placeholder="Please describe the exact defect or damage in detail..."></textarea>
+              <small class="field-help">Please describe the issue. You can also share unboxing photos/videos with Bhuvik on WhatsApp.</small>
+            </label>
+            <div style="display:flex;gap:10px;margin-top:6px;">
+              <button class="commerce-action" type="submit" id="submitReturnBtn" style="flex:1;">Submit Return Request <span>→</span></button>
+              <button class="orders-button" type="button" id="cancelReturnBtn">Cancel</button>
+            </div>
+            <p class="commerce-message" id="returnMessage"></p>
+          </form>
         </div>
       </div>`
     );
@@ -1216,8 +1261,12 @@
           : order.customer_request_reason
           ? `<p class="order-history-reason"><strong>Your request:</strong> ${esc(order.customer_request_reason)}</p>`
           : "";
-        const canCancel = ["pending_payment", "paid", "processing", "shipped"].includes(order.status);
-        const canReturn = ["paid", "processing", "shipped", "out_for_delivery", "delivered"].includes(order.status);
+        const canCancel = ["pending_payment", "paid", "processing"].includes(order.status);
+        const deliveryTimestamp = new Date(order.delivered_at || order.updated_at || order.created_at).getTime();
+        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+        const isWithin3Days = (Date.now() - deliveryTimestamp) <= THREE_DAYS_MS;
+        const canReturn = order.status === "delivered" && isWithin3Days;
+        const returnExpired = order.status === "delivered" && !isWithin3Days;
         const pm = order.payment_method === "cod" ? " · 📦 Pay on Delivery" : (order.status === "paid" || order.status === "processing" ? " · ⚡ Paid online" : "");
         return `<article class="order-history-card">
           <div class="order-history-head">
@@ -1229,9 +1278,10 @@
           </div>
           <div class="order-history-items">${items}</div>
           ${reasons}
-          ${(canCancel || canReturn) ? `<div class="order-history-actions">
+          ${(canCancel || canReturn || returnExpired) ? `<div class="order-history-actions">
             ${canCancel ? `<button type="button" data-order-action="cancel" data-order-id="${esc(order.id)}">Request cancellation</button>` : ""}
-            ${canReturn ? `<button type="button" data-order-action="return" data-order-id="${esc(order.id)}">Request return</button>` : ""}
+            ${canReturn ? `<div><button type="button" data-order-action="return" data-order-id="${esc(order.id)}">Request return</button><small class="return-window-note">✓ Eligible for return within 3 days for defective/damaged pieces</small></div>` : ""}
+            ${returnExpired ? `<small class="return-window-note expired">3-day return window closed</small>` : ""}
           </div>` : ""}
         </article>`;
       }).join("");
@@ -1367,13 +1417,79 @@
     }
   }
 
+  function openReturnModal(orderId) {
+    const modal = $("#returnModal");
+    if (!modal) return;
+    const idInput = $("#returnOrderId");
+    if (idInput) idInput.value = orderId;
+    const cat = $("#returnCategory");
+    if (cat) cat.value = "";
+    const detail = $("#returnDetail");
+    if (detail) detail.value = "";
+    const msg = $("#returnMessage");
+    if (msg) { msg.textContent = ""; msg.className = "commerce-message"; }
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeReturnModal() {
+    const modal = $("#returnModal");
+    if (modal) modal.hidden = true;
+    if ($("#checkoutModal").hidden && $("#orderConfirmModal").hidden && $("#accountModal").hidden && $("#aboutModal").hidden && $("#ordersModal").hidden) {
+      document.body.style.overflow = "";
+    }
+  }
+
+  async function submitReturn(event) {
+    event.preventDefault();
+    const btn = $("#submitReturnBtn");
+    const msg = $("#returnMessage");
+    const orderId = $("#returnOrderId")?.value;
+    const category = $("#returnCategory")?.value;
+    const detail = $("#returnDetail")?.value.trim();
+
+    if (!category) {
+      if (msg) { msg.textContent = "Please select a genuine reason for return."; msg.className = "commerce-message"; }
+      return;
+    }
+    if (!detail || detail.length < 10) {
+      if (msg) { msg.textContent = "Please describe the defect or issue in more detail (at least 10 characters)."; msg.className = "commerce-message"; }
+      return;
+    }
+
+    if (btn) btn.disabled = true;
+    if (msg) { msg.textContent = "Submitting return request…"; msg.className = "commerce-message"; }
+
+    try {
+      await request("/orders/action", {
+        method: "POST",
+        body: JSON.stringify({
+          orderId,
+          action: "return",
+          reason: `${category}: ${detail}`
+        })
+      });
+      closeReturnModal();
+      toast("Return request submitted for review. Bhuvik will reach out shortly.");
+      loadOrders();
+    } catch (error) {
+      if (msg) { msg.textContent = error.message; msg.className = "commerce-message"; }
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
   async function orderAction(orderId, action) {
-    const label = action === "cancel" ? "Why would you like to cancel this order?" : "Why would you like to return this order?";
+    if (action === "return") {
+      openReturnModal(orderId);
+      return;
+    }
+    const label = "Why would you like to cancel this order before delivery?";
     const reason = window.prompt(label);
     if (!reason || !reason.trim()) return;
     try {
       await request("/orders/action", { method: "POST", body: JSON.stringify({ orderId, action, reason: reason.trim() }) });
-      toast(action === "cancel" ? "Cancellation request sent." : "Return request sent.");
+      toast("Cancellation request sent.");
       loadOrders();
     } catch (error) {
       window.alert(error.message);
@@ -1677,6 +1793,13 @@
       if (event.target.id === "orderConfirmModal") closeOrderConfirmation();
     });
 
+    $("#returnClose")?.addEventListener("click", closeReturnModal);
+    $("#cancelReturnBtn")?.addEventListener("click", closeReturnModal);
+    $("#returnModal")?.addEventListener("click", (event) => {
+      if (event.target.id === "returnModal") closeReturnModal();
+    });
+    $("#returnForm")?.addEventListener("submit", submitReturn);
+
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         closeCheckout();
@@ -1684,6 +1807,7 @@
         closeOrders();
         closeAccountModal();
         closeAboutModal();
+        closeReturnModal();
       }
     });
 

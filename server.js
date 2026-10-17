@@ -168,6 +168,7 @@ ensureColumn("orders", "payment_method", "TEXT NOT NULL DEFAULT 'razorpay'");
 ensureColumn("orders", "failure_reason", "TEXT");
 ensureColumn("orders", "decision_reason", "TEXT");
 ensureColumn("orders", "customer_request_reason", "TEXT");
+ensureColumn("orders", "delivered_at", "TEXT");
 ensureColumn("orders", "fulfillment_method", "TEXT NOT NULL DEFAULT 'shiprocket'");
 ensureColumn("orders", "shiprocket_order_id", "TEXT");
 ensureColumn("orders", "shiprocket_shipment_id", "TEXT");
@@ -740,10 +741,17 @@ async function api(req, res, pathname, body, url) {
       if (!order) return json(res, 404, { error: "Order not found." });
       if (!reason) return json(res, 400, { error: "Please provide a reason." });
       if (action === "cancel") {
-        if (!["pending_payment", "paid", "processing", "shipped"].includes(order.status)) return json(res, 400, { error: "This order cannot be cancelled in its current status." });
+        if (!["pending_payment", "paid", "processing"].includes(order.status)) return json(res, 400, { error: "This order cannot be cancelled in its current status." });
         db.prepare("UPDATE orders SET status='cancel_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
       } else if (action === "return") {
-        if (!["paid", "processing", "shipped", "out_for_delivery", "delivered"].includes(order.status)) return json(res, 400, { error: "A return request is not available for this order yet." });
+        if (order.status !== "delivered") {
+          return json(res, 400, { error: "Returns are only available after your order has been delivered." });
+        }
+        const deliveryTimestamp = new Date(order.delivered_at || order.updated_at || order.created_at).getTime();
+        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+        if (Date.now() - deliveryTimestamp > THREE_DAYS_MS) {
+          return json(res, 400, { error: "The 3-day return window has closed. Handcrafted pieces can only be returned within 3 days of delivery for genuine defects." });
+        }
         db.prepare("UPDATE orders SET status='return_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
       } else return json(res, 400, { error: "Unsupported order action." });
       return json(res, 200, { ok: true, orderId: order.id, status: action === "cancel" ? "cancel_requested" : "return_requested" });
@@ -917,7 +925,8 @@ async function api(req, res, pathname, body, url) {
       if (!statuses.includes(status)) return json(res, 400, { error: "Unsupported order status." });
       if (status === "declined" && !reason) return json(res, 400, { error: "A decline reason is required." });
       const changed = order.status !== status;
-      db.prepare("UPDATE orders SET status=?,decision_reason=?,updated_at=? WHERE id=?").run(status, reason || null, now(), order.id);
+      const deliveredAt = status === "delivered" ? (order.delivered_at || now()) : order.delivered_at;
+      db.prepare("UPDATE orders SET status=?,decision_reason=?,delivered_at=?,updated_at=? WHERE id=?").run(status, reason || null, deliveredAt || null, now(), order.id);
       if (changed) void notifyCustomerOrderStatus(order, status, reason);
       return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null, emailNotificationConfigured: Boolean(RESEND_API_KEY && EMAIL_FROM) });
     }
