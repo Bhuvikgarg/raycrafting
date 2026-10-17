@@ -175,9 +175,16 @@
         <div class="custom-copy"><p class="eyebrow">Custom orders</p><h2 id="customTitle">Bring me your <em>idea.</em></h2><p>If you want a custom order, give us any similar image and we’ll review it — or just write a description. An image is better, but your words are welcome too.</p><p class="custom-promise">We’ll review your request and contact you within 1 hour.</p></div>
         <form class="custom-form soft-form" id="customOrderForm">
           <div class="form-grid"><label>Your name<input id="customName" name="name" required autocomplete="name" placeholder="Your name"></label><label>Email address<input id="customEmail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label></div>
-          <div class="form-grid"><label>Phone <span class="optional">optional</span><input id="customPhone" name="phone" type="tel" autocomplete="tel" placeholder="10-digit Indian number"></label><label>City <span class="optional">optional</span><input id="customCity" name="city" placeholder="Your city"></label></div>
+          <div class="form-grid"><label>Phone <span class="optional">recommended for WhatsApp quote</span><input id="customPhone" name="phone" type="tel" autocomplete="tel" placeholder="10-digit Indian number"></label><label>City <span class="optional">optional</span><input id="customCity" name="city" placeholder="Your city"></label></div>
           <label>State / Union Territory <span class="optional">optional</span><select id="customState" name="state"><option value="">Choose a state</option></select></label>
-          <label>Tell us your idea<textarea id="customDescription" name="description" rows="4" maxlength="3000" placeholder="Colours, flowers, size, occasion, name, budget — anything that helps..."></textarea></label>
+          <label>Tell us your idea<textarea id="customDescription" name="description" rows="4" maxlength="3000" placeholder="Colours, flowers, size, occasion, name, specific details — anything that helps..."></textarea></label>
+          <div class="custom-quote-option-box" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff8f4;padding:12px 14px;border:1.5px dashed #f2c7bc;border-radius:6px;margin:8px 0;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;margin:0;cursor:pointer;">
+              <input type="checkbox" id="customAskPrice" style="width:auto;margin:0;accent-color:var(--coral);" checked>
+              <span>Ask for exact price quote first (Bhuvik will review &amp; reply with price)</span>
+            </label>
+            <input id="customBudget" placeholder="Expected budget (₹, optional)" style="padding:7px 10px;font-size:11.5px;max-width:210px;margin:0;">
+          </div>
           <label class="upload-box">Reference image <span class="optional">recommended</span><input id="customImage" type="file" accept="image/png,image/jpeg,image/webp"><small>Upload a similar image and we’ll review it. JPG, PNG, or WebP; maximum 5 MB before resizing.</small></label>
           <div class="custom-upload-preview" id="customImagePreview" hidden><img id="customPreviewImage" alt="Your reference image preview"><button type="button" id="removeCustomImage">Remove image</button></div>
           <div class="form-actions"><button class="button button-light" type="submit">Send custom idea <span aria-hidden="true">↗</span></button><p class="form-message" id="customOrderStatus" role="status"></p></div>
@@ -195,19 +202,42 @@
           <details><summary>Where can I find my order after checkout?</summary><p>Open the profile icon in the top-right corner and choose <strong>My orders</strong>. You can also contact the studio if you need help.</p></details>
         </div>
       </section>
-      <section class="newsletter section-shell">
-        <div><p class="eyebrow">The bright note</p><h2>New drops, tiny stories,<br /><em>no inbox clutter.</em></h2></div>
-        <form class="newsletter-form" id="newsletterForm">
-          <label for="newsletterEmail">Your email address</label>
-          <div><input id="newsletterEmail" type="email" required placeholder="you@example.com" /><button class="button button-dark" type="submit">Join the note <span aria-hidden="true">→</span></button></div>
-          <p class="form-message" id="newsletterMessage" role="status"></p>
-        </form>
+
+      <section class="newsletter section-shell vip-reward-section" id="vipSection">
+        <div class="vip-reward-copy">
+          <p class="eyebrow">🌸 Instant 10% Discount · VIP Studio Drops</p>
+          <h2>Unlock 10% off your<br /><em>first handcrafted piece.</em></h2>
+          <p class="section-description">Join Bhuvik's inner circle for instant 10% savings on your first order, plus first dibs on limited handmade seasonal batches.</p>
+        </div>
+        <div class="vip-reward-container">
+          <form class="newsletter-form" id="newsletterForm">
+            <label for="newsletterEmail">Your Email or 10-digit WhatsApp Number</label>
+            <div>
+              <input id="newsletterEmail" required placeholder="Enter email or WhatsApp number" autocomplete="email" />
+              <button class="button button-dark" type="submit" id="newsletterSubmitBtn">Unlock 10% OFF <span aria-hidden="true">→</span></button>
+            </div>
+            <p class="form-message" id="newsletterMessage" role="status"></p>
+          </form>
+          <div class="vip-unlocked-card" id="vipUnlockedCard" hidden>
+            <div class="vip-unlocked-badge">🎉 10% OFF Coupon Unlocked!</div>
+            <div class="vip-coupon-code-box">
+              <span class="vip-code-text" id="vipCodeText">WELCOME10</span>
+              <button class="button button-dark vip-copy-btn" id="vipCopyBtn" type="button">Copy Code 📋</button>
+            </div>
+            <p class="vip-subtext">Apply <strong>WELCOME10</strong> at checkout for 10% off your entire bag · Free shipping on orders over ₹499.</p>
+            <div class="vip-action-links">
+              <a href="#shop" class="button button-light" style="font-size:11px;padding:8px 14px;">Shop the collection 🌸</a>
+              <a id="vipWhatsAppBroadcast" target="_blank" rel="noopener noreferrer" class="button" style="background:#25d366;color:#fff;font-size:11px;padding:8px 14px;" href="#">💬 Chat with Bhuvik</a>
+              <a id="vipInstagramDm" target="_blank" rel="noopener noreferrer" class="button" style="background:#e1306c;color:#fff;font-size:11px;padding:8px 14px;" href="#" hidden>📸 Instagram DM</a>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
 
     <footer class="site-footer section-shell">
       <div class="footer-brand"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><span>R</span></span><span class="brand-name">Raycrafting</span></a><p>Small things, made to stay.</p></div>
-      <div class="footer-links"><div><strong>Explore</strong><a href="#shop">Shop all</a><a href="#story">Our story</a><a href="#custom">Custom gifts</a><a href="#good-to-know">Good to know</a></div><div><strong>Say hello</strong><a href="mailto:hello@raycrafting.co">Email the studio</a><a href="#newsletterForm">Join the bright note</a><span>Instagram coming soon</span></div></div>
+      <div class="footer-links"><div><strong>Explore</strong><a href="#shop">Shop all</a><a href="#story">Our story</a><a href="#custom">Custom gifts</a><a href="#good-to-know">Good to know</a></div><div><strong>Say hello</strong><a href="mailto:hello@raycrafting.co">Email the studio</a><a id="footerInstagramLink" target="_blank" rel="noopener noreferrer" href="#" hidden>Instagram DM ↗</a><a id="footerWhatsAppLink" href="#custom">WhatsApp with maker ↗</a></div></div>
       <div class="footer-bottom"><span>© 2026 Raycrafting</span><span>Handmade with a little extra sunshine</span></div>
     </footer>
 
@@ -260,10 +290,16 @@
       </div>
     </div>
 
-    <a class="whatsapp-float" id="whatsappFloat" href="#custom" aria-label="Chat with maker on WhatsApp or send custom request">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-      <span>Chat with Maker</span>
-    </a>
+    <div class="channel-floats" id="channelFloats">
+      <a class="channel-float instagram-float" id="instagramFloat" target="_blank" rel="noopener noreferrer" href="#" aria-label="Chat with maker on Instagram Direct" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        <span>Instagram Chat</span>
+      </a>
+      <a class="channel-float whatsapp-float" id="whatsappFloat" href="#custom" aria-label="Chat with maker on WhatsApp or send custom request">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        <span>WhatsApp Chat</span>
+      </a>
+    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="catalog.js?v=sunflower2"></script>

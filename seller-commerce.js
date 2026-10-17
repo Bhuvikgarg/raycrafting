@@ -38,27 +38,30 @@
     try {
       const res = await fetch("/api/admin/settings", { headers: { "x-admin-token": adminToken() } });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.supportPhone && $("supportPhoneInput")) {
-        $("supportPhoneInput").value = data.supportPhone;
+      if (res.ok) {
+        if (data.supportPhone && $("supportPhoneInput")) $("supportPhoneInput").value = data.supportPhone;
+        if (data.instagramHandle && $("instagramHandleInput")) $("instagramHandleInput").value = data.instagramHandle;
       }
     } catch {}
   }
 
   async function saveSettings() {
-    const input = $("supportPhoneInput");
+    const phoneInput = $("supportPhoneInput");
+    const instaInput = $("instagramHandleInput");
     const status = $("settingsStatus");
-    if (!input || !status) return;
+    if (!status) return;
     status.textContent = "Saving…";
     try {
-      const phone = input.value.trim();
+      const phone = phoneInput ? phoneInput.value.trim() : "";
+      const insta = instaInput ? instaInput.value.trim().replace(/^@/, "") : "";
       const res = await fetch("/api/admin/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-token": adminToken() },
-        body: JSON.stringify({ supportPhone: phone })
+        body: JSON.stringify({ supportPhone: phone, instagramHandle: insta })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not save settings.");
-      status.textContent = "✓ WhatsApp number saved! Customers can now chat with you directly.";
+      status.textContent = "✓ Channels saved! WhatsApp and Instagram Direct chat links updated.";
       setTimeout(() => { status.textContent = ""; }, 4000);
     } catch (err) {
       status.textContent = err.message;
@@ -88,15 +91,24 @@
           <div class="settings-title">
             <span>📱</span>
             <div>
-              <strong>WhatsApp Store Assistance</strong>
-              <p>The floating WhatsApp button on your store connects directly to this number.</p>
+              <strong>WhatsApp & Instagram Channels</strong>
+              <p>Direct chat links for buyers to reach you on WhatsApp and Instagram Direct.</p>
             </div>
           </div>
-          <div class="settings-inline-row">
-            <input id="supportPhoneInput" placeholder="Enter WhatsApp number (e.g. 919876543210)">
-            <button type="button" class="primary-button" id="saveSettingsBtn">Save WhatsApp number</button>
+          <div class="settings-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;">WhatsApp Number</label>
+              <input id="supportPhoneInput" placeholder="e.g. 919041915832" style="width:100%;margin:0;padding:9px 12px;">
+              <small class="field-help">With country code (91...)</small>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;">Instagram Username</label>
+              <input id="instagramHandleInput" placeholder="e.g. raycrafting or @raycrafting" style="width:100%;margin:0;padding:9px 12px;">
+              <small class="field-help">Direct DM chat opens on ig.me</small>
+            </div>
           </div>
-          <small id="settingsStatus" class="field-help"></small>
+          <button type="button" class="primary-button" id="saveSettingsBtn">Save Contact Channels <span>→</span></button>
+          <small id="settingsStatus" class="field-help" style="margin-top:8px;display:block;"></small>
         </div>
       </section>
     `);

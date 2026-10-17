@@ -181,6 +181,9 @@ ensureColumn("products", "dimensions", "TEXT");
 ensureColumn("products", "materials", "TEXT");
 ensureColumn("products", "care", "TEXT");
 ensureColumn("orders", "gift_message", "TEXT");
+ensureColumn("custom_orders", "quoted_price", "REAL");
+ensureColumn("custom_orders", "buyer_price_request", "INTEGER DEFAULT 0");
+ensureColumn("custom_orders", "budget_hint", "TEXT");
 
 function getSetting(key, fallback = "") {
   try {
@@ -280,7 +283,7 @@ function validPassword(password, salt, expected) {
 }
 function issueSession(customerId) {
   const token = crypto.randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 90).toISOString();
   db.prepare("INSERT INTO sessions (token,customer_id,expires_at) VALUES (?,?,?)").run(token, customerId, expires);
   return token;
 }
@@ -313,6 +316,10 @@ function customerFromRequest(req) {
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
   if (!token || token.length > 128) return null;
   const row = db.prepare(`SELECT c.id,c.name,c.email,c.phone,c.avatar_url AS avatarUrl FROM sessions s JOIN customers c ON c.id=s.customer_id WHERE s.token=? AND s.expires_at>?`).get(token, now());
+  if (row) {
+    const extended = new Date(Date.now() + 1000 * 60 * 60 * 24 * 90).toISOString();
+    try { db.prepare("UPDATE sessions SET expires_at=? WHERE token=?").run(extended, token); } catch {}
+  }
   return row ? { ...row, token } : null;
 }
 function normalizeIndianPhone(value) {
@@ -479,11 +486,18 @@ async function api(req, res, pathname, body, url) {
     const requestUrl = url || new URL(req.url, `http://${req.headers.host || "localhost"}`);
     if (req.method === "GET" && pathname === "/api/health") return json(res, 200, { ok: true, service: "raycrafting", time: now() });
     if (req.method === "POST" && pathname === "/api/newsletter") {
-      if (!allowRequest(req, "newsletter", 5)) return json(res, 429, { error: "Too many requests. Try again later." });
-      const email = String(body.email || "").trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return json(res, 400, { error: "Enter a valid email address." });
-      db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(email, now());
-      return json(res, 200, { ok: true, message: "You’re on the list. A little brightness is on its way." });
+      if (!allowRequest(req, "newsletter", 10)) return json(res, 429, { error: "Too many requests. Try again later." });
+      const contact = String(body.email || body.contact || "").trim();
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+      const isPhone = validIndianPhone(contact);
+      if (!isEmail && !isPhone) return json(res, 400, { error: "Enter a valid email address or 10-digit mobile number." });
+      try { db.prepare("INSERT OR IGNORE INTO newsletter_subscribers (email,created_at) VALUES (?,?)").run(contact.toLowerCase(), now()); } catch {}
+      return json(res, 200, {
+        ok: true,
+        couponCode: "WELCOME10",
+        discountPercent: 10,
+        message: "🎉 Welcome! Use code WELCOME10 at checkout for 10% off your handcrafted blooms."
+      });
     }
     if (req.method === "POST" && pathname === "/api/custom-orders") {
       if (!allowRequest(req, "custom-order", 6, 15 * 60 * 1000)) return json(res, 429, { error: "Too many requests. Please try again later." });
@@ -495,13 +509,15 @@ async function api(req, res, pathname, body, url) {
       const state = String(body.state || "").trim().slice(0, 100);
       const description = String(body.description || "").trim().slice(0, 3000);
       const referenceImage = String(body.referenceImage || "");
+      const askPrice = Boolean(body.askPrice);
+      const budgetHint = String(body.budgetHint || "").trim().slice(0, 50);
       if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || (phone && !validIndianPhone(phone))) return json(res, 400, { error: "Enter your name, a valid email, and a valid Indian phone number if provided." });
       if (!description && !referenceImage) return json(res, 400, { error: "Please add a short description or a reference image." });
       if (referenceImage && (!/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(referenceImage) || referenceImage.length > 900000)) return json(res, 400, { error: "That image is too large. Please choose a smaller JPG, PNG, or WebP image." });
       const customer = customerFromRequest(req);
       const orderId = id("custom");
-      db.prepare("INSERT INTO custom_orders (id,customer_id,name,email,phone,city,state,description,reference_image,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer ? customer.id : null, name, email, phone, city, state, description || "Reference image supplied.", referenceImage || null, "new", now(), now());
-      return json(res, 201, { ok: true, customOrderId: orderId, message: "Your custom idea is with the studio. We’ll review it and contact you within 1 hour." });
+      db.prepare("INSERT INTO custom_orders (id,customer_id,name,email,phone,city,state,description,reference_image,status,buyer_price_request,budget_hint,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer ? customer.id : null, name, email, phone, city, state, description || "Reference image supplied.", referenceImage || null, "new", askPrice ? 1 : 0, budgetHint || null, now(), now());
+      return json(res, 201, { ok: true, customOrderId: orderId, message: askPrice ? "Your price quote request is with the studio! Bhuvik will review and send you a custom price quote shortly." : "Your custom idea is with the studio. We’ll review it and contact you within 1 hour." });
     }
     if (req.method === "POST" && pathname === "/api/note-requests") {
       if (!allowRequest(req, "note-request", 8, 15 * 60 * 1000)) return json(res, 429, { error: "Too many requests. Please try again later." });
@@ -519,6 +535,9 @@ async function api(req, res, pathname, body, url) {
     if (req.method === "GET" && pathname === "/api/config") {
       const supportPhone = getSetting("support_phone", SUPPORT_PHONE || "");
       const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co");
+      const rawInsta = getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || "");
+      const cleanInsta = rawInsta.replace(/^@/, "").trim();
+      const instagramUrl = cleanInsta ? (cleanInsta.startsWith("http") ? cleanInsta : `https://ig.me/m/${cleanInsta}`) : "";
       return json(res, 200, {
         currency: "INR",
         razorpayEnabled: Boolean(RAZORPAY_KEY_ID),
@@ -526,6 +545,8 @@ async function api(req, res, pathname, body, url) {
         razorpayKeyId: RAZORPAY_KEY_ID || null,
         supportEmail,
         supportPhone,
+        instagramHandle: cleanInsta ? `@${cleanInsta}` : "",
+        instagramUrl,
         googleEnabled: Boolean(GOOGLE_CLIENT_ID),
         googleClientId: GOOGLE_CLIENT_ID || null,
         selfPickupEnabled: true,
@@ -625,7 +646,26 @@ async function api(req, res, pathname, body, url) {
     if (req.method === "POST" && pathname === "/api/auth/logout") { const customer = customerFromRequest(req); if (customer) db.prepare("DELETE FROM sessions WHERE token=?").run(customer.token); return json(res, 200, { ok: true }); }
     if (req.method === "GET" && pathname === "/api/orders") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in to view your orders." });
-      return json(res, 200, { orders: customerOrderRows(customer.id) });
+      const orders = customerOrderRows(customer.id);
+      const customOrders = db.prepare("SELECT * FROM custom_orders WHERE customer_id=? OR (phone IS NOT NULL AND phone != '' AND phone=?) OR (email IS NOT NULL AND email != '' AND email=?) ORDER BY created_at DESC").all(customer.id, customer.phone || "", customer.email || "");
+      return json(res, 200, { orders, customOrders });
+    }
+    if (req.method === "POST" && pathname === "/api/custom-orders/action") {
+      const orderId = String(body.orderId || "");
+      const action = String(body.action || "");
+      const reason = String(body.reason || "").trim().slice(0, 500);
+      const order = db.prepare("SELECT * FROM custom_orders WHERE id=?").get(orderId);
+      if (!order) return json(res, 404, { error: "Custom request not found." });
+      if (action === "accept") {
+        db.prepare("UPDATE custom_orders SET status='accepted',updated_at=? WHERE id=?").run(now(), orderId);
+        return json(res, 200, { ok: true, orderId, status: "accepted", message: "Price quote accepted! Bhuvik will begin handcrafting your piece." });
+      } else if (action === "decline" || action === "reject") {
+        const note = reason ? `Buyer declined quote: ${reason}` : "Buyer declined quote.";
+        db.prepare("UPDATE custom_orders SET status='declined',seller_note=COALESCE(seller_note || ' · ', '') || ?,updated_at=? WHERE id=?").run(note, now(), orderId);
+        return json(res, 200, { ok: true, orderId, status: "declined", message: "Quote declined." });
+      } else {
+        return json(res, 400, { error: "Action must be accept or decline." });
+      }
     }
     if (req.method === "POST" && pathname === "/api/coupons/validate") {
       const subtotal = Number(body.subtotal || 0); const result = calculateCoupon(body.code, subtotal); return json(res, 200, result);
@@ -807,12 +847,13 @@ async function api(req, res, pathname, body, url) {
       const orderId = String(body.orderId || "");
       const status = String(body.status || "");
       const sellerNote = String(body.sellerNote || "").trim().slice(0, 1000);
-      const statuses = ["new", "reviewing", "contacted", "accepted", "in_progress", "ready", "completed", "declined"];
+      const quotedPrice = body.quotedPrice !== undefined && body.quotedPrice !== "" ? Math.max(0, Number(body.quotedPrice) || 0) : null;
+      const statuses = ["new", "reviewing", "price_quoted", "contacted", "accepted", "in_progress", "ready", "completed", "declined"];
       const order = db.prepare("SELECT * FROM custom_orders WHERE id=?").get(orderId);
       if (!order) return json(res, 404, { error: "Custom order not found." });
       if (!statuses.includes(status)) return json(res, 400, { error: "Unsupported custom order status." });
-      db.prepare("UPDATE custom_orders SET status=?,seller_note=?,updated_at=? WHERE id=?").run(status, sellerNote || null, now(), orderId);
-      return json(res, 200, { ok: true, customOrderId: orderId, status, sellerNote: sellerNote || null });
+      db.prepare("UPDATE custom_orders SET status=?,quoted_price=COALESCE(?, quoted_price),seller_note=?,updated_at=? WHERE id=?").run(status, quotedPrice, sellerNote || null, now(), orderId);
+      return json(res, 200, { ok: true, customOrderId: orderId, status, quotedPrice, sellerNote: sellerNote || null });
     }
     if (req.method === "GET" && pathname === "/api/admin/note-requests") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
@@ -842,17 +883,20 @@ async function api(req, res, pathname, body, url) {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       return json(res, 200, {
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
-        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co")
+        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
+        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || "")
       });
     }
     if (req.method === "POST" && pathname === "/api/admin/settings") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       if (typeof body.supportPhone === "string") setSetting("support_phone", body.supportPhone.trim());
       if (typeof body.supportEmail === "string") setSetting("support_email", body.supportEmail.trim());
+      if (typeof body.instagramHandle === "string") setSetting("instagram_handle", body.instagramHandle.trim().replace(/^@/, ""));
       return json(res, 200, {
         ok: true,
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
-        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co")
+        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
+        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || "")
       });
     }
     if (req.method === "POST" && pathname === "/api/admin/orders/fulfillment") {

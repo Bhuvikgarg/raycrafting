@@ -101,6 +101,14 @@ function renderCart() {
   document.querySelector("#cartSubtotal").textContent = money(subtotal);
 }
 
+function clearCart() {
+  cart = [];
+  try { localStorage.removeItem("raycrafting-cart"); } catch {}
+  renderCart();
+}
+window.raycraftingClearCart = clearCart;
+window.addEventListener("raycrafting:cart-cleared", clearCart);
+
 function setDrawer(open) {
   cartDrawer.classList.toggle("open", open);
   cartDrawer.setAttribute("aria-hidden", String(!open));

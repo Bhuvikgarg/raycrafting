@@ -176,6 +176,14 @@ function renderCart() {
   }
 }
 
+function clearCart() {
+  cart = [];
+  try { localStorage.removeItem("raycrafting-cart"); } catch {}
+  renderCart();
+}
+window.raycraftingClearCart = clearCart;
+window.addEventListener("raycrafting:cart-cleared", clearCart);
+
 async function loadPublicProducts() {
   try {
     const response = await fetch("/api/products", { cache: "no-store" });
@@ -361,23 +369,69 @@ fetch("/api/config").then((r) => r.json()).then((cfg) => {
     wa.target = "_blank";
     wa.rel = "noopener noreferrer";
   }
+  const insta = document.querySelector("#instagramFloat");
+  if (insta && cfg.instagramUrl) {
+    insta.href = cfg.instagramUrl;
+    insta.hidden = false;
+  }
+  const footerInsta = document.querySelector("#footerInstagramLink");
+  if (footerInsta && cfg.instagramUrl) {
+    footerInsta.href = cfg.instagramUrl;
+    footerInsta.hidden = false;
+  }
+  const vipInsta = document.querySelector("#vipInstagramDm");
+  if (vipInsta && cfg.instagramUrl) {
+    vipInsta.href = cfg.instagramUrl;
+    vipInsta.hidden = false;
+  }
+  const vipWa = document.querySelector("#vipWhatsAppBroadcast");
+  if (vipWa && cfg.supportPhone) {
+    const cleanPhone = String(cfg.supportPhone).replace(/\D/g, "");
+    vipWa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi Bhuvik! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
+  }
 }).catch(() => {});
 
-document.querySelector("#newsletterForm").addEventListener("submit", async (event) => {
+document.querySelector("#newsletterForm")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.target; const button = form.querySelector("button"); const message = document.querySelector("#newsletterMessage");
-  button.disabled = true; message.textContent = "Saving your email…";
+  button.disabled = true; message.textContent = "Unlocking your 10% coupon…";
   try {
-    const response = await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: document.querySelector("#newsletterEmail").value.trim() }) });
+    const contactVal = document.querySelector("#newsletterEmail").value.trim();
+    const response = await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contact: contactVal, email: contactVal }) });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "Could not join the list.");
-    message.textContent = data.message || "You’re on the list. A little brightness is on its way."; form.reset();
-  } catch (error) { message.textContent = error.message; } finally { button.disabled = false; }
+    if (!response.ok) throw new Error(data.error || "Could not claim offer.");
+    form.hidden = true;
+    const card = document.querySelector("#vipUnlockedCard");
+    if (card) {
+      card.hidden = false;
+      if (data.couponCode && document.querySelector("#vipCodeText")) {
+        document.querySelector("#vipCodeText").textContent = data.couponCode;
+      }
+    }
+    showToast("🎉 10% discount unlocked! Code: " + (data.couponCode || "WELCOME10"));
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.querySelector("#vipCopyBtn")?.addEventListener("click", () => {
+  const code = document.querySelector("#vipCodeText")?.textContent?.trim() || "WELCOME10";
+  navigator.clipboard?.writeText(code).then(() => {
+    showToast("Copied " + code + " to clipboard!");
+    const btn = document.querySelector("#vipCopyBtn");
+    if (btn) { btn.textContent = "Copied! ✓"; setTimeout(() => btn.textContent = "Copy Code 📋", 3000); }
+  });
 });
 
 document.querySelectorAll("[data-scroll]").forEach((button) => button.addEventListener("click", () => document.querySelector(`#${button.dataset.scroll}`).scrollIntoView({ behavior: "smooth" })));
 window.addEventListener("storage", (event) => {
   if (event.key === window.RAYCRAFTING_STORAGE_KEY) window.location.reload();
+  if (event.key === "raycrafting-cart") {
+    cart = JSON.parse(localStorage.getItem("raycrafting-cart") || "[]");
+    renderCart();
+  }
 });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeModal(); setDrawer(false); } });
 

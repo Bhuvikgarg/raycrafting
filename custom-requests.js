@@ -8,6 +8,32 @@
   var submitJson = async function (url, payload) { var response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); var data = await response.json().catch(function () { return {}; }); if (!response.ok) throw new Error(data.error || "Could not send this request."); return data; };
   var customForm = byId("customOrderForm"); var customImage = byId("customImage"); var customImageData = ""; var customStatus = byId("customOrderStatus");
   if (customImage) customImage.addEventListener("change", function () { var file = customImage.files[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { customStatus.textContent = "Please choose an image smaller than 5 MB."; customImage.value = ""; return; } customStatus.textContent = "Preparing your image…"; resizeImage(file).then(function (data) { customImageData = data; byId("customPreviewImage").src = data; byId("customImagePreview").hidden = false; customStatus.textContent = "Image ready to send."; }).catch(function () { customStatus.textContent = "Could not read that image. Please try another one."; }); });
-  byId("removeCustomImage").addEventListener("click", function () { customImageData = ""; customImage.value = ""; byId("customImagePreview").hidden = true; customStatus.textContent = ""; });
-  if (customForm) customForm.addEventListener("submit", async function (event) { event.preventDefault(); var button = customForm.querySelector("button[type=submit]"); button.disabled = true; customStatus.textContent = "Sending your idea…"; try { var data = await submitJson("/api/custom-orders", { name: byId("customName").value.trim(), email: byId("customEmail").value.trim(), phone: byId("customPhone").value.trim(), city: byId("customCity").value.trim(), state: byId("customState").value, description: byId("customDescription").value.trim(), referenceImage: customImageData }); customStatus.textContent = data.message || "Your custom idea has been sent."; customForm.reset(); customImageData = ""; byId("customImagePreview").hidden = true; } catch (error) { customStatus.textContent = error.message; } finally { button.disabled = false; } });
+  if (byId("removeCustomImage")) byId("removeCustomImage").addEventListener("click", function () { customImageData = ""; if (customImage) customImage.value = ""; byId("customImagePreview").hidden = true; customStatus.textContent = ""; });
+  if (customForm) customForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    var button = customForm.querySelector("button[type=submit]");
+    button.disabled = true;
+    customStatus.textContent = "Sending your idea…";
+    try {
+      var data = await submitJson("/api/custom-orders", {
+        name: byId("customName").value.trim(),
+        email: byId("customEmail").value.trim(),
+        phone: byId("customPhone").value.trim(),
+        city: byId("customCity").value.trim(),
+        state: byId("customState").value,
+        description: byId("customDescription").value.trim(),
+        referenceImage: customImageData,
+        askPrice: byId("customAskPrice") ? byId("customAskPrice").checked : true,
+        budgetHint: byId("customBudget") ? byId("customBudget").value.trim() : ""
+      });
+      customStatus.textContent = data.message || "Your custom idea has been sent.";
+      customForm.reset();
+      customImageData = "";
+      byId("customImagePreview").hidden = true;
+    } catch (error) {
+      customStatus.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
 }());
