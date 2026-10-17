@@ -154,6 +154,10 @@ db.exec(`
     raw_json TEXT,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
 `);
 
 function ensureColumn(table, column, definition) {
@@ -177,6 +181,18 @@ ensureColumn("products", "dimensions", "TEXT");
 ensureColumn("products", "materials", "TEXT");
 ensureColumn("products", "care", "TEXT");
 ensureColumn("orders", "gift_message", "TEXT");
+
+function getSetting(key, fallback = "") {
+  try {
+    const row = db.prepare("SELECT value FROM settings WHERE key=?").get(key);
+    return row && row.value ? row.value : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function setSetting(key, value) {
+  db.prepare("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(key, String(value));
+}
 
 const seedPath = path.join(ROOT, "products-seed.json");
 if (fs.existsSync(seedPath)) {
@@ -407,14 +423,17 @@ function calculateCoupon(code, subtotal) {
   const discount = coupon.kind === "percent" ? subtotal * coupon.amount / 100 : coupon.amount;
   return { code: coupon.code, discount: Math.min(subtotal, Math.round(discount * 100) / 100), description: coupon.kind === "percent" ? `${coupon.amount}% off` : `₹${coupon.amount} off` };
 }
-function orderRows() {
-  const orders = db.prepare(`SELECT o.*, c.name customer_name, c.email customer_email, c.phone customer_phone FROM orders o JOIN customers c ON c.id=o.customer_id ORDER BY o.created_at DESC`).all();
+function orderRows(filter = "confirmed") {
+  let where = "WHERE (o.status NOT IN ('pending_payment', 'failed_payment') OR o.payment_method = 'cod')";
+  if (filter === "unpaid") where = "WHERE o.status IN ('pending_payment', 'failed_payment') AND (o.payment_method IS NULL OR o.payment_method != 'cod')";
+  else if (filter === "all") where = "";
+  const orders = db.prepare(`SELECT o.*, c.name customer_name, c.email customer_email, c.phone customer_phone FROM orders o JOIN customers c ON c.id=o.customer_id ${where} ORDER BY o.created_at DESC`).all();
   const items = db.prepare("SELECT * FROM order_items WHERE order_id=?");
   const latestPayment = db.prepare("SELECT * FROM payments WHERE order_id=? ORDER BY created_at DESC, id DESC LIMIT 1");
   return orders.map((order) => ({ ...order, address: JSON.parse(order.address_json), items: items.all(order.id), latest_payment: latestPayment.get(order.id) || null }));
 }
 function customerOrderRows(customerId) {
-  return orderRows().filter((order) => order.customer_id === customerId).map((order) => {
+  return orderRows("all").filter((order) => order.customer_id === customerId).map((order) => {
     const { customer_name, customer_email, customer_phone, ...safeOrder } = order;
     return safeOrder;
   });
@@ -496,7 +515,22 @@ async function api(req, res, pathname, body) {
       db.prepare("INSERT INTO note_requests (id,name,email,message,language,city,state,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)").run(noteId, name, email, message, language, city, state, "new", now(), now());
       return json(res, 201, { ok: true, noteId, message: "Your note has been sent to the studio. Thank you for sharing something heartfelt." });
     }
-    if (req.method === "GET" && pathname === "/api/config") return json(res, 200, { currency: "INR", razorpayEnabled: Boolean(RAZORPAY_KEY_ID), phoneOtpEnabled: PHONE_OTP_ENABLED, razorpayKeyId: RAZORPAY_KEY_ID || null, supportEmail: SUPPORT_EMAIL, supportPhone: SUPPORT_PHONE, googleEnabled: Boolean(GOOGLE_CLIENT_ID), googleClientId: GOOGLE_CLIENT_ID || null, selfPickupEnabled: true });
+    if (req.method === "GET" && pathname === "/api/config") {
+      const supportPhone = getSetting("support_phone", SUPPORT_PHONE || "");
+      const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co");
+      return json(res, 200, {
+        currency: "INR",
+        razorpayEnabled: Boolean(RAZORPAY_KEY_ID),
+        phoneOtpEnabled: PHONE_OTP_ENABLED,
+        razorpayKeyId: RAZORPAY_KEY_ID || null,
+        supportEmail,
+        supportPhone,
+        googleEnabled: Boolean(GOOGLE_CLIENT_ID),
+        googleClientId: GOOGLE_CLIENT_ID || null,
+        selfPickupEnabled: true,
+        codEnabled: true
+      });
+    }
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
@@ -617,6 +651,7 @@ async function api(req, res, pathname, body) {
       const items = Array.isArray(body.items) ? body.items : [];
       const requestedFulfillment = String(body.fulfillmentMethod || "manual");
       const fulfillmentMethod = requestedFulfillment === "self_pickup" ? "self_pickup" : "manual";
+      const paymentMethod = body.paymentMethod === "cod" ? "cod" : "razorpay";
       let address;
       try { address = cleanAddress(body.address, fulfillmentMethod); } catch (error) { return json(res, 400, { error: error.message }); }
 
@@ -624,8 +659,21 @@ async function api(req, res, pathname, body) {
       const getProduct = db.prepare("SELECT * FROM products WHERE id=? AND active=1"); const verified = []; let subtotal = 0;
       for (const item of items) { const product = getProduct.get(String(item.id)); const quantity = Math.max(1, Math.min(99, Number(item.quantity) || 1)); if (!product) return json(res, 400, { error: "One of the products is no longer available." }); const lineTotal = Math.round(product.price * quantity * 100) / 100; subtotal += lineTotal; verified.push({ product, quantity, lineTotal }); }
       const coupon = calculateCoupon(body.couponCode, subtotal); const shipping = fulfillmentMethod === "self_pickup" ? 0 : (subtotal - coupon.discount >= 499 ? 0 : 60); const total = Math.round((subtotal - coupon.discount + shipping) * 100) / 100; const orderId = id("ord"); const timestamp = now(); const giftMessage = String(body.giftMessage || "").trim().slice(0, 500);
-      db.exec("BEGIN"); try { db.prepare("INSERT INTO orders (id,customer_id,status,subtotal,discount,shipping,total,currency,coupon_code,address_json,fulfillment_method,gift_message,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer.id, "pending_payment", subtotal, coupon.discount, shipping, total, "INR", coupon.code || null, JSON.stringify(address), fulfillmentMethod, giftMessage || null, timestamp, timestamp); const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total) VALUES (?,?,?,?,?,?)"); for (const item of verified) insert.run(orderId, item.product.id, item.product.name, item.product.price, item.quantity, item.lineTotal); db.exec("COMMIT"); } catch (error) { db.exec("ROLLBACK"); throw error; }
-      return json(res, 201, { orderId, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: "pending_payment", fulfillmentMethod });
+
+      const initialStatus = paymentMethod === "cod" ? "processing" : "pending_payment";
+
+      db.exec("BEGIN"); try {
+        db.prepare("INSERT INTO orders (id,customer_id,status,subtotal,discount,shipping,total,currency,coupon_code,address_json,fulfillment_method,gift_message,payment_method,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer.id, initialStatus, subtotal, coupon.discount, shipping, total, "INR", coupon.code || null, JSON.stringify(address), fulfillmentMethod, giftMessage || null, paymentMethod, timestamp, timestamp);
+        const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total) VALUES (?,?,?,?,?,?)");
+        for (const item of verified) insert.run(orderId, item.product.id, item.product.name, item.product.price, item.quantity, item.lineTotal);
+        db.exec("COMMIT");
+      } catch (error) { db.exec("ROLLBACK"); throw error; }
+
+      if (paymentMethod === "cod") {
+        void notifyCustomerOrderStatus({ id: orderId, total, items: verified, customer_name: customer.name, customer_email: customer.email }, "processing", "Pay on Delivery confirmed");
+      }
+
+      return json(res, 201, { orderId, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: initialStatus, paymentMethod, fulfillmentMethod });
     }
     if (req.method === "POST" && pathname === "/api/orders/action") {
       const customer = customerFromRequest(req); if (!customer) return json(res, 401, { error: "Sign in to manage your orders." });
@@ -762,7 +810,33 @@ async function api(req, res, pathname, body) {
       db.prepare("UPDATE note_requests SET status=?,updated_at=? WHERE id=?").run(status, now(), noteId);
       return json(res, 200, { ok: true, noteId, status });
     }
-    if (req.method === "GET" && pathname === "/api/admin/orders") { if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." }); return json(res, 200, { orders: orderRows() }); }
+    if (req.method === "GET" && pathname === "/api/admin/orders") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const view = url.searchParams.get("view") || "confirmed";
+      const confirmedCount = db.prepare("SELECT COUNT(*) as count FROM orders WHERE (status NOT IN ('pending_payment', 'failed_payment') OR payment_method = 'cod')").get().count;
+      const unpaidCount = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status IN ('pending_payment', 'failed_payment') AND (payment_method IS NULL OR payment_method != 'cod')").get().count;
+      return json(res, 200, {
+        orders: orderRows(view),
+        counts: { confirmed: confirmedCount, unpaid: unpaidCount, all: confirmedCount + unpaidCount }
+      });
+    }
+    if (req.method === "GET" && pathname === "/api/admin/settings") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      return json(res, 200, {
+        supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
+        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co")
+      });
+    }
+    if (req.method === "POST" && pathname === "/api/admin/settings") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      if (typeof body.supportPhone === "string") setSetting("support_phone", body.supportPhone.trim());
+      if (typeof body.supportEmail === "string") setSetting("support_email", body.supportEmail.trim());
+      return json(res, 200, {
+        ok: true,
+        supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
+        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co")
+      });
+    }
     if (req.method === "POST" && pathname === "/api/admin/orders/fulfillment") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const orderId = String(body.orderId || ""); const fulfillmentMethod = String(body.fulfillmentMethod || "");

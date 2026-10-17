@@ -705,13 +705,13 @@ body { background: radial-gradient(circle at 8% 5%, rgba(255, 205, 224, .9) 0, t
 .floating-daisy {
   position: absolute;
   left: var(--left, 50%);
-  top: -45px;
-  width: var(--size, 24px);
-  height: var(--size, 24px);
+  top: -65px;
+  width: var(--size, 42px);
+  height: var(--size, 42px);
   will-change: transform;
-  animation: floatDaisy var(--duration, 18s) linear infinite;
+  animation: floatDaisy var(--duration, 20s) linear infinite;
   animation-delay: var(--delay, 0s);
-  filter: drop-shadow(0 3px 6px rgba(231, 110, 89, 0.16));
+  filter: drop-shadow(0 4px 10px rgba(231, 110, 89, 0.22));
 }
 .floating-daisy svg {
   width: 100%;

@@ -31,48 +31,150 @@
     const map = new Map(products().map((product) => [product.id, product]));
     document.querySelectorAll(".catalog-item").forEach((item) => { const edit = item.querySelector("[data-edit]"); const product = edit && map.get(edit.dataset.edit); if (!product) return; const old = Number(product.originalPrice) > Number(product.price) ? `<del>${money(product.originalPrice)}</del> ` : ""; const price = item.querySelector(".catalog-price"); if (price) price.innerHTML = `${old}${money(product.price)}`; });
   }
+  let currentOrdersView = "confirmed";
+
+  async function loadSettings() {
+    if (!adminToken()) return;
+    try {
+      const res = await fetch("/api/admin/settings", { headers: { "x-admin-token": adminToken() } });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.supportPhone && $("supportPhoneInput")) {
+        $("supportPhoneInput").value = data.supportPhone;
+      }
+    } catch {}
+  }
+
+  async function saveSettings() {
+    const input = $("supportPhoneInput");
+    const status = $("settingsStatus");
+    if (!input || !status) return;
+    status.textContent = "Saving…";
+    try {
+      const phone = input.value.trim();
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-token": adminToken() },
+        body: JSON.stringify({ supportPhone: phone })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not save settings.");
+      status.textContent = "✓ WhatsApp number saved! Customers can now chat with you directly.";
+      setTimeout(() => { status.textContent = ""; }, 4000);
+    } catch (err) {
+      status.textContent = err.message;
+    }
+  }
+
   function addOrdersPanel() {
     if ($("ordersPanel")) return;
-    document.querySelector(".studio-grid").insertAdjacentHTML("afterend", '<section class="catalog-panel orders-panel" id="ordersPanel"><div class="panel-heading"><div><p class="eyebrow">Customer orders</p><h2>Orders</h2></div><button class="icon-text-button" id="refreshOrders" type="button">Refresh ↻</button></div><div id="ordersList"><p class="field-help">Loading orders…</p></div></section>');
-    $("refreshOrders").addEventListener("click", loadOrders); loadOrders();
+    document.querySelector(".studio-grid").insertAdjacentHTML("afterend", `
+      <section class="catalog-panel orders-panel" id="ordersPanel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Customer orders</p>
+            <h2>Orders</h2>
+          </div>
+          <button class="icon-text-button" id="refreshOrders" type="button">Refresh ↻</button>
+        </div>
+
+        <div class="orders-tab-strip">
+          <button type="button" class="order-filter-tab active" data-orders-view="confirmed">✓ Confirmed orders <span id="confirmedCountPill"></span></button>
+          <button type="button" class="order-filter-tab" data-orders-view="unpaid">⏳ Unpaid / Incomplete <span id="unpaidCountPill"></span></button>
+        </div>
+
+        <div id="ordersList"><p class="field-help">Loading orders…</p></div>
+
+        <div class="studio-settings-box">
+          <div class="settings-title">
+            <span>📱</span>
+            <div>
+              <strong>WhatsApp Store Assistance</strong>
+              <p>The floating WhatsApp button on your store connects directly to this number.</p>
+            </div>
+          </div>
+          <div class="settings-inline-row">
+            <input id="supportPhoneInput" placeholder="Enter WhatsApp number (e.g. 919876543210)">
+            <button type="button" class="primary-button" id="saveSettingsBtn">Save WhatsApp number</button>
+          </div>
+          <small id="settingsStatus" class="field-help"></small>
+        </div>
+      </section>
+    `);
+
+    $("refreshOrders").addEventListener("click", () => loadOrders(currentOrdersView));
+    $("ordersPanel").addEventListener("click", (e) => {
+      const tab = e.target.closest("[data-orders-view]");
+      if (tab) {
+        currentOrdersView = tab.dataset.ordersView;
+        document.querySelectorAll(".order-filter-tab").forEach((t) => t.classList.toggle("active", t === tab));
+        loadOrders(currentOrdersView);
+      }
+      if (e.target.id === "saveSettingsBtn") {
+        saveSettings();
+      }
+    });
+
+    loadOrders(currentOrdersView);
+    loadSettings();
   }
+
   function fulfillmentLabel(order) {
     if (order.fulfillment_method === "self_pickup") return "Self pickup";
     if (order.fulfillment_method === "manual") return "Manual delivery";
     return "Manual delivery";
   }
+
   function orderAddress(order) {
     if (order.fulfillment_method === "self_pickup") return "Self pickup — collection instructions will be shared after acceptance.";
     const address = order.address || {};
     return [address.name, address.line1, address.line2, address.city, address.state, address.postalCode].filter(Boolean).join(", ");
   }
-  async function loadOrders() {
+
+  async function loadOrders(view = currentOrdersView) {
     const target = $("ordersList");
     if (!adminToken()) { target.innerHTML = '<p class="field-help">Unlock Seller Studio to view customer orders.</p>'; return; }
     try {
-      const response = await fetch("/api/admin/orders", { headers: { "x-admin-token": adminToken() }, cache: "no-store" });
+      const response = await fetch(`/api/admin/orders?view=${encodeURIComponent(view)}`, { headers: { "x-admin-token": adminToken() }, cache: "no-store" });
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) { expireSellerSession(); throw new Error("Seller session expired. Enter your studio PIN again."); }
       if (!response.ok) throw new Error(data.error || "Could not load orders.");
+
+      if (data.counts) {
+        if ($("confirmedCountPill")) $("confirmedCountPill").textContent = `(${data.counts.confirmed || 0})`;
+        if ($("unpaidCountPill")) $("unpaidCountPill").textContent = `(${data.counts.unpaid || 0})`;
+      }
+
       target.innerHTML = data.orders.length ? data.orders.map((order) => {
-        const canProcess = order.status === "paid";
+        const isCod = order.payment_method === "cod";
+        const canProcess = order.status === "paid" || (isCod && order.status === "processing");
         const canShip = order.status === "processing";
         const canOutForDelivery = order.status === "shipped";
         const canDeliver = order.status === "out_for_delivery";
         const canCancel = order.status === "cancel_requested";
         const canReturn = order.status === "return_requested";
-        const failure = order.failure_reason ? '<p class="order-alert failed"><strong>Payment failure:</strong> ' + esc(order.failure_reason) + '</p>' : "";
+
+        let paymentPill = `<span class="payment-badge-online">✓ Paid Online</span>`;
+        if (isCod) paymentPill = `<span class="payment-badge-cod">📦 Pay on Delivery (COD)</span>`;
+        else if (order.status === "pending_payment") paymentPill = `<span class="payment-badge-unpaid">⏳ Unpaid Draft</span>`;
+        else if (order.status === "failed_payment") paymentPill = `<span class="payment-badge-failed">❌ Payment Failed</span>`;
+
+        const failure = order.failure_reason ? '<p class="order-alert failed"><strong>Payment issue:</strong> ' + esc(order.failure_reason) + '</p>' : "";
         const gift = order.gift_message ? '<p class="order-alert" style="background:#fff2f6;border-color:var(--coral);color:#8a3b53;"><strong>💌 Gift note:</strong> "' + esc(order.gift_message) + '"</p>' : "";
         const request = order.customer_request_reason ? '<p class="order-alert"><strong>Customer request:</strong> ' + esc(order.customer_request_reason) + '</p>' : "";
         const decision = order.decision_reason ? '<p class="order-alert declined"><strong>Seller reason:</strong> ' + esc(order.decision_reason) + '</p>' : "";
-        const shippingAwb = order["ship"+"rocket_awb"]; const shippingCourier = order["ship"+"rocket_courier"]; const shipping = shippingAwb ? '<p class="shipping-meta"><strong>Tracking reference:</strong> ' + esc(shippingAwb) + (shippingCourier ? " · " + esc(shippingCourier) : "") + '</p>' : "";
-        const fulfillment = '<div class="fulfillment-meta"><strong>' + esc(fulfillmentLabel(order)) + '</strong>' + (order.fulfillment_method !== "self_pickup" ? " · " + esc(order.shipping_status || "Not booked") : "") + '</div>';
-        const fulfillmentActions = "";
-        const actions = (canProcess ? '<button type="button" data-order-status="processing" data-order-id="' + esc(order.id) + '">Accept order</button>' : "") + (canShip ? '<button type="button" data-order-status="shipped" data-order-id="' + esc(order.id) + '">Mark shipped</button>' : "") + (canOutForDelivery ? '<button type="button" data-order-status="out_for_delivery" data-order-id="' + esc(order.id) + '">Out for delivery</button>' : "") + (canDeliver ? '<button type="button" data-order-status="delivered" data-order-id="' + esc(order.id) + '">Mark delivered</button>' : "") + (canCancel ? '<button type="button" data-order-status="cancelled" data-order-id="' + esc(order.id) + '">Approve cancellation</button>' : "") + (canReturn ? '<button type="button" data-order-status="returned" data-order-id="' + esc(order.id) + '">Approve return</button>' : "") + (!["declined", "cancelled", "returned", "delivered"].includes(order.status) ? '<button type="button" class="decline-order" data-order-status="declined" data-order-id="' + esc(order.id) + '">Decline order</button>' : "");
-        return '<article class="order-card"><div class="order-card-head"><div><strong>' + esc(order.id) + '</strong><p>' + new Date(order.created_at).toLocaleString("en-IN") + '</p></div><span class="order-status status-' + esc(order.status) + '">' + esc(order.status.replaceAll("_", " ")) + '</span><strong>' + money(order.total) + '</strong></div><p><strong>' + esc(order.customer_name) + '</strong> · ' + esc(order.customer_email) + (order.customer_phone ? " · " + esc(order.customer_phone) : "") + '</p>' + fulfillment + '<p>' + esc(orderAddress(order)) + '</p><small>' + order.items.map((item) => item.quantity + " × " + esc(item.name)).join(" · ") + (order.coupon_code ? " · Coupon: " + esc(order.coupon_code) : "") + '</small>' + shipping + failure + gift + request + decision + '<div class="order-actions">' + fulfillmentActions + actions + '</div></article>';
-      }).join("") : '<p class="field-help">No orders yet. Customer orders will appear here after checkout.</p>';
+        const shippingAwb = order["shiprocket_awb"]; const shippingCourier = order["shiprocket_courier"]; const shipping = shippingAwb ? '<p class="shipping-meta"><strong>Tracking reference:</strong> ' + esc(shippingAwb) + (shippingCourier ? " · " + esc(shippingCourier) : "") + '</p>' : "";
+        const fulfillment = '<div class="fulfillment-meta"><strong>' + esc(fulfillmentLabel(order)) + '</strong>' + (order.fulfillment_method !== "self_pickup" ? " · " + esc(order.shipping_status || "Standard dispatch") : "") + '</div>';
+
+        const cleanPhone = String(order.customer_phone || order.address?.phone || "").replace(/\D/g, "");
+        const waLink = cleanPhone ? `<a class="whatsapp-customer-btn" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent(`Hi ${order.customer_name || ""}, this is Raycrafting regarding your order ${order.id}!`)}">💬 Chat on WhatsApp</a>` : "";
+
+        const actions = (order.status === "processing" ? '<button type="button" data-order-status="shipped" data-order-id="' + esc(order.id) + '">Mark shipped</button>' : "") + (canProcess && order.status === "paid" ? '<button type="button" data-order-status="processing" data-order-id="' + esc(order.id) + '">Accept &amp; Craft</button>' : "") + (canOutForDelivery ? '<button type="button" data-order-status="out_for_delivery" data-order-id="' + esc(order.id) + '">Out for delivery</button>' : "") + (canDeliver ? '<button type="button" data-order-status="delivered" data-order-id="' + esc(order.id) + '">Mark delivered</button>' : "") + (canCancel ? '<button type="button" data-order-status="cancelled" data-order-id="' + esc(order.id) + '">Approve cancellation</button>' : "") + (canReturn ? '<button type="button" data-order-status="returned" data-order-id="' + esc(order.id) + '">Approve return</button>' : "") + (!["declined", "cancelled", "returned", "delivered"].includes(order.status) ? '<button type="button" class="decline-order" data-order-status="declined" data-order-id="' + esc(order.id) + '">Decline order</button>' : "");
+
+        return '<article class="order-card"><div class="order-card-head"><div><strong>' + esc(order.id) + '</strong><p>' + new Date(order.created_at).toLocaleString("en-IN") + '</p></div><div class="order-badges">' + paymentPill + '<span class="order-status status-' + esc(order.status) + '">' + esc(order.status.replaceAll("_", " ")) + '</span></div><strong>' + money(order.total) + '</strong></div><p class="customer-row"><strong>' + esc(order.customer_name) + '</strong> · ' + esc(order.customer_email) + (order.customer_phone ? " · " + esc(order.customer_phone) : "") + ' ' + waLink + '</p>' + fulfillment + '<p>' + esc(orderAddress(order)) + '</p><small>' + order.items.map((item) => item.quantity + " × " + esc(item.name)).join(" · ") + (order.coupon_code ? " · Coupon: " + esc(order.coupon_code) : "") + '</small>' + shipping + failure + gift + request + decision + '<div class="order-actions">' + actions + '</div></article>';
+      }).join("") : (view === "confirmed" ? '<p class="field-help">No confirmed orders yet. When customers complete payment or choose Pay on Delivery, orders will appear here!</p>' : '<p class="field-help">No incomplete or unpaid checkout sessions.</p>');
     } catch (error) { target.innerHTML = '<p class="field-help">' + esc(error.message) + '</p>'; }
   }
+
   async function updateFulfillment(orderId, fulfillmentMethod) {
     const response = await fetch("/api/admin/orders/fulfillment", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-token": adminToken() }, body: JSON.stringify({ orderId, fulfillmentMethod }) });
     const data = await response.json().catch(() => ({}));
@@ -80,6 +182,7 @@
     if (!response.ok) { window.alert(data.error || "Could not update the delivery method."); return; }
     loadOrders();
   }
+
   async function updateOrderStatus(orderId, status) {
     let reason = "";
     if (status === "declined") { reason = window.prompt("Why are you declining this order? This reason will be shown to the customer:") || ""; if (!reason.trim()) return; }
@@ -90,6 +193,7 @@
     if (!response.ok) { window.alert(data.error || "Could not update order."); return; }
     loadOrders();
   }
+
   function wireProductDiscount() {
     addDiscountField();
     const form = $("productForm"); if (!form) return;
@@ -99,11 +203,64 @@
     $("resetButton").addEventListener("click", () => setTimeout(async () => { try { await syncProducts(); $("saveStatus").textContent = "Demo catalog synced to the public shop."; } catch (error) { $("saveStatus").textContent = error.message; showToast(error.message); } }, 100));
     setInterval(decorateCatalog, 800);
   }
+
   function init() {
-    const style = document.createElement("style"); style.textContent = `.orders-panel{margin-top:20px}.order-card{border-bottom:1px solid var(--line);padding:16px 0}.order-card:last-child{border-bottom:0}.order-card p{margin:6px 0;color:var(--muted);font-size:11px}.order-card small{color:var(--muted);font-size:10px}.fulfillment-meta{display:inline-block;margin:9px 0 2px;padding:5px 8px;background:#f1eee8;color:var(--ink);font:9px var(--mono);text-transform:uppercase;letter-spacing:.04em}.shipping-meta{padding:8px 10px;background:#e8f0e5;color:#557351;font-size:10px}.order-card-head{display:grid;grid-template-columns:1fr auto auto;gap:15px;align-items:start}.order-card-head p{margin:4px 0 0}.order-status{padding:4px 7px;font:9px var(--mono);text-transform:uppercase;letter-spacing:.04em;background:#f1eee8}.status-paid,.status-processing,.status-shipped,.status-out_for_delivery,.status-delivered{background:#dfeada;color:#557351}.status-pending_payment,.status-cancel_requested,.status-return_requested{background:#fff1cf;color:#98721a}.status-failed_payment,.status-declined{background:#fbe0da;color:#a74232}.order-alert{padding:8px 10px;background:#fff1cf;color:#765d20}.order-alert.failed,.order-alert.declined{background:#fbe0da;color:#a74232}.order-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.order-actions button{border:1px solid var(--line);background:transparent;padding:8px 10px;font-size:10px}.order-actions button:hover{border-color:var(--coral);color:var(--coral-dark)}.order-actions .decline-order{color:var(--coral-dark)}@media(max-width:500px){.order-card-head{grid-template-columns:1fr auto}.order-card-head>strong:last-child{grid-column:2;grid-row:1}}`; document.head.appendChild(style);
+    const style = document.createElement("style");
+    style.textContent = `
+      .orders-panel { margin-top: 20px; }
+      .orders-tab-strip { display: flex; gap: 8px; margin: 0 0 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+      .order-filter-tab { border: 1px solid var(--line); background: transparent; padding: 7px 12px; font: 600 11px var(--sans); border-radius: 999px; cursor: pointer; color: var(--muted); }
+      .order-filter-tab:hover { color: var(--ink); border-color: var(--ink); }
+      .order-filter-tab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+      .order-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+      .payment-badge-online { padding: 3px 7px; background: #dfeada; color: #356230; font: 600 9px var(--mono); text-transform: uppercase; border-radius: 4px; }
+      .payment-badge-cod { padding: 3px 7px; background: #fff1cf; color: #825f0e; font: 600 9px var(--mono); text-transform: uppercase; border-radius: 4px; }
+      .payment-badge-unpaid { padding: 3px 7px; background: #f0eeea; color: #7a7670; font: 600 9px var(--mono); text-transform: uppercase; border-radius: 4px; }
+      .payment-badge-failed { padding: 3px 7px; background: #fbe0da; color: #a74232; font: 600 9px var(--mono); text-transform: uppercase; border-radius: 4px; }
+      .whatsapp-customer-btn { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #25d366; color: #fff !important; border-radius: 999px; font-size: 10.5px; font-weight: 600; text-decoration: none; margin-left: 6px; }
+      .whatsapp-customer-btn:hover { background: #20ba5a; }
+      .customer-row { display: flex; align-items: center; flex-wrap: wrap; }
+      .studio-settings-box { margin-top: 32px; padding: 22px; background: #fffdf9; border: 1px solid rgba(196, 95, 124, 0.22); border-radius: 14px; }
+      .settings-title { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
+      .settings-title span { font-size: 22px; line-height: 1; }
+      .settings-title strong { font-size: 13px; display: block; }
+      .settings-title p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+      .settings-inline-row { display: flex; gap: 10px; align-items: stretch; }
+      .settings-inline-row input { max-width: 320px; margin: 0; padding: 9px 12px; }
+      .settings-inline-row button { margin: 0; white-space: nowrap; padding: 9px 16px; }
+      .order-card { border-bottom: 1px solid var(--line); padding: 16px 0; }
+      .order-card:last-child { border-bottom: 0; }
+      .order-card p { margin: 6px 0; color: var(--muted); font-size: 11px; }
+      .order-card small { color: var(--muted); font-size: 10px; }
+      .fulfillment-meta { display: inline-block; margin: 9px 0 2px; padding: 5px 8px; background: #f1eee8; color: var(--ink); font: 9px var(--mono); text-transform: uppercase; letter-spacing: .04em; }
+      .shipping-meta { padding: 8px 10px; background: #e8f0e5; color: #557351; font-size: 10px; }
+      .order-card-head { display: grid; grid-template-columns: 1fr auto auto; gap: 15px; align-items: start; }
+      .order-card-head p { margin: 4px 0 0; }
+      .order-status { padding: 4px 7px; font: 9px var(--mono); text-transform: uppercase; letter-spacing: .04em; background: #f1eee8; }
+      .status-paid, .status-processing, .status-shipped, .status-out_for_delivery, .status-delivered { background: #dfeada; color: #557351; }
+      .status-pending_payment, .status-cancel_requested, .status-return_requested { background: #fff1cf; color: #98721a; }
+      .status-failed_payment, .status-declined { background: #fbe0da; color: #a74232; }
+      .order-alert { padding: 8px 10px; background: #fff1cf; color: #765d20; }
+      .order-alert.failed, .order-alert.declined { background: #fbe0da; color: #a74232; }
+      .order-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+      .order-actions button { border: 1px solid var(--line); background: transparent; padding: 8px 10px; font-size: 10px; }
+      .order-actions button:hover { border-color: var(--coral); color: var(--coral-dark); }
+      .order-actions .decline-order { color: var(--coral-dark); }
+      @media(max-width:500px) {
+        .order-card-head { grid-template-columns: 1fr auto; }
+        .order-card-head > strong:last-child { grid-column: 2; grid-row: 1; }
+        .settings-inline-row { flex-direction: column; }
+      }
+    `;
+    document.head.appendChild(style);
     document.querySelector("#accessForm")?.addEventListener("submit", () => sessionStorage.removeItem("raycrafting-admin-pin"));
     addDiscountField(); wireProductDiscount(); addOrdersPanel();
-    $("ordersList").addEventListener("click", (event) => { const statusButton = event.target.closest("[data-order-status]"); if (statusButton) updateOrderStatus(statusButton.dataset.orderId, statusButton.dataset.orderStatus); const fulfillmentButton = event.target.closest("[data-fulfillment]"); if (fulfillmentButton) updateFulfillment(fulfillmentButton.dataset.orderId, fulfillmentButton.dataset.fulfillment); });
+    $("ordersList").addEventListener("click", (event) => {
+      const statusButton = event.target.closest("[data-order-status]");
+      if (statusButton) updateOrderStatus(statusButton.dataset.orderId, statusButton.dataset.orderStatus);
+      const fulfillmentButton = event.target.closest("[data-fulfillment]");
+      if (fulfillmentButton) updateFulfillment(fulfillmentButton.dataset.orderId, fulfillmentButton.dataset.fulfillment);
+    });
   }
   init();
 }());

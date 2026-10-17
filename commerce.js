@@ -38,7 +38,37 @@
   function injectStyles() {
     const style = document.createElement("style");
     style.textContent = `
-      .commerce-modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(37,38,41,.56);overflow:auto}.commerce-modal[hidden]{display:none}.commerce-panel{width:min(760px,100%);max-height:calc(100vh - 40px);overflow:auto;background:var(--white,#fffdf9);padding:30px;box-shadow:0 25px 80px rgba(37,38,41,.22)}.commerce-head{display:flex;justify-content:space-between;gap:20px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:22px}.commerce-head h2{margin:0;font:600 34px/1 var(--display,"Playfair Display",serif);letter-spacing:-.04em}.commerce-head p{margin:8px 0 0;color:var(--muted);font-size:12px}.commerce-close{border:0;background:none;font-size:28px;color:var(--muted);cursor:pointer}.commerce-tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-bottom:22px}.commerce-tab{border:0;border-bottom:2px solid transparent;background:none;padding:0 0 10px;color:var(--muted);font:11px var(--mono);text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.commerce-tab.active{border-color:var(--coral);color:var(--ink)}.commerce-form{display:grid;gap:14px}.commerce-form label{display:block;margin:0;font-size:11px;font-weight:600}.commerce-form input,.commerce-form select,.commerce-form textarea{width:100%;border:1px solid var(--line);background:#fbf8f3;color:var(--ink);padding:11px 12px;margin-top:7px;font:13px var(--sans);outline:0}.commerce-form input:focus,.commerce-form textarea:focus{border-color:var(--coral)}.commerce-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.commerce-action{border:0;background:var(--ink);color:var(--white);padding:13px 16px;font-size:12px;font-weight:600;cursor:pointer}.commerce-action:hover{background:var(--coral-dark)}.commerce-action:disabled{opacity:.55;cursor:wait}.commerce-message{min-height:18px;margin:0;color:var(--coral-dark);font-size:12px}.field-help{display:block;margin-top:5px;color:var(--muted);font-size:10px;font-weight:400;line-height:1.4}.commerce-message.success{color:#557351}.commerce-note{margin:14px 0 0;color:var(--muted);font-size:11px;line-height:1.6}.checkout-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:26px}.checkout-section{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:22px}.checkout-section:last-child{border-bottom:0;margin-bottom:0}.checkout-section h3{margin:0 0 15px;font:600 20px var(--display);letter-spacing:-.03em}.checkout-lines{display:grid;gap:12px}.checkout-line{display:grid;grid-template-columns:48px 1fr auto;gap:11px;align-items:center}.checkout-line img{width:48px;height:48px;object-fit:cover;background:var(--sage)}.checkout-line h4{margin:0;font-size:12px}.checkout-line p{margin:3px 0 0;color:var(--muted);font-size:10px}.checkout-totals{padding:17px 0;border-top:1px solid var(--line);display:grid;gap:9px;font-size:12px}.checkout-total-row{display:flex;justify-content:space-between;gap:20px}.checkout-total-row.discount{color:#557351}.checkout-total-row.total{padding-top:11px;border-top:1px solid var(--line);font-weight:700;font-size:14px}.coupon-row{display:flex;gap:8px}.coupon-row input{margin:0}.coupon-row button{white-space:nowrap;padding:10px 13px}.coupon-help{margin:8px 0 0;color:var(--muted);font-size:10px}.discount-display{display:flex;align-items:center;gap:7px;margin-top:4px}.discount-display .current-price{font-weight:700}.discount-display .old-price{text-decoration:line-through;color:var(--muted);font-size:11px}.discount-display .sale-badge{color:var(--coral-dark);font:10px var(--mono);text-transform:uppercase}.product-price .discount-display{justify-content:flex-end;flex-wrap:wrap}.fulfillment-options{display:grid;gap:9px;margin:0 0 15px}.fulfillment-option{display:flex!important;gap:10px;align-items:start;padding:12px;border:1px solid var(--line);background:#fbf8f3;cursor:pointer}.fulfillment-option:has(input:checked){border-color:var(--coral);background:#fff3ee}.fulfillment-option input{width:auto!important;margin:2px 0 0!important;padding:0!important}.fulfillment-option strong{display:block;font-size:12px}.fulfillment-option small{display:block;margin-top:3px;color:var(--muted);font-size:10px;font-weight:400}.location-row{display:flex;align-items:center;gap:10px;margin:0 0 15px}.location-row button{border:1px solid var(--line);background:transparent;padding:8px 10px;font-size:10px;cursor:pointer}.location-row button:hover{border-color:var(--coral);color:var(--coral-dark)}.location-row small{color:var(--muted);font-size:10px}.customer-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;background:#f1eee8;font-size:12px}.customer-bar button{border:0;background:none;text-decoration:underline;color:var(--coral-dark);cursor:pointer}@media(max-width:650px){.commerce-panel{padding:22px}.checkout-layout,.commerce-grid{grid-template-columns:1fr}.commerce-head h2{font-size:28px}}
+      .commerce-modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(37,38,41,.56);overflow:auto}.commerce-modal[hidden]{display:none}.commerce-panel{width:min(760px,100%);max-height:calc(100vh - 40px);overflow:auto;background:var(--white,#fffdf9);padding:30px;box-shadow:0 25px 80px rgba(37,38,41,.22)}.commerce-head{display:flex;justify-content:space-between;gap:20px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:22px}.commerce-head h2{margin:0;font:600 34px/1 var(--display,"Playfair Display",serif);letter-spacing:-.04em}.commerce-head p{margin:8px 0 0;color:var(--muted);font-size:12px}.commerce-close{border:0;background:none;font-size:28px;color:var(--muted);cursor:pointer}.commerce-tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-bottom:22px}.commerce-tab{border:0;border-bottom:2px solid transparent;background:none;padding:0 0 10px;color:var(--muted);font:11px var(--mono);text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.commerce-tab.active{border-color:var(--coral);color:var(--ink)}.commerce-form{display:grid;gap:14px}.commerce-form label{display:block;margin:0;font-size:11px;font-weight:600}.commerce-form input,.commerce-form select,.commerce-form textarea{width:100%;border:1px solid var(--line);background:#fbf8f3;color:var(--ink);padding:11px 12px;margin-top:7px;font:13px var(--sans);outline:0}.commerce-form input:focus,.commerce-form textarea:focus{border-color:var(--coral)}.commerce-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.commerce-action{border:0;background:var(--ink);color:var(--white);padding:13px 16px;font-size:12px;font-weight:600;cursor:pointer}.commerce-action:hover{background:var(--coral-dark)}.commerce-action:disabled{opacity:.55;cursor:wait}.commerce-message{min-height:18px;margin:0;color:var(--coral-dark);font-size:12px}.field-help{display:block;margin-top:5px;color:var(--muted);font-size:10px;font-weight:400;line-height:1.4}.commerce-message.success{color:#557351}.commerce-note{margin:14px 0 0;color:var(--muted);font-size:11px;line-height:1.6}.checkout-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:26px}.checkout-section{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:22px}.checkout-section:last-child{border-bottom:0;margin-bottom:0}.checkout-section h3{margin:0 0 15px;font:600 20px var(--display);letter-spacing:-.03em}.checkout-lines{display:grid;gap:12px}.checkout-line{display:grid;grid-template-columns:48px 1fr auto;gap:11px;align-items:center}.checkout-line img{width:48px;height:48px;object-fit:cover;background:var(--sage)}.checkout-line h4{margin:0;font-size:12px}.checkout-line p{margin:3px 0 0;color:var(--muted);font-size:10px}.checkout-totals{padding:17px 0;border-top:1px solid var(--line);display:grid;gap:9px;font-size:12px}.checkout-total-row{display:flex;justify-content:space-between;gap:20px}.checkout-total-row.discount{color:#557351}.checkout-total-row.total{padding-top:11px;border-top:1px solid var(--line);font-weight:700;font-size:14px}.coupon-row{display:flex;gap:8px}.coupon-row input{margin:0}.coupon-row button{white-space:nowrap;padding:10px 13px}.coupon-help{margin:8px 0 0;color:var(--muted);font-size:10px}.discount-display{display:flex;align-items:center;gap:7px;margin-top:4px}.discount-display .current-price{font-weight:700}.discount-display .old-price{text-decoration:line-through;color:var(--muted);font-size:11px}.discount-display .sale-badge{color:var(--coral-dark);font:10px var(--mono);text-transform:uppercase}.product-price .discount-display{justify-content:flex-end;flex-wrap:wrap}.fulfillment-options{display:grid;gap:9px;margin:0 0 15px}.fulfillment-option{display:flex!important;gap:10px;align-items:start;padding:12px;border:1px solid var(--line);background:#fbf8f3;cursor:pointer}.fulfillment-option:has(input:checked){border-color:var(--coral);background:#fff3ee}.fulfillment-option input{width:auto!important;margin:2px 0 0!important;padding:0!important}.fulfillment-option strong{display:block;font-size:12px}.fulfillment-option small{display:block;margin-top:3px;color:var(--muted);font-size:10px;font-weight:400}.location-row{display:flex;align-items:center;gap:10px;margin:0 0 15px}.location-row button{border:1px solid var(--line);background:transparent;padding:8px 10px;font-size:10px;cursor:pointer}.location-row button:hover{border-color:var(--coral);color:var(--coral-dark)}.location-row small{color:var(--muted);font-size:10px}.customer-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;background:#f1eee8;font-size:12px}.customer-bar button{border:0;background:none;text-decoration:underline;color:var(--coral-dark);cursor:pointer}
+      .payment-method-options{display:grid;gap:10px;margin-top:10px}
+      .payment-method-card{display:block!important;border:1.5px solid var(--line);background:#fbf8f3;padding:13px 15px;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s;border-radius:4px}
+      .payment-method-card:hover{border-color:var(--coral);background:#fffdf9}
+      .payment-method-card.active,.payment-method-card:has(input:checked){border-color:var(--coral);background:#fff7f4;box-shadow:0 4px 14px rgba(231,110,89,0.12)}
+      .pm-radio-row{display:flex;gap:12px;align-items:flex-start}
+      .pm-radio-row input{width:auto!important;margin:2px 0 0!important;padding:0!important;accent-color:var(--coral)}
+      .pm-text{flex:1}
+      .pm-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+      .pm-title-row strong{font-size:12.5px;color:var(--ink)}
+      .pm-badge-rec{background:#557351;color:#fff;font:9px var(--mono);text-transform:uppercase;padding:2px 7px;border-radius:999px;letter-spacing:.04em}
+      .pm-desc{margin:3px 0 0;font-size:10.5px;color:var(--muted);line-height:1.4}
+      .pm-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+      .pm-chip{display:inline-block;padding:2px 6px;background:#fff;border:1px solid var(--line);border-radius:3px;font:9px var(--mono);color:var(--ink)}
+      .pincode-status{font-size:10.5px;margin-top:4px;display:block;min-height:15px}
+      .pincode-status.detected{color:#557351;font-weight:600}
+      .pincode-status.loading{color:var(--coral-dark)}
+      .confirm-panel{text-align:center;max-width:540px;padding:36px 30px}
+      .confirm-celebration{margin-bottom:20px}
+      .confirm-flower-icon{font-size:48px;line-height:1;margin-bottom:12px;animation:confirmDaisy 2s infinite ease-in-out}
+      @keyframes confirmDaisy{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.12) rotate(12deg)}}
+      .confirm-celebration h2{margin:0;font:600 32px/1.1 var(--display);letter-spacing:-.03em}
+      .confirm-celebration p{margin:8px 0 0;color:var(--muted);font-size:12px}
+      .confirm-summary-box{background:#fbf8f3;border:1px solid var(--line);padding:16px 18px;margin:20px 0;border-radius:4px;text-align:left;display:grid;gap:10px;font-size:12px}
+      .confirm-summary-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+      .confirm-summary-row span{color:var(--muted);font-size:11px}
+      .confirm-badge{background:#dfeada;color:#557351;font:9px var(--mono);text-transform:uppercase;padding:3px 7px;border-radius:3px;font-weight:600}
+      .confirm-actions{display:grid;gap:9px}
+      .confirm-whatsapp-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25d366;color:#fff!important;padding:12px 16px;font-size:12px;font-weight:600;border-radius:2px;text-decoration:none}
+      .confirm-whatsapp-btn:hover{background:#20ba5a}
+      @media(max-width:650px){.commerce-panel{padding:22px}.checkout-layout,.commerce-grid{grid-template-columns:1fr}.commerce-head h2{font-size:28px}}
     `;
     document.head.appendChild(style);
     const ordersStyle = document.createElement("style");
@@ -47,8 +77,9 @@
   }
 
   function injectModal() {
-    document.body.insertAdjacentHTML("beforeend", `<div class="commerce-modal" id="checkoutModal" hidden><div class="commerce-panel" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle"><div class="commerce-head"><div><p class="eyebrow">A brighter checkout</p><h2 id="checkoutTitle">Complete your order.</h2><p>Secure account, clear pricing, and delivery details in one place.</p></div><button class="commerce-close" id="commerceClose" type="button" aria-label="Close checkout">×</button></div><div id="commerceAuth"><div class="commerce-tabs"><button class="commerce-tab active" data-auth-tab="login" type="button">Sign in</button><button class="commerce-tab" data-auth-tab="register" type="button">Create account</button><button class="commerce-tab" data-auth-tab="phone" type="button">Phone OTP</button></div><form class="commerce-form" id="loginForm"><label>Email address<input id="loginEmail" type="email" required autocomplete="email"></label><label>Password<input id="loginPassword" type="password" required minlength="8" autocomplete="current-password"></label><button class="commerce-action" type="submit">Sign in and continue <span>→</span></button></form><form class="commerce-form" id="registerForm" hidden><div class="commerce-grid"><label>Your name<input id="registerName" required minlength="2" maxlength="120" autocomplete="name"></label><label>Phone number<input id="registerPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">Use a 10-digit Indian mobile number.</small></label></div><label>Email address<input id="registerEmail" type="email" required autocomplete="email"></label><label>Password<input id="registerPassword" type="password" minlength="8" required autocomplete="new-password"><small class="commerce-note">Use at least 8 characters.</small></label><button class="commerce-action" type="submit">Create account <span>→</span></button></form><form class="commerce-form" id="phoneForm" hidden><label>Your name <span class="commerce-note">(for a new account)</span><input id="phoneName" minlength="2" maxlength="120" autocomplete="name"></label><label>Mobile number<input id="phoneNumber" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">We will send a one-time code by SMS.</small></label><button class="commerce-action" id="sendOtpButton" type="button">Send OTP <span>→</span></button><div id="phoneOtpSection" hidden><label>6-digit OTP<input id="phoneOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Enter the code"></label><button class="commerce-action" id="verifyOtpButton" type="button">Verify OTP <span>→</span></button></div><p class="commerce-message" id="phoneMessage"></p></form><p class="commerce-message" id="commerceMessage"></p><div class="google-auth" id="googleAuth"><div class="auth-divider">or continue with</div><div id="googleSignInButton"></div><p class="google-auth-note">Google verifies your email securely. Your order history stays in Raycrafting.</p></div><p class="commerce-note">Your account lets you track orders and keeps your delivery details ready for next time.</p></div><div id="commerceFlow" hidden><div id="customerBar" class="customer-bar"></div><div class="checkout-layout"><div><section class="checkout-section"><h3>How should we get it to you?</h3><div class="fulfillment-options" id="fulfillmentOptions"><label class="fulfillment-option"><input type="radio" name="fulfillmentMethod" value="manual" checked><span><strong>Standard delivery</strong><small>We will review the address and arrange delivery manually.</small></span></label><label class="fulfillment-option"><input type="radio" name="fulfillmentMethod" value="self_pickup"><span><strong>Self pickup</strong><small>Collect from the studio after your order is accepted. No delivery charge.</small></span></label></div><div class="location-row"><button id="locationButton" type="button">Use my current location</button><small id="locationMessage">Optional: helps you confirm your delivery area.</small></div><h3>Delivery details</h3><form class="commerce-form" id="addressForm"><div class="commerce-grid"><label>Full name<input id="addressName" required minlength="2" maxlength="120" autocomplete="name"></label><label>Phone number<input id="addressPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">10-digit Indian mobile number, starting with 6–9.</small></label></div><label id="addressLine1Field">Address line 1<input id="addressLine1" required minlength="5" maxlength="200" autocomplete="street-address"></label><label id="addressLine2Field">Address line 2 <span class="commerce-note">(optional)</span><input id="addressLine2" maxlength="200" autocomplete="address-line2"></label><div class="commerce-grid" id="addressCityStateFields"><label>City<input id="addressCity" required minlength="2" maxlength="80" autocomplete="address-level2"></label><label>State<input id="addressState" required minlength="2" maxlength="80" autocomplete="address-level1"></label></div><label id="addressPostalCodeField">PIN code<input id="addressPostalCode" required inputmode="numeric" pattern="[1-8][0-9]{5}" maxlength="6" autocomplete="postal-code" placeholder="e.g. 110001"><small class="field-help">6 digits; Indian PINs start with 1–8.</small></label><p class="commerce-message" id="addressMessage" aria-live="polite"></p></form></section><section class="checkout-section"><h3>Coupon code</h3><div class="coupon-row"><input id="couponCode" placeholder="e.g. BRIGHT10" autocomplete="off"><button class="commerce-action" id="couponButton" type="button">Apply</button></div><p class="coupon-help">Use code <strong>WELCOME10</strong> for 10% off your order!</p><p class="commerce-message" id="couponMessage"></p></section></div><aside><section class="checkout-section"><h3>Your order</h3><div class="checkout-lines" id="checkoutLines"></div><div class="checkout-totals" id="checkoutTotals"></div></section><button class="commerce-action" id="payButton" type="button">Continue to secure payment <span>→</span></button><p class="commerce-message" id="paymentMessage"></p><div class="checkout-trust-badge"><span class="trust-shield">🔒</span><div><strong>100% Secure Checkout via Razorpay</strong><p>UPI (GPay, PhonePe, Paytm, BHIM), Cards &amp; NetBanking accepted</p></div></div></aside></div></div></div></div>`);
+    document.body.insertAdjacentHTML("beforeend", `<div class="commerce-modal" id="checkoutModal" hidden><div class="commerce-panel" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle"><div class="commerce-head"><div><p class="eyebrow">A brighter checkout</p><h2 id="checkoutTitle">Complete your order.</h2><p>Secure account, clear pricing, and delivery details in one place.</p></div><button class="commerce-close" id="commerceClose" type="button" aria-label="Close checkout">×</button></div><div id="commerceAuth"><div class="commerce-tabs"><button class="commerce-tab active" data-auth-tab="login" type="button">Sign in</button><button class="commerce-tab" data-auth-tab="register" type="button">Create account</button><button class="commerce-tab" data-auth-tab="phone" type="button">Phone OTP</button></div><form class="commerce-form" id="loginForm"><label>Email address<input id="loginEmail" type="email" required autocomplete="email"></label><label>Password<input id="loginPassword" type="password" required minlength="8" autocomplete="current-password"></label><button class="commerce-action" type="submit">Sign in and continue <span>→</span></button></form><form class="commerce-form" id="registerForm" hidden><div class="commerce-grid"><label>Your name<input id="registerName" required minlength="2" maxlength="120" autocomplete="name"></label><label>Phone number<input id="registerPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">Use a 10-digit Indian mobile number.</small></label></div><label>Email address<input id="registerEmail" type="email" required autocomplete="email"></label><label>Password<input id="registerPassword" type="password" minlength="8" required autocomplete="new-password"><small class="commerce-note">Use at least 8 characters.</small></label><button class="commerce-action" type="submit">Create account <span>→</span></button></form><form class="commerce-form" id="phoneForm" hidden><label>Your name <span class="commerce-note">(for a new account)</span><input id="phoneName" minlength="2" maxlength="120" autocomplete="name"></label><label>Mobile number<input id="phoneNumber" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">We will send a one-time code by SMS.</small></label><button class="commerce-action" id="sendOtpButton" type="button">Send OTP <span>→</span></button><div id="phoneOtpSection" hidden><label>6-digit OTP<input id="phoneOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Enter the code"></label><button class="commerce-action" id="verifyOtpButton" type="button">Verify OTP <span>→</span></button></div><p class="commerce-message" id="phoneMessage"></p></form><p class="commerce-message" id="commerceMessage"></p><div class="google-auth" id="googleAuth"><div class="auth-divider">or continue with</div><div id="googleSignInButton"></div><p class="google-auth-note">Google verifies your email securely. Your order history stays in Raycrafting.</p></div><p class="commerce-note">Your account lets you track orders and keeps your delivery details ready for next time.</p></div><div id="commerceFlow" hidden><div id="customerBar" class="customer-bar"></div><div class="checkout-layout"><div><section class="checkout-section"><h3>How should we get it to you?</h3><div class="fulfillment-options" id="fulfillmentOptions"><label class="fulfillment-option"><input type="radio" name="fulfillmentMethod" value="manual" checked><span><strong>Standard delivery</strong><small>We will review the address and arrange delivery manually.</small></span></label><label class="fulfillment-option"><input type="radio" name="fulfillmentMethod" value="self_pickup"><span><strong>Self pickup</strong><small>Collect from the studio after your order is accepted. No delivery charge.</small></span></label></div><div class="location-row"><button id="locationButton" type="button">Use my current location</button><small id="locationMessage">Optional: helps you confirm your delivery area.</small></div><h3>Delivery details</h3><form class="commerce-form" id="addressForm"><div class="commerce-grid"><label>Full name<input id="addressName" required minlength="2" maxlength="120" autocomplete="name"></label><label>Phone number<input id="addressPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">10-digit Indian mobile number, starting with 6–9.</small></label></div><label id="addressLine1Field">Address line 1<input id="addressLine1" required minlength="5" maxlength="200" autocomplete="street-address"></label><label id="addressLine2Field">Address line 2 <span class="commerce-note">(optional)</span><input id="addressLine2" maxlength="200" autocomplete="address-line2"></label><div class="commerce-grid" id="addressCityStateFields"><label>City<input id="addressCity" required minlength="2" maxlength="80" autocomplete="address-level2"></label><label>State<input id="addressState" required minlength="2" maxlength="80" autocomplete="address-level1"></label></div><label id="addressPostalCodeField">PIN code<input id="addressPostalCode" required inputmode="numeric" pattern="[1-8][0-9]{5}" maxlength="6" autocomplete="postal-code" placeholder="e.g. 110001"><small class="field-help">6 digits; Indian PINs start with 1–8.</small><span id="pincodeStatus" class="pincode-status"></span></label><p class="commerce-message" id="addressMessage" aria-live="polite"></p></form></section><section class="checkout-section"><h3>Choose payment method</h3><div class="payment-method-options" id="paymentMethodOptions"><label class="payment-method-card active" data-method="razorpay"><div class="pm-radio-row"><input type="radio" name="paymentMethod" value="razorpay" checked><div class="pm-text"><div class="pm-title-row"><strong>⚡ Instant UPI, Cards &amp; NetBanking</strong><span class="pm-badge-rec">Recommended</span></div><p class="pm-desc">Instant confirmation via Razorpay. Zero transaction fee. 100% encrypted &amp; secure.</p><div class="pm-chips"><span class="pm-chip">GPay</span><span class="pm-chip">PhonePe</span><span class="pm-chip">Paytm</span><span class="pm-chip">RuPay</span><span class="pm-chip">Cards &amp; NetBanking</span></div></div></div></label><label class="payment-method-card" data-method="cod"><div class="pm-radio-row"><input type="radio" name="paymentMethod" value="cod"><div class="pm-text"><div class="pm-title-row"><strong>📦 Pay on Delivery (Cash on Delivery)</strong></div><p class="pm-desc">Pay cash or scan QR upon doorstep delivery. No advance payment required.</p></div></div></label></div></section><section class="checkout-section"><h3>Coupon code</h3><div class="coupon-row"><input id="couponCode" placeholder="e.g. BRIGHT10" autocomplete="off"><button class="commerce-action" id="couponButton" type="button">Apply</button></div><p class="coupon-help">Use code <strong>WELCOME10</strong> for 10% off your order!</p><p class="commerce-message" id="couponMessage"></p></section></div><aside><section class="checkout-section"><h3>Your order</h3><div class="checkout-lines" id="checkoutLines"></div><div class="checkout-totals" id="checkoutTotals"></div></section><button class="commerce-action" id="payButton" type="button">Continue to payment <span>→</span></button><p class="commerce-message" id="paymentMessage"></p><div class="checkout-trust-badge"><span class="trust-shield">🔒</span><div><strong>100% Secure Checkout</strong><p>Encrypted transactions &amp; handcrafted order guarantee</p></div></div></aside></div></div></div></div>`);
     document.body.insertAdjacentHTML("beforeend", `<div class="commerce-modal" id="ordersModal" hidden><div class="commerce-panel" role="dialog" aria-modal="true" aria-labelledby="ordersTitle"><div class="commerce-head"><div><p class="eyebrow">Your Raycrafting catalogue</p><h2 id="ordersTitle">Your orders.</h2><p>Track every little thing, request help, or tell us when plans change.</p></div><button class="commerce-close" id="ordersClose" type="button" aria-label="Close orders">×</button></div><div id="ordersLoginNote" hidden><p class="commerce-note">Sign in to see your order history.</p><button class="commerce-action" id="ordersLoginButton" type="button">Sign in to your account <span>→</span></button></div><div class="orders-list" id="ordersList"><p class="commerce-note">Loading your orders…</p></div><div class="support-box"><div><strong>Need a hand?</strong><p>Chat or call us about an order.</p></div><div class="support-links"><a id="chatSupport" href="mailto:hello@raycrafting.co">Chat support</a><a id="callSupport" href="tel:" hidden>Call support</a></div></div></div></div>`);
+    document.body.insertAdjacentHTML("beforeend", `<div class="commerce-modal" id="orderConfirmModal" hidden><div class="commerce-panel confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle"><div class="confirm-celebration"><div class="confirm-flower-icon">🌸</div><p class="eyebrow">Raycrafting Handcrafted Order</p><h2 id="confirmTitle">Your order is placed!</h2><p id="confirmSubtitle">We’ve received your order and are carefully preparing your handmade piece.</p></div><div class="confirm-summary-box"><div class="confirm-summary-row"><span>Order ID</span><strong id="confirmOrderId">#RC-0000</strong></div><div class="confirm-summary-row"><span>Total Amount</span><strong id="confirmTotal">₹0</strong></div><div class="confirm-summary-row"><span>Payment Method</span><span class="confirm-badge" id="confirmPaymentBadge">Pay on Delivery</span></div><div class="confirm-summary-row" id="confirmAddressRow"><span>Deliver to</span><strong id="confirmAddressText">—</strong></div></div><div class="confirm-actions"><button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders <span>→</span></button><a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with Bhuvik on WhatsApp</a><button class="orders-button" id="confirmCloseBtn" type="button" style="margin-top:6px">Back to Shop</button></div></div></div>`);
   }
 
   function injectAccountUI() {
@@ -76,11 +107,24 @@
     const shipping = document.querySelector("input[name=fulfillmentMethod]:checked")?.value === "self_pickup" ? 0 : (subtotal - discount >= 499 ? 0 : 60);
     return { subtotal, discount, shipping, total: subtotal - discount + shipping };
   }
+  function selectedPaymentMethod() {
+    return document.querySelector("input[name=paymentMethod]:checked")?.value || "razorpay";
+  }
   function renderCheckout() {
     const lines = getLines(); const total = totals();
+    const method = selectedPaymentMethod();
     $("#checkoutLines").innerHTML = lines.map((item) => { const detail = priceInfo(item.product); return `<div class="checkout-line"><img src="${esc(item.product.image || window.RAYCRAFTING_DEFAULT_IMAGE)}" alt=""><div><h4>${esc(item.product.name)}</h4><p>${item.quantity} × ${money(detail.sale)}</p></div><strong>${money(detail.sale * item.quantity)}</strong></div>`; }).join("");
     $("#checkoutTotals").innerHTML = lines.length ? `<div class="checkout-total-row"><span>Subtotal</span><strong>${money(total.subtotal)}</strong></div>${total.discount ? `<div class="checkout-total-row discount"><span>Coupon savings</span><strong>−${money(total.discount)}</strong></div>` : ""}<div class="checkout-total-row"><span>Delivery</span><strong>${total.shipping ? money(total.shipping) : "Free"}</strong></div><div class="checkout-total-row total"><span>Total</span><strong>${money(total.total)}</strong></div>` : `<p class="commerce-note">Your bag is empty. Add something bright before checking out.</p>`;
-    if ($("#payButton")) { $("#payButton").disabled = !lines.length; $("#payButton").textContent = lines.length ? "Continue to secure payment  →" : "Your bag is empty"; }
+    if ($("#payButton")) {
+      $("#payButton").disabled = !lines.length;
+      if (!lines.length) {
+        $("#payButton").textContent = "Your bag is empty";
+      } else if (method === "cod") {
+        $("#payButton").textContent = `Confirm Order · Pay ${money(total.total)} on Delivery 📦`;
+      } else {
+        $("#payButton").textContent = `Pay ${money(total.total)} via UPI / Card 🔒`;
+      }
+    }
   }
   function decorateProducts() {
     const map = new Map(products().map((product) => [product.id, product]));
@@ -113,7 +157,31 @@
   async function verifyPhoneOtp() { const phone = phoneAuthPending || normalizeIndianPhone($("#phoneNumber").value); const code = $("#phoneOtp").value.replace(/\D/g, ""); if (!phoneAuthPending) { phoneMessage("Send an OTP first."); return; } if (!/^\d{6}$/.test(code)) { phoneMessage("Enter the 6-digit OTP."); return; } const button = $("#verifyOtpButton"); button.disabled = true; phoneMessage("Verifying your OTP…"); try { saveLogin(await request("/auth/phone/verify", { method: "POST", body: JSON.stringify({ phone, code, name: $("#phoneName").value.trim() }) })); } catch (error) { phoneMessage(error.message); } finally { button.disabled = false; } }
   async function setupGoogleAuth() { const target = $("#googleAuth"); if (!target) return; try { const config = await request("/config"); if (!config.googleEnabled || !config.googleClientId) { target.hidden = true; return; } target.hidden = false; const loadScript = () => new Promise((resolve, reject) => { if (window.google?.accounts?.id) return resolve(); const script = document.createElement("script"); script.src = "https://accounts.google.com/gsi/client"; script.async = true; script.defer = true; script.onload = resolve; script.onerror = reject; document.head.appendChild(script); }); await loadScript(); window.google.accounts.id.initialize({ client_id: config.googleClientId, callback: (response) => googleLogin(response.credential) }); const button = $("#googleSignInButton"); if (button && !button.dataset.ready) { window.google.accounts.id.renderButton(button, { theme: "outline", size: "large", text: "continue_with", shape: "rectangular", width: Math.min(420, window.innerWidth - 90) }); button.dataset.ready = "true"; } } catch { target.hidden = true; } }
 
-  function showCheckoutFlow() { $("#commerceAuth").hidden = true; $("#commerceFlow").hidden = false; const bar = $("#customerBar"); bar.textContent = ""; const signedIn = document.createElement("span"); signedIn.textContent = "Signed in as " + customer.name + " · " + customer.email; const logoutButton = document.createElement("button"); logoutButton.id = "logoutCustomer"; logoutButton.type = "button"; logoutButton.textContent = "Sign out"; bar.append(signedIn, logoutButton); logoutButton.addEventListener("click", logout); $("#addressName").value = customer.name || ""; $("#addressPhone").value = customer.phone || ""; setFulfillmentUI(); renderCheckout(); maybePromptLocationAccess(); }
+  function showCheckoutFlow() {
+    $("#commerceAuth").hidden = true; $("#commerceFlow").hidden = false;
+    const bar = $("#customerBar"); bar.textContent = "";
+    const signedIn = document.createElement("span"); signedIn.textContent = "Signed in as " + customer.name + " · " + customer.email;
+    const logoutButton = document.createElement("button"); logoutButton.id = "logoutCustomer"; logoutButton.type = "button"; logoutButton.textContent = "Sign out";
+    bar.append(signedIn, logoutButton);
+    logoutButton.addEventListener("click", logout);
+    $("#addressName").value = customer.name || "";
+    $("#addressPhone").value = customer.phone || "";
+    try {
+      const saved = JSON.parse(localStorage.getItem("raycrafting_saved_address") || "null");
+      if (saved) {
+        if (!$("#addressName").value && saved.name) $("#addressName").value = saved.name;
+        if (!$("#addressPhone").value && saved.phone) $("#addressPhone").value = saved.phone;
+        if (saved.line1 && !$("#addressLine1").value) $("#addressLine1").value = saved.line1;
+        if (saved.line2 && !$("#addressLine2").value) $("#addressLine2").value = saved.line2;
+        if (saved.city && !$("#addressCity").value) $("#addressCity").value = saved.city;
+        if (saved.state && !$("#addressState").value) $("#addressState").value = saved.state;
+        if (saved.postalCode && !$("#addressPostalCode").value) $("#addressPostalCode").value = saved.postalCode;
+      }
+    } catch {}
+    setFulfillmentUI();
+    renderCheckout();
+    maybePromptLocationAccess();
+  }
   function openCheckout() { closeProfileMenu(); $("#checkoutModal").hidden = false; document.body.style.overflow = "hidden"; renderCheckout(); setupGoogleAuth(); loadCustomer().then((signedIn) => { if (signedIn) showCheckoutFlow(); else { $("#commerceAuth").hidden = false; $("#commerceFlow").hidden = true; showAuthTab("login"); } }); }
   window.raycraftingOpenCheckout = openCheckout;
   function closeCheckout() { $("#checkoutModal").hidden = true; document.body.style.overflow = ""; }
@@ -173,6 +241,69 @@
       button.textContent = "Use my current location"; button.disabled = false;
     }, (error) => { if (message) message.textContent = error.code === 1 ? "Location access was denied. Click the lock/settings icon beside the web address, choose Location → Allow, then click Try location again." : "We could not detect your location. You can enter the address manually."; button.textContent = "Try location again"; button.disabled = false; }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
   }
+  async function lookupPostalCode(pincode) {
+    const status = $("#pincodeStatus");
+    if (!validIndianPincode(pincode)) {
+      if (status) { status.textContent = ""; status.className = "pincode-status"; }
+      return;
+    }
+    if (status) {
+      status.className = "pincode-status loading";
+      status.textContent = "Detecting City & State from PIN code…";
+    }
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+      const data = await res.json();
+      if (Array.isArray(data) && data[0]?.Status === "Success" && Array.isArray(data[0]?.PostOffice) && data[0].PostOffice.length > 0) {
+        const po = data[0].PostOffice[0];
+        const city = po.District || po.Block || po.Circle;
+        const state = po.State;
+        if (city && (!$("#addressCity").value || $("#addressCity").value !== city)) $("#addressCity").value = city;
+        if (state && (!$("#addressState").value || $("#addressState").value !== state)) $("#addressState").value = state;
+        if (status) {
+          status.className = "pincode-status detected";
+          status.textContent = `✓ ${city}, ${state} detected automatically`;
+        }
+      } else if (status) {
+        status.className = "pincode-status";
+        status.textContent = "";
+      }
+    } catch {
+      if (status) { status.className = "pincode-status"; status.textContent = ""; }
+    }
+  }
+  function showOrderConfirmation({ orderId, total, paymentMethod, addressText }) {
+    closeCheckout();
+    $("#confirmOrderId").textContent = orderId ? `#${orderId}` : "#RC";
+    $("#confirmTotal").textContent = money(total);
+    const isCod = paymentMethod === "cod";
+    const badge = $("#confirmPaymentBadge");
+    if (badge) {
+      badge.textContent = isCod ? "📦 Pay on Delivery (Doorstep)" : "⚡ Paid Online (Razorpay)";
+      badge.style.background = isCod ? "#fff1cf" : "#dfeada";
+      badge.style.color = isCod ? "#98721a" : "#557351";
+    }
+    const addrNode = $("#confirmAddressText");
+    if (addrNode) addrNode.textContent = addressText || "Handcrafted delivery";
+
+    const waBtn = $("#confirmWhatsAppBtn");
+    if (waBtn) {
+      const phone = String(supportConfig.supportPhone || "").replace(/\D/g, "");
+      if (phone) {
+        const clean = phone.startsWith("91") ? phone : "91" + phone;
+        waBtn.href = `https://wa.me/${clean}?text=${encodeURIComponent(`Hi Bhuvik! I just placed order ${orderId} on Raycrafting (${money(total)}). Excited for the blooms!`)}`;
+        waBtn.style.display = "inline-flex";
+      } else {
+        waBtn.style.display = "none";
+      }
+    }
+    $("#orderConfirmModal").hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function closeOrderConfirmation() {
+    $("#orderConfirmModal").hidden = true;
+    if ($("#checkoutModal").hidden && $("#ordersModal").hidden) document.body.style.overflow = "";
+  }
   function loadRazorpay() { return new Promise((resolve, reject) => { if (window.Razorpay) return resolve(); const script = document.createElement("script"); script.src = "https://checkout.razorpay.com/v1/checkout.js"; script.onload = resolve; script.onerror = () => reject(new Error("Could not load Razorpay Checkout.")); document.head.appendChild(script); }); }
   function statusLabel(status) { return ({ pending_payment: "Pending payment", failed_payment: "Payment failed", paid: "Paid", processing: "Processing", shipped: "Shipped", out_for_delivery: "Out for delivery", delivered: "Delivered", cancel_requested: "Cancellation requested", return_requested: "Return requested", cancelled: "Cancelled", returned: "Returned", declined: "Declined" }[status] || status.replaceAll("_", " ")); }
   function renderOrders(orders) {
@@ -183,7 +314,8 @@
       const reasons = order.failure_reason ? `<p class="order-history-reason"><strong>Payment issue:</strong> ${esc(order.failure_reason)}</p>` : order.decision_reason ? `<p class="order-history-reason"><strong>Seller note:</strong> ${esc(order.decision_reason)}</p>` : order.customer_request_reason ? `<p class="order-history-reason"><strong>Your request:</strong> ${esc(order.customer_request_reason)}</p>` : "";
       const canCancel = ["pending_payment", "paid", "processing", "shipped"].includes(order.status);
       const canReturn = ["paid", "processing", "shipped", "out_for_delivery", "delivered"].includes(order.status);
-      return `<article class="order-history-card"><div class="order-history-head"><div><h3>${esc(order.id)}</h3><p class="order-history-meta">${new Date(order.created_at).toLocaleString("en-IN")} · ${money(order.total)}</p></div><span class="order-history-status ${esc(order.status)}">${esc(statusLabel(order.status))}</span></div><div class="order-history-items">${items}</div>${reasons}${(canCancel || canReturn) ? `<div class="order-history-actions">${canCancel ? `<button type="button" data-order-action="cancel" data-order-id="${esc(order.id)}">Request cancellation</button>` : ""}${canReturn ? `<button type="button" data-order-action="return" data-order-id="${esc(order.id)}">Request return</button>` : ""}</div>` : ""}</article>`;
+      const pm = order.payment_method === "cod" ? " · 📦 Pay on Delivery" : (order.status === "paid" || order.status === "processing" ? " · ⚡ Paid online" : "");
+      return `<article class="order-history-card"><div class="order-history-head"><div><h3>${esc(order.id)}</h3><p class="order-history-meta">${new Date(order.created_at).toLocaleString("en-IN")} · ${money(order.total)}${pm}</p></div><span class="order-history-status ${esc(order.status)}">${esc(statusLabel(order.status))}</span></div><div class="order-history-items">${items}</div>${reasons}${(canCancel || canReturn) ? `<div class="order-history-actions">${canCancel ? `<button type="button" data-order-action="cancel" data-order-id="${esc(order.id)}">Request cancellation</button>` : ""}${canReturn ? `<button type="button" data-order-action="return" data-order-id="${esc(order.id)}">Request return</button>` : ""}</div>` : ""}</article>`;
     }).join("");
   }
   async function loadSupport() {
@@ -199,7 +331,7 @@
     try { const data = await request("/orders"); renderOrders(data.orders || []); } catch (error) { $("#ordersList").innerHTML = `<p class="commerce-message">${esc(error.message)}</p>`; }
   }
   function openOrders() { $("#ordersModal").hidden = false; document.body.style.overflow = "hidden"; loadSupport(); loadOrders(); }
-  function closeOrders() { $("#ordersModal").hidden = true; if ($("#checkoutModal").hidden) document.body.style.overflow = ""; }
+  function closeOrders() { $("#ordersModal").hidden = true; if ($("#checkoutModal").hidden && $("#orderConfirmModal").hidden) document.body.style.overflow = ""; }
   async function orderAction(orderId, action) {
     const label = action === "cancel" ? "Why would you like to cancel this order?" : "Why would you like to return this order?";
     const reason = window.prompt(label); if (!reason || !reason.trim()) return;
@@ -214,11 +346,81 @@
     const button = $("#payButton"); button.disabled = true; showMessage(""); try {
       const delivery = validateAddress();
       if (!delivery.valid) { showMessage(delivery.error); return; }
-      const created = await request("/orders", { method: "POST", body: JSON.stringify({ items: getLines().map((item) => ({ id: item.id, quantity: item.quantity })), couponCode: coupon.code, address: delivery.value, fulfillmentMethod: delivery.value.fulfillmentMethod, giftMessage: localStorage.getItem("raycrafting-gift-note") || "" }) });
+      try { localStorage.setItem("raycrafting_saved_address", JSON.stringify(delivery.value)); } catch {}
+
+      const paymentMethod = selectedPaymentMethod();
+      const addressSummary = delivery.value.fulfillmentMethod === "self_pickup"
+        ? "Studio Self-Pickup"
+        : `${delivery.value.line1}, ${delivery.value.city}, ${delivery.value.state} - ${delivery.value.postalCode}`;
+
+      const created = await request("/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          items: getLines().map((item) => ({ id: item.id, quantity: item.quantity })),
+          couponCode: coupon.code,
+          address: delivery.value,
+          fulfillmentMethod: delivery.value.fulfillmentMethod,
+          paymentMethod,
+          giftMessage: localStorage.getItem("raycrafting-gift-note") || ""
+        })
+      });
+
+      if (paymentMethod === "cod") {
+        clearCartView();
+        toast("🌸 Order confirmed! We'll start crafting it.");
+        showOrderConfirmation({
+          orderId: created.orderId,
+          total: created.total,
+          paymentMethod: "cod",
+          addressText: addressSummary
+        });
+        return;
+      }
+
       razorpayConfig = razorpayConfig || await request("/config");
-      if (!razorpayConfig.razorpayEnabled) throw new Error("Online payment is temporarily unavailable. Please try again in a moment.");
-      const paymentOrder = await request("/payments/razorpay/order", { method: "POST", body: JSON.stringify({ orderId: created.orderId }) }); await loadRazorpay();
-      const checkout = new Razorpay({ key: paymentOrder.keyId, amount: paymentOrder.amount, currency: "INR", name: "Raycrafting", description: `Order ${created.orderId}`, order_id: paymentOrder.orderId, prefill: { name: customer.name, email: customer.email, contact: customer.phone || address().phone }, config: { display: { blocks: { banks: { name: "Pay via UPI", instruments: [{ method: "upi" }] } }, sequence: ["block.banks"], preferences: { show_default_blocks: true } } }, theme: { color: "#e76e59" }, handler: async (response) => { try { await request("/verify-payment", { method: "POST", body: JSON.stringify({ orderId: created.orderId, razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: response.razorpay_order_id, razorpay_signature: response.razorpay_signature }) }); clearCartView(); closeCheckout(); toast("Payment received — your order is confirmed."); } catch (error) { showMessage(error.message); } } }); checkout.on("payment.failed", async (response) => { const reason = response.error?.description || "Payment was not completed."; await request("/payments/razorpay/failed", { method: "POST", body: JSON.stringify({ orderId: created.orderId, paymentId: response.error?.metadata?.payment_id || "", reason }) }).catch(() => {}); showMessage(`${reason} Your order is marked as failed; you can retry from My orders.`); }); checkout.open();
+      if (!razorpayConfig.razorpayEnabled) throw new Error("Online payment is temporarily unavailable. Please choose Pay on Delivery or try again shortly.");
+      const paymentOrder = await request("/payments/razorpay/order", { method: "POST", body: JSON.stringify({ orderId: created.orderId }) });
+      await loadRazorpay();
+      const checkout = new Razorpay({
+        key: paymentOrder.keyId,
+        amount: paymentOrder.amount,
+        currency: "INR",
+        name: "Raycrafting",
+        description: `Order ${created.orderId}`,
+        order_id: paymentOrder.orderId,
+        prefill: { name: customer.name, email: customer.email, contact: customer.phone || address().phone },
+        config: { display: { blocks: { banks: { name: "Pay via UPI", instruments: [{ method: "upi" }] } }, sequence: ["block.banks"], preferences: { show_default_blocks: true } } },
+        theme: { color: "#e76e59" },
+        handler: async (response) => {
+          try {
+            await request("/verify-payment", {
+              method: "POST",
+              body: JSON.stringify({
+                orderId: created.orderId,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            clearCartView();
+            toast("Payment received — your order is confirmed.");
+            showOrderConfirmation({
+              orderId: created.orderId,
+              total: created.total,
+              paymentMethod: "razorpay",
+              addressText: addressSummary
+            });
+          } catch (error) {
+            showMessage(error.message);
+          }
+        }
+      });
+      checkout.on("payment.failed", async (response) => {
+        const reason = response.error?.description || "Payment was not completed.";
+        await request("/payments/razorpay/failed", { method: "POST", body: JSON.stringify({ orderId: created.orderId, paymentId: response.error?.metadata?.payment_id || "", reason }) }).catch(() => {});
+        showMessage(`${reason} You can retry payment anytime from 'My orders' or select Pay on Delivery.`);
+      });
+      checkout.open();
     } catch (error) { showMessage(error.message); } finally { button.disabled = false; }
   }
   function init() {
@@ -241,10 +443,26 @@
     $("#ordersList").addEventListener("click", (event) => { const action = event.target.closest("[data-order-action]"); if (action) orderAction(action.dataset.orderId, action.dataset.orderAction); });
     document.querySelectorAll("[data-auth-tab]").forEach((button) => button.addEventListener("click", () => showAuthTab(button.dataset.authTab)));
     $("#loginForm").addEventListener("submit", login); $("#registerForm").addEventListener("submit", register); $("#sendOtpButton").addEventListener("click", requestPhoneOtp); $("#verifyOtpButton").addEventListener("click", verifyPhoneOtp); $("#phoneNumber").addEventListener("input", (event) => { event.target.value = event.target.value.replace(/[^+\d ()-]/g, "").slice(0, 14); phoneAuthPending = ""; }); $("#phoneOtp").addEventListener("input", (event) => { event.target.value = event.target.value.replace(/\D/g, "").slice(0, 6); }); $("#couponButton").addEventListener("click", applyCoupon); $("#payButton").addEventListener("click", pay); $("#locationButton").addEventListener("click", detectLocation); document.querySelectorAll("input[name=fulfillmentMethod]").forEach((input) => input.addEventListener("change", setFulfillmentUI));
+    document.querySelectorAll("input[name=paymentMethod]").forEach((radio) => {
+      radio.addEventListener("change", () => {
+        document.querySelectorAll(".payment-method-card").forEach((card) => {
+          const r = card.querySelector("input[type=radio]");
+          card.classList.toggle("active", r && r.checked);
+        });
+        renderCheckout();
+      });
+    });
     $("#addressPhone").addEventListener("input", (event) => { event.target.value = event.target.value.replace(/[^+\d ()-]/g, "").slice(0, 14); });
-    $("#addressPostalCode").addEventListener("input", (event) => { event.target.value = event.target.value.replace(/\D/g, "").slice(0, 6); });
+    $("#addressPostalCode").addEventListener("input", (event) => {
+      event.target.value = event.target.value.replace(/\D/g, "").slice(0, 6);
+      if (event.target.value.length === 6) lookupPostalCode(event.target.value);
+      else { const st = $("#pincodeStatus"); if (st) st.textContent = ""; }
+    });
     $("#addressForm").addEventListener("input", () => { if ($("#addressMessage").textContent) validateAddress(); });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCheckout(); });
+    $("#confirmViewOrdersBtn")?.addEventListener("click", () => { closeOrderConfirmation(); openOrders(); });
+    $("#confirmCloseBtn")?.addEventListener("click", closeOrderConfirmation);
+    $("#orderConfirmModal")?.addEventListener("click", (event) => { if (event.target.id === "orderConfirmModal") closeOrderConfirmation(); });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeCheckout(); closeOrderConfirmation(); } });
     const observer = new MutationObserver(() => decorateProducts()); observer.observe($("#productGrid"), { childList: true }); decorateProducts();
     document.addEventListener("click", (event) => { const card = event.target.closest(".product-card[data-product-id]"); if (card && event.target.closest("[data-action='details']")) setTimeout(() => decorateModal(products().find((product) => product.id === card.dataset.productId)), 0); });
     window.addEventListener("storage", (event) => { if (event.key === window.RAYCRAFTING_STORAGE_KEY || event.key === "raycrafting-cart") { coupon = { code: "", discount: 0 }; decorateProducts(); renderCheckout(); } });

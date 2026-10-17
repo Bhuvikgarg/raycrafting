@@ -418,18 +418,29 @@ function initFairyAtmosphere() {
   if (prefersReducedMotion) return;
 
   const DAISY_SVG = `
-    <svg viewBox="0 0 40 40" class="fairy-daisy-svg" aria-hidden="true">
-      <g transform="translate(20,20)">
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" />
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(45)" />
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(90)" />
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(135)" />
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(180)" />
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(225)" />
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(270)" />
-        <ellipse cx="0" cy="-12" rx="4.5" ry="7" fill="rgba(255, 255, 255, 0.92)" transform="rotate(315)" />
-        <circle cx="0" cy="0" r="5" fill="#f8c850" />
-        <circle cx="-1.5" cy="-1.5" r="1.5" fill="#ffeaa7" opacity="0.85" />
+    <svg viewBox="0 0 50 50" class="fairy-daisy-svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="daisyPistil" cx="40%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#fff5a8" />
+          <stop offset="50%" stop-color="#f8be35" />
+          <stop offset="100%" stop-color="#e08e16" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(25,25)">
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(30)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(60)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(90)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(120)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(150)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(180)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(210)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(240)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(270)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(300)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(330)" />
+        <circle cx="0" cy="0" r="7" fill="url(#daisyPistil)" />
+        <circle cx="-2" cy="-2" r="2.2" fill="#ffffff" opacity="0.65" />
       </g>
     </svg>
   `;
@@ -451,12 +462,14 @@ function initFairyAtmosphere() {
     daisy.className = "floating-daisy";
     daisy.innerHTML = DAISY_SVG;
 
-    const size = Math.floor(Math.random() * 14) + 16;
+    const size = isMobile
+      ? Math.floor(Math.random() * 16) + 28
+      : Math.floor(Math.random() * 24) + 38;
     const left = (Math.random() * 96 + 2).toFixed(1);
-    const duration = (Math.random() * 12 + 14).toFixed(1);
+    const duration = (Math.random() * 10 + 16).toFixed(1);
     const delay = -(Math.random() * 25).toFixed(1);
-    const sway = (Math.random() * 60 - 30).toFixed(0) + "px";
-    const opacity = (Math.random() * 0.35 + 0.45).toFixed(2);
+    const sway = (Math.random() * 70 - 35).toFixed(0) + "px";
+    const opacity = (Math.random() * 0.3 + 0.55).toFixed(2);
 
     daisy.style.setProperty("--size", `${size}px`);
     daisy.style.setProperty("--left", `${left}%`);
