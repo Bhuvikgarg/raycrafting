@@ -271,8 +271,9 @@
                     <div id="addressFormFields">
                       <div class="commerce-grid">
                         <label>Full name<input id="addressName" required minlength="2" maxlength="120" autocomplete="name" placeholder="Bhuvik Garg"></label>
-                        <label>Phone number<input id="addressPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">10-digit Indian mobile number starting with 6–9.</small></label>
+                        <label>Phone number<input id="addressPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">10-digit Indian mobile number.</small></label>
                       </div>
+                      <label id="addressEmailField">Email address <span class="commerce-note">(for order updates &amp; receipt)</span><input id="addressEmail" type="email" required minlength="5" maxlength="120" autocomplete="email" placeholder="you@example.com"><small class="field-help">We'll email your order details &amp; tracking status here.</small></label>
                       <label id="addressLine1Field">House / Flat / Street address<input id="addressLine1" required minlength="5" maxlength="200" autocomplete="street-address" placeholder="e.g. Flat 402, Sunshine Apartments"></label>
                       <label id="addressLine2Field">Landmark or Area <span class="commerce-note">(optional)</span><input id="addressLine2" maxlength="200" autocomplete="address-line2" placeholder="Near City Park"></label>
                       <div class="commerce-grid" id="addressCityStateFields">
@@ -664,7 +665,10 @@
     if (customer) {
       avatar.innerHTML = customer.avatarUrl ? `<img src="${esc(customer.avatarUrl)}" alt="">` : esc(profileInitial());
       label.textContent = customer.name || "Account";
-      if (menuLabel) menuLabel.textContent = `Signed in as ${customer.email || customer.phone || customer.name}`;
+      const displayId = (customer.email && !customer.email.endsWith("@accounts.raycrafting.local"))
+        ? customer.email
+        : (customer.name || (customer.phone ? `+91 ${customer.phone}` : "Customer"));
+      if (menuLabel) menuLabel.textContent = `Signed in as ${displayId}`;
       if (authAction) authAction.textContent = "Sign out";
     } else {
       avatar.textContent = "?";
@@ -824,11 +828,15 @@
     if (customer) {
       if (!$("#addressName").value) $("#addressName").value = customer.name || "";
       if (!$("#addressPhone").value) $("#addressPhone").value = customer.phone || "";
+      if (!$("#addressEmail").value && customer.email && !customer.email.endsWith("@accounts.raycrafting.local")) {
+        $("#addressEmail").value = customer.email;
+      }
     }
 
     if (saved && !isEditingAddress) {
       if (!$("#addressName").value && saved.name) $("#addressName").value = saved.name;
       if (!$("#addressPhone").value && saved.phone) $("#addressPhone").value = saved.phone;
+      if (!$("#addressEmail").value && saved.email) $("#addressEmail").value = saved.email;
       if (!$("#addressLine1").value && saved.line1) $("#addressLine1").value = saved.line1;
       if (!$("#addressLine2").value && saved.line2) $("#addressLine2").value = saved.line2;
       if (!$("#addressCity").value && saved.city) $("#addressCity").value = saved.city;
@@ -839,7 +847,7 @@
         savedCard.hidden = false;
         const namePhone = $("#savedAddressSummaryName");
         const fullText = $("#savedAddressSummaryText");
-        if (namePhone) namePhone.textContent = `${saved.name} · ${saved.phone}`;
+        if (namePhone) namePhone.textContent = `${saved.name} · ${saved.phone}${saved.email ? ` · ${saved.email}` : ""}`;
         if (fullText) fullText.textContent = `${saved.line1}${saved.line2 ? ", " + saved.line2 : ""}, ${saved.city}, ${saved.state} - ${saved.postalCode}`;
       }
       if (formFields) formFields.hidden = true;
@@ -1020,13 +1028,14 @@
   function address() {
     return {
       fulfillmentMethod: selectedFulfillment(),
-      name: $("#addressName").value.trim(),
-      phone: normalizeIndianPhone($("#addressPhone").value),
-      line1: $("#addressLine1").value.trim(),
-      line2: $("#addressLine2").value.trim(),
-      city: $("#addressCity").value.trim(),
-      state: $("#addressState").value.trim(),
-      postalCode: $("#addressPostalCode").value.trim()
+      name: ($("#addressName")?.value || "").trim(),
+      phone: normalizeIndianPhone($("#addressPhone")?.value || ""),
+      email: ($("#addressEmail")?.value || "").trim().toLowerCase(),
+      line1: ($("#addressLine1")?.value || "").trim(),
+      line2: ($("#addressLine2")?.value || "").trim(),
+      city: ($("#addressCity")?.value || "").trim(),
+      state: ($("#addressState")?.value || "").trim(),
+      postalCode: ($("#addressPostalCode")?.value || "").trim()
     };
   }
 
@@ -1056,7 +1065,8 @@
     const selfPickup = value.fulfillmentMethod === "self_pickup";
     const checks = [
       [value.name.length >= 2 && value.name.length <= 120, "Enter your full name."],
-      [validIndianPhone(value.phone), "Enter a valid 10-digit Indian mobile number starting with 6–9."]
+      [validIndianPhone(value.phone), "Enter a valid 10-digit Indian mobile number starting with 6–9."],
+      [Boolean(value.email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email), "Enter a valid email address to receive order details & tracking."]
     ];
     if (!selfPickup) {
       checks.push(
@@ -1069,8 +1079,8 @@
     }
     const failed = checks.find((check) => !check[0]);
     const message = $("#addressMessage");
-    if (message && !selfPickup) {
-      message.textContent = failed ? failed[1] : "";
+    if (message) {
+      message.textContent = failed ? failed[1] : (selfPickup ? "Self pickup selected. You can collect your order directly from Bhuvik's studio." : "");
       message.className = failed ? "commerce-message" : "commerce-message success";
     }
     return { valid: !failed, value, error: failed?.[1] || "" };
@@ -1548,6 +1558,9 @@
           items: getLines().map((item) => ({ id: item.id, quantity: item.quantity })),
           couponCode: coupon.code,
           address: delivery.value,
+          email: delivery.value.email,
+          phone: delivery.value.phone,
+          name: delivery.value.name,
           fulfillmentMethod: delivery.value.fulfillmentMethod,
           paymentMethod,
           giftMessage: localStorage.getItem("raycrafting-gift-note") || ""
@@ -1591,7 +1604,7 @@
         order_id: paymentOrder.orderId,
         prefill: {
           name: delivery.value.name,
-          email: customer?.email || "",
+          email: delivery.value.email || customer?.email || "",
           contact: delivery.value.phone
         },
         config: {

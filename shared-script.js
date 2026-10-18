@@ -78,12 +78,17 @@ function productMarkup(product) {
     }
   }
 
-  return `<article class="product-card" data-product-id="${escapeHtml(product.id)}">
+  const gallery = Array.isArray(product.images) && product.images.length > 1 ? product.images : [];
+  const galleryBadge = gallery.length > 1 ? `<span class="product-gallery-badge">📸 ${gallery.length} views</span>` : "";
+  const altAttrs = gallery.length > 1 ? ` data-alt-img="${escapeHtml(gallery[1])}" data-main-img="${escapeHtml(productImage(product))}"` : "";
+
+  return `<article class="product-card" data-product-id="${escapeHtml(product.id)}"${altAttrs}>
     <div class="product-image art-${escapeHtml(product.art || "default")}" data-action="details">
       <img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)}, a handmade ${escapeHtml(product.category.toLowerCase())}" loading="lazy" />
       <span class="product-tag">${escapeHtml(product.category)}</span>
       ${badge}
       ${discountPill}
+      ${galleryBadge}
       <button class="wish-button ${liked ? "active" : ""}" type="button" data-action="like" aria-label="${liked ? "Remove" : "Add"} ${escapeHtml(product.name)} ${liked ? "from" : "to"} wishlist">${liked ? "♥" : "♡"}</button>
       <div class="product-quick-view-overlay" data-action="details">
         <span class="quick-view-btn">Quick View 👁</span>
@@ -215,7 +220,33 @@ function showToast(message) {
 
 function openProduct(product) {
   selectedProduct = product;
-  document.querySelector("#modalArt").innerHTML = `<img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)}" />`;
+  const gallery = (Array.isArray(product.images) && product.images.length > 0) ? product.images : [productImage(product)];
+  const thumbsHtml = gallery.length > 1 ? `
+    <div class="modal-thumbs">
+      ${gallery.map((src, i) => `
+        <button type="button" class="modal-thumb-btn ${i === 0 ? "active" : ""}" data-src="${escapeHtml(src)}" aria-label="View angle ${i + 1}">
+          <img src="${escapeHtml(src)}" alt="" />
+        </button>
+      `).join("")}
+    </div>
+  ` : "";
+  document.querySelector("#modalArt").innerHTML = `
+    <div class="modal-gallery-wrap">
+      <img id="modalMainImg" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(product.name)}" />
+      ${thumbsHtml}
+    </div>
+  `;
+
+  const modalArt = document.querySelector("#modalArt");
+  modalArt.querySelectorAll(".modal-thumb-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const mainImg = document.querySelector("#modalMainImg");
+      if (mainImg) mainImg.src = btn.dataset.src;
+      modalArt.querySelectorAll(".modal-thumb-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
   document.querySelector("#modalTitle").textContent = product.name;
   document.querySelector("#modalCategory").textContent = product.category;
   document.querySelector("#modalDescription").textContent = product.description;
@@ -302,6 +333,26 @@ productGrid.addEventListener("click", (event) => {
 
   if (event.target.closest("[data-action='details']") || event.target.closest(".product-image") || event.target.closest("h3")) {
     openProduct(product);
+  }
+});
+
+productGrid.addEventListener("mouseover", (event) => {
+  const card = event.target.closest("[data-alt-img]");
+  if (!card) return;
+  const img = card.querySelector(".product-image img");
+  if (img && card.dataset.altImg && !img.src.endsWith(card.dataset.altImg)) {
+    img.src = card.dataset.altImg;
+  }
+});
+
+productGrid.addEventListener("mouseout", (event) => {
+  const card = event.target.closest("[data-alt-img]");
+  if (!card) return;
+  if (!card.contains(event.relatedTarget)) {
+    const img = card.querySelector(".product-image img");
+    if (img && card.dataset.mainImg) {
+      img.src = card.dataset.mainImg;
+    }
   }
 });
 

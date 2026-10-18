@@ -181,6 +181,7 @@ ensureColumn("products", "badge", "TEXT");
 ensureColumn("products", "dimensions", "TEXT");
 ensureColumn("products", "materials", "TEXT");
 ensureColumn("products", "care", "TEXT");
+ensureColumn("products", "images_json", "TEXT");
 ensureColumn("orders", "gift_message", "TEXT");
 ensureColumn("custom_orders", "quoted_price", "REAL");
 ensureColumn("custom_orders", "buyer_price_request", "INTEGER DEFAULT 0");
@@ -202,9 +203,15 @@ const seedPath = path.join(ROOT, "products-seed.json");
 if (fs.existsSync(seedPath)) {
   try {
     const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
-    const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, category=excluded.category, price=excluded.price, original_price=excluded.original_price, detail=excluded.detail, description=excluded.description, featured=excluded.featured, art=excluded.art, image=CASE WHEN excluded.image != '' THEN excluded.image ELSE products.image END, active=excluded.active, badge=excluded.badge, dimensions=excluded.dimensions, materials=excluded.materials, care=excluded.care`);
+    const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, category=excluded.category, price=excluded.price, original_price=excluded.original_price, detail=excluded.detail, description=excluded.description, featured=excluded.featured, art=excluded.art, image=CASE WHEN excluded.image != '' THEN excluded.image ELSE products.image END, images_json=excluded.images_json, active=excluded.active, badge=excluded.badge, dimensions=excluded.dimensions, materials=excluded.materials, care=excluded.care`);
+    const seedIds = [];
     for (const p of seedProducts) {
-      productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || ""), p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
+      seedIds.push(String(p.id));
+      const imgs = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
+      productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
+    }
+    if (seedIds.length) {
+      db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${seedIds.map(() => "?").join(",")})`).run(...seedIds);
     }
   } catch (err) {
     console.error("Failed to seed products:", err.message);
@@ -226,27 +233,278 @@ const SECURITY_HEADERS = {
   "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://accounts.google.com; frame-src https://checkout.razorpay.com https://api.razorpay.com https://accounts.google.com; connect-src 'self' https://api.razorpay.com https://accounts.google.com https://api.postalpincode.in; form-action 'self'"
 };
 function htmlEscape(value = "") { return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character])); }
-async function notifyCustomerOrderStatus(order, status, reason) {
-  if (!RESEND_API_KEY || !EMAIL_FROM || !order.customer_email) return;
-  const copy = {
-    paid: ["Payment received", "Your payment was received and your order is confirmed."],
-    processing: ["Order accepted", "The seller accepted your order and is preparing it."],
-    shipped: ["Order shipped", "Your order has been dispatched."],
-    out_for_delivery: ["Out for delivery", "Your order is with the delivery partner and should reach you soon."],
-    delivered: ["Order delivered", "Your order has been marked as delivered."],
-    cancelled: ["Order cancelled", "Your order has been cancelled."],
-    declined: ["Order declined", "The seller could not fulfil your order."],
-    returned: ["Return completed", "Your order has been marked as returned."],
-    failed_payment: ["Payment not completed", "Your payment was not completed. You can retry from My orders."]
-  }[status] || ["Order update", "Your order status is now " + status.replaceAll("_", " ") + "."];
-  const subject = `Raycrafting: ${copy[0]} — ${order.id}`;
-  const safeName = htmlEscape(order.customer_name || "there");
-  const safeReason = reason ? `<p><strong>Seller note:</strong> ${htmlEscape(reason)}</p>` : "";
-  const html = `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#252629"><h2>${copy[0]}</h2><p>Hi ${safeName},</p><p>${copy[1]}</p><p>Order: <strong>${htmlEscape(order.id)}</strong></p>${safeReason}<p>Sign in to Raycrafting to view the latest status or contact the studio for help.</p><p>— Raycrafting</p></div>`;
-  try {
-    const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` }, body: JSON.stringify({ from: EMAIL_FROM, reply_to: SUPPORT_EMAIL, to: [order.customer_email], subject, html }) });
-    if (!response.ok) console.error("Customer status email failed", response.status);
-  } catch (error) { console.error("Customer status email error", error.message); }
+
+async function notifyCustomerOrderStatus(order, status, reason = "") {
+  const apiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
+  const emailFrom = getSetting("email_from", EMAIL_FROM || "Raycrafting <orders@raycrafting.store>");
+  const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co");
+  const supportPhone = getSetting("support_phone", SUPPORT_PHONE || "");
+
+  let recipientEmail = String(order.customer_email || order.email || "").trim().toLowerCase();
+  let recipientName = String(order.customer_name || order.name || "").trim();
+
+  let orderData = order;
+  if (!orderData.items || !orderData.total || !orderData.address_json) {
+    try {
+      const fullOrder = db.prepare("SELECT o.*, c.name customer_name, c.email customer_email, c.phone customer_phone FROM orders o JOIN customers c ON c.id=o.customer_id WHERE o.id=?").get(order.id);
+      if (fullOrder) {
+        const items = db.prepare("SELECT * FROM order_items WHERE order_id=?").all(order.id);
+        orderData = { ...fullOrder, items };
+        if (!recipientEmail || recipientEmail.endsWith("@accounts.raycrafting.local")) {
+          recipientEmail = String(fullOrder.customer_email || "").trim().toLowerCase();
+        }
+        if (!recipientName) recipientName = String(fullOrder.customer_name || "").trim();
+      }
+    } catch (e) {
+      console.error("Error loading order for email:", e.message);
+    }
+  }
+
+  let address = orderData.address;
+  if (!address && orderData.address_json) {
+    try { address = JSON.parse(orderData.address_json); } catch {}
+  }
+  address = address || {};
+
+  if ((!recipientEmail || recipientEmail.endsWith("@accounts.raycrafting.local")) && address.email && !address.email.endsWith("@accounts.raycrafting.local")) {
+    recipientEmail = address.email.trim().toLowerCase();
+  }
+  if (!recipientName && address.name) recipientName = address.name;
+  if (!recipientName) recipientName = "Friend";
+
+  const isRealEmail = recipientEmail && !recipientEmail.endsWith("@accounts.raycrafting.local") && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail);
+
+  const statusConfig = {
+    paid: {
+      headline: "🌸 Order Confirmed & Paid",
+      badge: "Paid Online",
+      badgeBg: "#dfeada",
+      badgeColor: "#557351",
+      intro: "Thank you for your order! Your payment was received and Bhuvik is carefully handcrafting your pieces."
+    },
+    processing: {
+      headline: "🌸 Order Confirmed & Crafting",
+      badge: orderData.payment_method === "cod" ? "Pay on Delivery" : "Confirmed",
+      badgeBg: "#dfeada",
+      badgeColor: "#557351",
+      intro: orderData.payment_method === "cod"
+        ? "Thank you for your order! Your Pay on Delivery order is confirmed and Bhuvik has begun handcrafting your pieces."
+        : "The studio has accepted your order and Bhuvik is handcrafting your pieces."
+    },
+    shipped: {
+      headline: "📦 Your Order Has Shipped!",
+      badge: "Dispatched",
+      badgeBg: "#e3effa",
+      badgeColor: "#1d6fb8",
+      intro: "Exciting news! Your handcrafted order is on its way to your doorstep."
+    },
+    out_for_delivery: {
+      headline: "🚚 Out for Delivery Today",
+      badge: "Out for Delivery",
+      badgeBg: "#e3effa",
+      badgeColor: "#1d6fb8",
+      intro: "Your package is with the delivery partner and should reach you today!"
+    },
+    delivered: {
+      headline: "✨ Order Delivered",
+      badge: "Delivered",
+      badgeBg: "#dfeada",
+      badgeColor: "#557351",
+      intro: "Your order has been delivered! We hope your handmade pieces bring warm sunshine to your day."
+    },
+    cancel_requested: {
+      headline: "Notice: Cancellation Requested",
+      badge: "Cancellation Requested",
+      badgeBg: "#fff1cf",
+      badgeColor: "#98721a",
+      intro: "We received your request to cancel this order. Bhuvik is reviewing it."
+    },
+    cancelled: {
+      headline: "Order Cancelled",
+      badge: "Cancelled",
+      badgeBg: "#fbe0da",
+      badgeColor: "#a74232",
+      intro: "Your order has been cancelled. If any online payment was captured, a full refund will be processed to your source account."
+    },
+    return_requested: {
+      headline: "Return Request Received",
+      badge: "Return Requested",
+      badgeBg: "#fff1cf",
+      badgeColor: "#98721a",
+      intro: "We received your return request under our 3-day handcrafted studio policy. Bhuvik will review the details within 24 hours."
+    },
+    returned: {
+      headline: "Return Completed",
+      badge: "Returned",
+      badgeBg: "#dfeada",
+      badgeColor: "#557351",
+      intro: "Your return has been processed. Thank you for your patience."
+    },
+    declined: {
+      headline: "Order Declined",
+      badge: "Declined",
+      badgeBg: "#fbe0da",
+      badgeColor: "#a74232",
+      intro: "The studio could not fulfill this order."
+    },
+    failed_payment: {
+      headline: "Payment Incomplete",
+      badge: "Payment Incomplete",
+      badgeBg: "#fbe0da",
+      badgeColor: "#a74232",
+      intro: "Your online payment could not be completed. You can retry payment anytime from 'My orders' or select Pay on Delivery."
+    }
+  };
+
+  const currentCfg = statusConfig[status] || {
+    headline: "Order Update: " + status.replaceAll("_", " "),
+    badge: status.replaceAll("_", " "),
+    badgeBg: "#f1eee8",
+    badgeColor: "#555",
+    intro: "There is an update on your Raycrafting order."
+  };
+
+  const subject = `Raycrafting: ${currentCfg.headline} — #${orderData.id}`;
+  const safeName = htmlEscape(recipientName);
+  const items = Array.isArray(orderData.items) ? orderData.items : [];
+
+  const itemRowsHtml = items.map((it) => {
+    const unitPrice = Number(it.unit_price) || 0;
+    const qty = Number(it.quantity) || 1;
+    const lineTotal = Number(it.line_total) || (unitPrice * qty);
+    return `
+      <tr style="border-bottom:1px solid #eee8e0;">
+        <td style="padding:10px 0;font-size:13px;color:#252629;">
+          <strong>${htmlEscape(it.name || "Handcrafted Piece")}</strong>
+          <div style="font-size:11px;color:#7e8087;">₹${unitPrice.toFixed(0)} × ${qty}</div>
+        </td>
+        <td style="padding:10px 0;text-align:right;font-size:13px;font-weight:600;color:#252629;">
+          ₹${lineTotal.toFixed(0)}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  const subtotal = Number(orderData.subtotal) || items.reduce((s, i) => s + (Number(i.line_total) || 0), 0);
+  const discount = Number(orderData.discount) || 0;
+  const shipping = Number(orderData.shipping) || 0;
+  const total = Number(orderData.total) || (subtotal - discount + shipping);
+
+  const addressText = orderData.fulfillment_method === "self_pickup" || address.fulfillmentMethod === "self_pickup"
+    ? "Studio Self-Pickup"
+    : [address.line1, address.line2, address.city, address.state && address.postalCode ? `${address.state} - ${address.postalCode}` : (address.state || address.postalCode)].filter(Boolean).map(htmlEscape).join(", ");
+
+  const cleanSupportPhone = String(supportPhone || "").replace(/\D/g, "");
+  const whatsappUrl = cleanSupportPhone
+    ? `https://wa.me/${cleanSupportPhone.startsWith("91") ? cleanSupportPhone : "91" + cleanSupportPhone}?text=${encodeURIComponent(`Hi Bhuvik, I have a question regarding order #${orderData.id}`)}`
+    : "";
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;padding:24px 12px;background:#f7f4ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#252629;line-height:1.5;">
+      <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #ebd9cc;border-radius:6px;overflow:hidden;box-shadow:0 8px 30px rgba(75,55,64,0.06);">
+        <div style="background:#4b3740;padding:22px 24px;text-align:center;">
+          <h1 style="margin:0;font-size:24px;color:#fff;letter-spacing:-0.02em;font-family:Georgia,serif;">Raycrafting</h1>
+          <p style="margin:4px 0 0;font-size:11px;color:#e8d4cf;text-transform:uppercase;letter-spacing:0.08em;">Flowers That Keep Their Sunshine</p>
+        </div>
+        <div style="padding:28px 24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <span style="font-size:12px;color:#7e8087;font-family:monospace;">ORDER #${htmlEscape(orderData.id)}</span>
+            <span style="background:${currentCfg.badgeBg};color:${currentCfg.badgeColor};padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">${htmlEscape(currentCfg.badge)}</span>
+          </div>
+          <h2 style="margin:0 0 10px;font-size:20px;color:#252629;font-family:Georgia,serif;">${currentCfg.headline}</h2>
+          <p style="margin:0 0 16px;font-size:13px;color:#494b50;">Hi ${safeName},</p>
+          <p style="margin:0 0 18px;font-size:13px;color:#494b50;line-height:1.6;">${currentCfg.intro}</p>
+          ${reason ? `<div style="background:#fff6ee;border-left:3px solid #e76e59;padding:10px 14px;margin-bottom:20px;border-radius:3px;font-size:12px;color:#6b443c;"><strong>Note:</strong> ${htmlEscape(reason)}</div>` : ""}
+
+          <div style="border-top:1.5px solid #eee8e0;border-bottom:1.5px solid #eee8e0;padding:14px 0;margin:20px 0;">
+            <h3 style="margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:0.05em;color:#7e8087;">Order Summary</h3>
+            <table style="width:100%;border-collapse:collapse;">
+              ${itemRowsHtml || `<tr><td style="padding:6px 0;font-size:12px;color:#7e8087;">Handcrafted piece</td><td style="text-align:right;font-weight:600;">₹${total.toFixed(0)}</td></tr>`}
+            </table>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #eee8e0;font-size:12px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#666;">
+                <span>Subtotal</span>
+                <span>₹${subtotal.toFixed(0)}</span>
+              </div>
+              ${discount > 0 ? `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#557351;font-weight:600;"><span>Discount (${htmlEscape(orderData.coupon_code || "Coupon")})</span><span>-₹${discount.toFixed(0)}</span></div>` : ""}
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;color:#666;">
+                <span>Delivery</span>
+                <span>${shipping === 0 ? "FREE" : `₹${shipping.toFixed(0)}`}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #eee8e0;font-size:15px;font-weight:700;color:#252629;">
+                <span>Total</span>
+                <span>₹${total.toFixed(0)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fbfbf9;border:1px solid #eee8e0;border-radius:4px;padding:14px 16px;margin-bottom:22px;font-size:12px;">
+            <div style="color:#7e8087;text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.05em;margin-bottom:6px;">Delivery Details</div>
+            <div style="font-weight:600;color:#252629;margin-bottom:2px;">${safeName} ${address.phone ? `· ${htmlEscape(address.phone)}` : ""}</div>
+            <div style="color:#5f6368;line-height:1.45;">${addressText || "Delivery address registered"}</div>
+            <div style="margin-top:6px;color:#7e8087;font-size:11px;">Payment: <strong>${orderData.payment_method === "cod" ? "Pay on Delivery (Doorstep Cash / UPI)" : "Paid Online via Razorpay"}</strong></div>
+          </div>
+
+          ${whatsappUrl ? `<div style="text-align:center;margin:22px 0 12px;"><a href="${whatsappUrl}" target="_blank" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:12px;font-weight:600;">💬 Chat with Bhuvik on WhatsApp</a></div>` : ""}
+          <div style="text-align:center;font-size:11px;color:#9aa0a6;margin-top:18px;">
+            Questions or custom inquiries? Reply to this email or contact <a href="mailto:${htmlEscape(supportEmail)}" style="color:#e76e59;text-decoration:none;">${htmlEscape(supportEmail)}</a>.
+          </div>
+        </div>
+        <div style="background:#faf8f5;border-top:1px solid #eee8e0;padding:14px;text-align:center;font-size:11px;color:#9aa0a6;">
+          Handcrafted in small batches with love · Raycrafting Studio
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  if (isRealEmail && apiKey) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          from: emailFrom,
+          reply_to: supportEmail,
+          to: [recipientEmail],
+          subject,
+          html
+        })
+      });
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`[Resend Error] Customer status email failed (${response.status}):`, errText);
+      } else {
+        console.log(`[Order Email] Dispatched live email to ${recipientEmail} for Order #${orderData.id} (${status})`);
+      }
+    } catch (error) {
+      console.error("[Resend Error] Network failure sending email:", error.message);
+    }
+  } else {
+    console.log(`[Order Email] ${apiKey ? "Skipped (no real customer email)" : "Simulated (No RESEND_API_KEY in .env/Settings)"} -> To: ${recipientEmail || "none"}, Order: #${orderData.id}, Status: ${status}, Items: ${items.length}, Total: ₹${total}`);
+  }
+
+  // Also notify studio owner on order placement, cancellation, or return
+  if (apiKey && supportEmail && ["processing", "paid", "cancel_requested", "cancelled", "return_requested"].includes(status)) {
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          from: emailFrom,
+          reply_to: isRealEmail ? recipientEmail : supportEmail,
+          to: [supportEmail],
+          subject: `[Studio Alert] Order #${orderData.id}: ${currentCfg.headline}`,
+          html: `<div style="font-family:sans-serif;padding:16px;"><h3>Studio Alert: ${currentCfg.headline}</h3><p><strong>Order:</strong> #${orderData.id}</p><p><strong>Customer:</strong> ${safeName} (${recipientEmail || "no email"}, ${address.phone || "no phone"})</p><p><strong>Status:</strong> ${status}</p><p><strong>Total:</strong> ₹${total}</p><p><strong>Items:</strong> ${items.map(i => `${i.name} (x${i.quantity})`).join(", ")}</p>${reason ? `<p><strong>Reason:</strong> ${htmlEscape(reason)}</p>` : ""}<hr><p>Log into your studio admin to manage this order.</p></div>`
+        })
+      });
+    } catch (e) {
+      console.error("[Resend Error] Studio owner alert failed:", e.message);
+    }
+  }
 }
 function json(res, status, data) {
   const body = JSON.stringify(data);
@@ -342,9 +600,11 @@ function cleanAddress(input, fulfillmentMethod = "shiprocket") {
   };
   const name = field("name", 120);
   const phone = normalizeIndianPhone(input.phone);
+  const rawEmail = String(input.email || "").trim().toLowerCase().slice(0, 254);
+  const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail) ? rawEmail : "";
   if (name.length < 2) throw new Error("Enter your full name.");
   if (!validIndianPhone(input.phone)) throw new Error("Enter a valid 10-digit Indian mobile number starting with 6–9.");
-  if (fulfillmentMethod === "self_pickup") return { name, phone, line1: "", line2: "", city: "", state: "", postalCode: "" };
+  if (fulfillmentMethod === "self_pickup") return { name, phone, email, line1: "", line2: "", city: "", state: "", postalCode: "" };
   const line1 = field("line1", 200);
   const line2 = field("line2", 200, false);
   const city = field("city", 80);
@@ -353,7 +613,7 @@ function cleanAddress(input, fulfillmentMethod = "shiprocket") {
   if (name.length < 2 || line1.length < 5 || city.length < 2 || state.length < 2) throw new Error("Enter a complete delivery address.");
   if (!validIndianPhone(input.phone)) throw new Error("Enter a valid 10-digit Indian mobile number starting with 6–9.");
   if (!validIndianPincode(postalCode)) throw new Error("Enter a valid 6-digit Indian PIN code starting with 1–8.");
-  return { name, phone, line1, line2, city, state, postalCode };
+  return { name, phone, email, line1, line2, city, state, postalCode };
 }
 function shiprocketConfigError() {
   const error = new Error("Shiprocket delivery is not configured yet. Add Shiprocket API credentials and the seller pickup PIN.");
@@ -555,13 +815,27 @@ async function api(req, res, pathname, body, url) {
       });
     }
     if (req.method === "GET" && pathname === "/api/products") {
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
-      return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0 })) });
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
+      return json(res, 200, {
+        products: products.map((product) => {
+          let images = [];
+          try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
+          if (!images.length && product.image) images = [product.image];
+          return { ...product, images, originalPrice: product.original_price || 0 };
+        })
+      });
     }
     if (req.method === "GET" && pathname === "/api/admin/products") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
-      return json(res, 200, { products: products.map((product) => ({ ...product, originalPrice: product.original_price || 0, active: product.active !== 0 })) });
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
+      return json(res, 200, {
+        products: products.map((product) => {
+          let images = [];
+          try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
+          if (!images.length && product.image) images = [product.image];
+          return { ...product, images, originalPrice: product.original_price || 0, active: product.active !== 0 };
+        })
+      });
     }
     if (req.method === "POST" && pathname === "/api/admin/auth") {
       if (!allowRequest(req, "admin-auth", 8)) return json(res, 429, { error: "Too many attempts. Try again later." });
@@ -690,10 +964,13 @@ async function api(req, res, pathname, body, url) {
     }
     if (req.method === "POST" && pathname === "/api/orders") {
       let customer = customerFromRequest(req);
+      const suppliedEmail = String(body.email || body.address?.email || "").trim().toLowerCase();
+      const isRealEmail = suppliedEmail && !suppliedEmail.endsWith("@accounts.raycrafting.local") && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(suppliedEmail);
+
       if (!customer) {
         const phone = normalizeIndianPhone(body.phone || body.address?.phone);
         const name = String(body.name || body.address?.name || "Raycrafting Customer").trim();
-        const email = String(body.email || body.address?.email || (phone ? phoneCustomerEmail(phone) : "")).trim().toLowerCase();
+        const email = isRealEmail ? suppliedEmail : (phone ? phoneCustomerEmail(phone) : "");
         if (phone && validIndianPhone(phone)) {
           let row = db.prepare("SELECT id, name, email, phone FROM customers WHERE phone=? ORDER BY created_at ASC LIMIT 1").get(phone);
           if (!row) {
@@ -701,11 +978,22 @@ async function api(req, res, pathname, body, url) {
             const secret = hashPassword(crypto.randomBytes(32).toString("hex"));
             db.prepare("INSERT INTO customers (id,name,email,phone,password_hash,password_salt,created_at) VALUES (?,?,?,?,?,?,?)").run(customerId, name, email, phone, secret.hash, secret.salt, now());
             row = { id: customerId, name, email, phone };
+          } else if (isRealEmail && row.email.endsWith("@accounts.raycrafting.local")) {
+            try {
+              db.prepare("UPDATE customers SET email=? WHERE id=?").run(suppliedEmail, row.id);
+              row.email = suppliedEmail;
+            } catch {}
           }
           const token = issueSession(row.id);
           customer = { ...row, token };
         }
+      } else if (customer && isRealEmail && customer.email.endsWith("@accounts.raycrafting.local")) {
+        try {
+          db.prepare("UPDATE customers SET email=? WHERE id=?").run(suppliedEmail, customer.id);
+          customer.email = suppliedEmail;
+        } catch {}
       }
+
       if (!customer) return json(res, 401, { error: "Please enter your mobile number and address." });
       const items = Array.isArray(body.items) ? body.items : [];
       const requestedFulfillment = String(body.fulfillmentMethod || "manual");
@@ -713,6 +1001,8 @@ async function api(req, res, pathname, body, url) {
       const paymentMethod = body.paymentMethod === "cod" ? "cod" : "razorpay";
       let address;
       try { address = cleanAddress(body.address, fulfillmentMethod); } catch (error) { return json(res, 400, { error: error.message }); }
+
+      if (isRealEmail && !address.email) address.email = suppliedEmail;
 
       if (!items.length) return json(res, 400, { error: "Your bag is empty." });
       const getProduct = db.prepare("SELECT * FROM products WHERE id=? AND active=1"); const verified = []; let subtotal = 0;
@@ -729,7 +1019,20 @@ async function api(req, res, pathname, body, url) {
       } catch (error) { db.exec("ROLLBACK"); throw error; }
 
       if (paymentMethod === "cod") {
-        void notifyCustomerOrderStatus({ id: orderId, total, items: verified, customer_name: customer.name, customer_email: customer.email }, "processing", "Pay on Delivery confirmed");
+        void notifyCustomerOrderStatus({
+          id: orderId,
+          total,
+          subtotal,
+          discount: coupon.discount,
+          shipping,
+          coupon_code: coupon.code,
+          items: verified.map(v => ({ name: v.product.name, unit_price: v.product.price, quantity: v.quantity, line_total: v.lineTotal })),
+          customer_name: customer.name || address.name,
+          customer_email: isRealEmail ? suppliedEmail : (customer.email && !customer.email.endsWith("@accounts.raycrafting.local") ? customer.email : address.email),
+          payment_method: "cod",
+          fulfillment_method: fulfillmentMethod,
+          address
+        }, "processing", "Pay on Delivery confirmed");
       }
 
       return json(res, 201, { orderId, token: customer.token, subtotal, discount: coupon.discount, shipping, total, currency: "INR", status: initialStatus, paymentMethod, fulfillmentMethod });
@@ -743,6 +1046,7 @@ async function api(req, res, pathname, body, url) {
       if (action === "cancel") {
         if (!["pending_payment", "paid", "processing"].includes(order.status)) return json(res, 400, { error: "This order cannot be cancelled in its current status." });
         db.prepare("UPDATE orders SET status='cancel_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
+        void notifyCustomerOrderStatus({ ...order, customer_name: customer.name, customer_email: customer.email }, "cancel_requested", reason);
       } else if (action === "return") {
         if (order.status !== "delivered") {
           return json(res, 400, { error: "Returns are only available after your order has been delivered." });
@@ -753,6 +1057,7 @@ async function api(req, res, pathname, body, url) {
           return json(res, 400, { error: "The 3-day return window has closed. Handcrafted pieces can only be returned within 3 days of delivery for genuine defects." });
         }
         db.prepare("UPDATE orders SET status='return_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
+        void notifyCustomerOrderStatus({ ...order, customer_name: customer.name, customer_email: customer.email }, "return_requested", reason);
       } else return json(res, 400, { error: "Unsupported order action." });
       return json(res, 200, { ok: true, orderId: order.id, status: action === "cancel" ? "cancel_requested" : "return_requested" });
     }
@@ -889,10 +1194,14 @@ async function api(req, res, pathname, body, url) {
     }
     if (req.method === "GET" && pathname === "/api/admin/settings") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const currentApiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
       return json(res, 200, {
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
         supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
-        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || "")
+        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""),
+        emailFrom: getSetting("email_from", EMAIL_FROM || "Raycrafting <orders@raycrafting.store>"),
+        resendConfigured: Boolean(currentApiKey),
+        resendApiKeyMasked: currentApiKey ? (currentApiKey.slice(0, 5) + "..." + currentApiKey.slice(-4)) : ""
       });
     }
     if (req.method === "POST" && pathname === "/api/admin/settings") {
@@ -900,11 +1209,16 @@ async function api(req, res, pathname, body, url) {
       if (typeof body.supportPhone === "string") setSetting("support_phone", body.supportPhone.trim());
       if (typeof body.supportEmail === "string") setSetting("support_email", body.supportEmail.trim());
       if (typeof body.instagramHandle === "string") setSetting("instagram_handle", body.instagramHandle.trim().replace(/^@/, ""));
+      if (typeof body.emailFrom === "string" && body.emailFrom.trim()) setSetting("email_from", body.emailFrom.trim());
+      if (typeof body.resendApiKey === "string" && body.resendApiKey.trim()) setSetting("resend_api_key", body.resendApiKey.trim());
+      const currentApiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
       return json(res, 200, {
         ok: true,
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
         supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
-        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || "")
+        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""),
+        emailFrom: getSetting("email_from", EMAIL_FROM || "Raycrafting <orders@raycrafting.store>"),
+        resendConfigured: Boolean(currentApiKey)
       });
     }
     if (req.method === "POST" && pathname === "/api/admin/orders/fulfillment") {
@@ -928,18 +1242,22 @@ async function api(req, res, pathname, body, url) {
       const deliveredAt = status === "delivered" ? (order.delivered_at || now()) : order.delivered_at;
       db.prepare("UPDATE orders SET status=?,decision_reason=?,delivered_at=?,updated_at=? WHERE id=?").run(status, reason || null, deliveredAt || null, now(), order.id);
       if (changed) void notifyCustomerOrderStatus(order, status, reason);
-      return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null, emailNotificationConfigured: Boolean(RESEND_API_KEY && EMAIL_FROM) });
+      const currentApiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
+      return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null, emailNotificationConfigured: Boolean(currentApiKey) });
     }
     if (req.method === "POST" && pathname === "/api/admin/products/sync") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const products = Array.isArray(body.products) ? body.products : [];
       const ids = products.map((product) => String(product.id || "")).filter(Boolean);
-      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,active) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,active=excluded.active`);
+      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=COALESCE(excluded.images_json, products.images_json),active=excluded.active`);
       db.exec("BEGIN");
       try {
         if (ids.length) db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
         else db.prepare("UPDATE products SET active=0").run();
-        for (const product of products) upsert.run(String(product.id), String(product.name || "Untitled product"), String(product.category || "Other"), Number(product.price) || 0, Number(product.originalPrice) || 0, String(product.detail || ""), String(product.description || ""), Number(product.featured) || 1, String(product.art || "custom"), String(product.image || ""), product.active === false || product.active === 0 ? 0 : 1);
+        for (const product of products) {
+          const imgs = Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []);
+          upsert.run(String(product.id), String(product.name || "Untitled product"), String(product.category || "Other"), Number(product.price) || 0, Number(product.originalPrice) || 0, String(product.detail || ""), String(product.description || ""), Number(product.featured) || 1, String(product.art || "custom"), String(product.image || imgs[0] || ""), JSON.stringify(imgs), product.active === false || product.active === 0 ? 0 : 1);
+        }
         db.exec("COMMIT");
       } catch (error) { db.exec("ROLLBACK"); throw error; }
       return json(res, 200, { ok: true, count: products.length });
