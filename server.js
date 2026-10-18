@@ -158,6 +158,10 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS admin_sessions (
+    token TEXT PRIMARY KEY,
+    expires_at INTEGER NOT NULL
+  );
 `);
 
 function ensureColumn(table, column, definition) {
@@ -187,10 +191,26 @@ ensureColumn("custom_orders", "quoted_price", "REAL");
 ensureColumn("custom_orders", "buyer_price_request", "INTEGER DEFAULT 0");
 ensureColumn("custom_orders", "budget_hint", "TEXT");
 
+function parseInstagramUsername(val) {
+  if (!val) return "";
+  let clean = String(val).trim();
+  clean = clean.replace(/^https?:\/\//i, "");
+  clean = clean.replace(/^(www\.)?instagram\.com\//i, "");
+  clean = clean.replace(/^(www\.)?ig\.me\/m\//i, "");
+  clean = clean.replace(/^@+/, "");
+  clean = clean.replace(/[\/\?#].*$/, "").trim();
+  return clean;
+}
+
 function getSetting(key, fallback = "") {
   try {
     const row = db.prepare("SELECT value FROM settings WHERE key=?").get(key);
-    return row && row.value ? row.value : fallback;
+    if (!row || row.value === undefined || row.value === null) return fallback;
+    let val = String(row.value).trim();
+    if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
+      val = val.slice(1, -1).trim();
+    }
+    return val || fallback;
   } catch {
     return fallback;
   }
@@ -560,14 +580,30 @@ function allowRequest(req, bucket, limit, windowMs = 15 * 60 * 1000) {
 }
 function issueAdminSession() {
   const token = crypto.randomBytes(32).toString("hex");
-  ADMIN_SESSIONS.set(token, Date.now() + 1000 * 60 * 60 * 8);
+  const expiresAt = Date.now() + 1000 * 60 * 60 * 24 * 30; // 30 days
+  try {
+    db.prepare("INSERT INTO admin_sessions (token, expires_at) VALUES (?, ?) ON CONFLICT(token) DO UPDATE SET expires_at=excluded.expires_at").run(token, expiresAt);
+  } catch {}
+  ADMIN_SESSIONS.set(token, expiresAt);
   return token;
 }
 function adminTokenFromRequest(req) {
   const token = String(req.headers["x-admin-token"] || "").trim();
-  const expiresAt = ADMIN_SESSIONS.get(token);
-  if (!token || !expiresAt) return "";
-  if (Date.now() > expiresAt) { ADMIN_SESSIONS.delete(token); return ""; }
+  if (!token) return "";
+  let expiresAt = ADMIN_SESSIONS.get(token);
+  if (!expiresAt) {
+    try {
+      const row = db.prepare("SELECT expires_at FROM admin_sessions WHERE token=?").get(token);
+      if (row) expiresAt = row.expires_at;
+    } catch {}
+  }
+  if (!expiresAt) return "";
+  if (Date.now() > expiresAt) {
+    try { db.prepare("DELETE FROM admin_sessions WHERE token=?").run(token); } catch {}
+    ADMIN_SESSIONS.delete(token);
+    return "";
+  }
+  ADMIN_SESSIONS.set(token, expiresAt);
   return token;
 }
 function customerFromRequest(req) {
@@ -796,9 +832,9 @@ async function api(req, res, pathname, body, url) {
     if (req.method === "GET" && pathname === "/api/config") {
       const supportPhone = getSetting("support_phone", SUPPORT_PHONE || "");
       const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co");
-      const rawInsta = getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || "");
-      const cleanInsta = rawInsta.replace(/^@/, "").trim();
-      const instagramUrl = cleanInsta ? (cleanInsta.startsWith("http") ? cleanInsta : `https://ig.me/m/${cleanInsta}`) : "";
+      const cleanInsta = parseInstagramUsername(getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""));
+      const instagramUrl = cleanInsta ? `https://ig.me/m/${cleanInsta}` : "";
+      const bannerQuote = getSetting("banner_quote", "“Where flowers bloom, so does hope.” — Handcrafted with love");
       return json(res, 200, {
         currency: "INR",
         razorpayEnabled: Boolean(RAZORPAY_KEY_ID),
@@ -808,6 +844,7 @@ async function api(req, res, pathname, body, url) {
         supportPhone,
         instagramHandle: cleanInsta ? `@${cleanInsta}` : "",
         instagramUrl,
+        bannerQuote,
         googleEnabled: Boolean(GOOGLE_CLIENT_ID),
         googleClientId: GOOGLE_CLIENT_ID || null,
         selfPickupEnabled: true,
@@ -844,7 +881,11 @@ async function api(req, res, pathname, body, url) {
       return json(res, 200, { token: issueAdminSession(), expiresIn: 8 * 60 * 60 });
     }
     if (req.method === "POST" && pathname === "/api/admin/logout") {
-      const token = adminTokenFromRequest(req); if (token) ADMIN_SESSIONS.delete(token);
+      const token = adminTokenFromRequest(req);
+      if (token) {
+        ADMIN_SESSIONS.delete(token);
+        try { db.prepare("DELETE FROM admin_sessions WHERE token=?").run(token); } catch {}
+      }
       return json(res, 200, { ok: true });
     }
     if (req.method === "POST" && pathname === "/api/auth/register") {
@@ -1195,10 +1236,13 @@ async function api(req, res, pathname, body, url) {
     if (req.method === "GET" && pathname === "/api/admin/settings") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const currentApiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
+      const cleanInsta = parseInstagramUsername(getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""));
       return json(res, 200, {
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
         supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
-        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""),
+        instagramHandle: cleanInsta,
+        instagramUrl: cleanInsta ? `https://ig.me/m/${cleanInsta}` : "",
+        bannerQuote: getSetting("banner_quote", "“Where flowers bloom, so does hope.” — Handcrafted with love"),
         emailFrom: getSetting("email_from", EMAIL_FROM || "Raycrafting <orders@raycrafting.store>"),
         resendConfigured: Boolean(currentApiKey),
         resendApiKeyMasked: currentApiKey ? (currentApiKey.slice(0, 5) + "..." + currentApiKey.slice(-4)) : ""
@@ -1208,15 +1252,19 @@ async function api(req, res, pathname, body, url) {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       if (typeof body.supportPhone === "string") setSetting("support_phone", body.supportPhone.trim());
       if (typeof body.supportEmail === "string") setSetting("support_email", body.supportEmail.trim());
-      if (typeof body.instagramHandle === "string") setSetting("instagram_handle", body.instagramHandle.trim().replace(/^@/, ""));
+      if (typeof body.instagramHandle === "string") setSetting("instagram_handle", parseInstagramUsername(body.instagramHandle));
+      if (typeof body.bannerQuote === "string" && body.bannerQuote.trim()) setSetting("banner_quote", body.bannerQuote.trim());
       if (typeof body.emailFrom === "string" && body.emailFrom.trim()) setSetting("email_from", body.emailFrom.trim());
       if (typeof body.resendApiKey === "string" && body.resendApiKey.trim()) setSetting("resend_api_key", body.resendApiKey.trim());
       const currentApiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
+      const cleanInsta = parseInstagramUsername(getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""));
       return json(res, 200, {
         ok: true,
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
         supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
-        instagramHandle: getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""),
+        instagramHandle: cleanInsta,
+        instagramUrl: cleanInsta ? `https://ig.me/m/${cleanInsta}` : "",
+        bannerQuote: getSetting("banner_quote", "“Where flowers bloom, so does hope.” — Handcrafted with love"),
         emailFrom: getSetting("email_from", EMAIL_FROM || "Raycrafting <orders@raycrafting.store>"),
         resendConfigured: Boolean(currentApiKey)
       });

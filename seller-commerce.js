@@ -33,14 +33,34 @@
   }
   let currentOrdersView = "confirmed";
 
+  function hydrateSettingsFromCache() {
+    try {
+      const cached = JSON.parse(localStorage.getItem("raycrafting_admin_settings_cache") || "null");
+      if (cached) {
+        if (cached.supportPhone && $("supportPhoneInput") && !$("supportPhoneInput").value) $("supportPhoneInput").value = cached.supportPhone;
+        if (cached.instagramHandle && $("instagramHandleInput") && !$("instagramHandleInput").value) $("instagramHandleInput").value = cached.instagramHandle;
+        if (cached.bannerQuote && $("bannerQuoteInput") && !$("bannerQuoteInput").value) $("bannerQuoteInput").value = cached.bannerQuote;
+      }
+    } catch {}
+  }
+
   async function loadSettings() {
+    hydrateSettingsFromCache();
     if (!adminToken()) return;
     try {
       const res = await fetch("/api/admin/settings", { headers: { "x-admin-token": adminToken() } });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        if (data.supportPhone && $("supportPhoneInput")) $("supportPhoneInput").value = data.supportPhone;
-        if (data.instagramHandle && $("instagramHandleInput")) $("instagramHandleInput").value = data.instagramHandle;
+        if (data.supportPhone !== undefined && $("supportPhoneInput")) $("supportPhoneInput").value = data.supportPhone || "";
+        if (data.instagramHandle !== undefined && $("instagramHandleInput")) $("instagramHandleInput").value = data.instagramHandle || "";
+        if (data.bannerQuote !== undefined && $("bannerQuoteInput")) $("bannerQuoteInput").value = data.bannerQuote || "";
+        try {
+          localStorage.setItem("raycrafting_admin_settings_cache", JSON.stringify({
+            supportPhone: data.supportPhone || "",
+            instagramHandle: data.instagramHandle || "",
+            bannerQuote: data.bannerQuote || ""
+          }));
+        } catch {}
       }
     } catch {}
   }
@@ -48,20 +68,29 @@
   async function saveSettings() {
     const phoneInput = $("supportPhoneInput");
     const instaInput = $("instagramHandleInput");
+    const quoteInput = $("bannerQuoteInput");
     const status = $("settingsStatus");
     if (!status) return;
     status.textContent = "Saving…";
     try {
       const phone = phoneInput ? phoneInput.value.trim() : "";
       const insta = instaInput ? instaInput.value.trim().replace(/^@/, "") : "";
+      const quote = quoteInput ? quoteInput.value.trim() : "";
       const res = await fetch("/api/admin/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-token": adminToken() },
-        body: JSON.stringify({ supportPhone: phone, instagramHandle: insta })
+        body: JSON.stringify({ supportPhone: phone, instagramHandle: insta, bannerQuote: quote })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not save settings.");
-      status.textContent = "✓ Channels saved! WhatsApp and Instagram Direct chat links updated.";
+      try {
+        localStorage.setItem("raycrafting_admin_settings_cache", JSON.stringify({
+          supportPhone: phone,
+          instagramHandle: insta,
+          bannerQuote: quote
+        }));
+      } catch {}
+      status.textContent = "✓ Settings saved! Top quote banner, WhatsApp, and Instagram links updated.";
       setTimeout(() => { status.textContent = ""; }, 4000);
     } catch (err) {
       status.textContent = err.message;
@@ -89,10 +118,10 @@
 
         <div class="studio-settings-box">
           <div class="settings-title">
-            <span>📱</span>
+            <span>🌸</span>
             <div>
-              <strong>WhatsApp & Instagram Channels</strong>
-              <p>Direct chat links for buyers to reach you on WhatsApp and Instagram Direct.</p>
+              <strong>Studio Settings & Contact Channels</strong>
+              <p>Customize your top inspiring quote banner, WhatsApp number, and Instagram Direct link.</p>
             </div>
           </div>
           <div class="settings-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -102,12 +131,17 @@
               <small class="field-help">With country code (91...)</small>
             </div>
             <div>
-              <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;">Instagram Username</label>
+              <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;">Instagram Username / Link</label>
               <input id="instagramHandleInput" placeholder="e.g. raycrafting or @raycrafting" style="width:100%;margin:0;padding:9px 12px;">
-              <small class="field-help">Direct DM chat opens on ig.me</small>
+              <small class="field-help">Direct DM chat opens on ig.me/m/username</small>
             </div>
           </div>
-          <button type="button" class="primary-button" id="saveSettingsBtn">Save Contact Channels <span>→</span></button>
+          <div style="margin-bottom:14px;padding-top:10px;border-top:1px dashed var(--line);">
+            <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;">Top Banner Inspiring Quote (Keep Spreading Good Quotes)</label>
+            <input id="bannerQuoteInput" placeholder="e.g. “Where flowers bloom, so does hope.” — Handcrafted with love" style="width:100%;margin:0;padding:9px 12px;">
+            <small class="field-help">Appears across the top ribbon of the store for every buyer to see.</small>
+          </div>
+          <button type="button" class="primary-button" id="saveSettingsBtn">Save Studio Settings & Channels <span>→</span></button>
           <small id="settingsStatus" class="field-help" style="margin-top:8px;display:block;"></small>
         </div>
       </section>
@@ -121,10 +155,13 @@
         document.querySelectorAll(".order-filter-tab").forEach((t) => t.classList.toggle("active", t === tab));
         loadOrders(currentOrdersView);
       }
-      if (e.target.id === "saveSettingsBtn") {
+      if (e.target.closest("#saveSettingsBtn")) {
         saveSettings();
       }
     });
+
+    const directSaveBtn = $("saveSettingsBtn");
+    if (directSaveBtn) directSaveBtn.addEventListener("click", saveSettings);
 
     loadOrders(currentOrdersView);
     loadSettings();
@@ -272,6 +309,10 @@
       if (statusButton) updateOrderStatus(statusButton.dataset.orderId, statusButton.dataset.orderStatus);
       const fulfillmentButton = event.target.closest("[data-fulfillment]");
       if (fulfillmentButton) updateFulfillment(fulfillmentButton.dataset.orderId, fulfillmentButton.dataset.fulfillment);
+    });
+    window.addEventListener("raycrafting-admin-unlocked", () => {
+      loadSettings();
+      loadOrders(currentOrdersView);
     });
   }
   init();

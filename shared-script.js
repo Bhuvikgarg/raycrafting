@@ -440,6 +440,10 @@ fetch("/api/config").then((r) => r.json()).then((cfg) => {
     const cleanPhone = String(cfg.supportPhone).replace(/\D/g, "");
     vipWa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi Bhuvik! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
   }
+  if (cfg.bannerQuote) {
+    const quoteEl = document.querySelector("#announcementQuoteText");
+    if (quoteEl) quoteEl.textContent = cfg.bannerQuote;
+  }
 }).catch(() => {});
 
 document.querySelector("#newsletterForm")?.addEventListener("submit", async (event) => {
@@ -523,29 +527,35 @@ function initFairyAtmosphere() {
   if (prefersReducedMotion) return;
 
   const DAISY_SVG = `
-    <svg viewBox="0 0 50 50" class="fairy-daisy-svg" aria-hidden="true">
+    <svg viewBox="0 0 60 60" class="fairy-daisy-svg" aria-hidden="true">
       <defs>
-        <radialGradient id="daisyPistil" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stop-color="#fff5a8" />
-          <stop offset="50%" stop-color="#f8be35" />
-          <stop offset="100%" stop-color="#e08e16" />
+        <linearGradient id="daisyPetalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="65%" stop-color="#fffbfc" />
+          <stop offset="100%" stop-color="#ffeef3" />
+        </linearGradient>
+        <radialGradient id="daisyPistil" cx="38%" cy="36%" r="62%">
+          <stop offset="0%" stop-color="#fff8ad" />
+          <stop offset="35%" stop-color="#fdb31c" />
+          <stop offset="75%" stop-color="#ea7412" />
+          <stop offset="100%" stop-color="#b65008" />
         </radialGradient>
       </defs>
-      <g transform="translate(25,25)">
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(30)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(60)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(90)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(120)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(150)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(180)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(210)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(240)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(270)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(300)" />
-        <ellipse cx="0" cy="-15" rx="5.5" ry="9" fill="rgba(255, 255, 255, 0.95)" transform="rotate(330)" />
-        <circle cx="0" cy="0" r="7" fill="url(#daisyPistil)" />
-        <circle cx="-2" cy="-2" r="2.2" fill="#ffffff" opacity="0.65" />
+      <g transform="translate(30,30)">
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(30)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(60)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(90)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(120)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(150)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(180)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(210)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(240)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(270)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(300)" />
+        <ellipse cx="0" cy="-18" rx="6" ry="10.5" fill="url(#daisyPetalGrad)" stroke="rgba(230, 160, 182, 0.75)" stroke-width="0.85" transform="rotate(330)" />
+        <circle cx="0" cy="0" r="8.5" fill="url(#daisyPistil)" stroke="rgba(182, 80, 8, 0.5)" stroke-width="0.6" />
+        <circle cx="-2.5" cy="-2.5" r="2.8" fill="#ffffff" opacity="0.75" />
       </g>
     </svg>
   `;
@@ -568,13 +578,13 @@ function initFairyAtmosphere() {
     daisy.innerHTML = DAISY_SVG;
 
     const size = isMobile
-      ? Math.floor(Math.random() * 16) + 28
-      : Math.floor(Math.random() * 24) + 38;
+      ? Math.floor(Math.random() * 18) + 38
+      : Math.floor(Math.random() * 26) + 48;
     const left = (Math.random() * 96 + 2).toFixed(1);
     const duration = (Math.random() * 10 + 16).toFixed(1);
     const delay = -(Math.random() * 25).toFixed(1);
     const sway = (Math.random() * 70 - 35).toFixed(0) + "px";
-    const opacity = (Math.random() * 0.3 + 0.55).toFixed(2);
+    const opacity = (Math.random() * 0.22 + 0.68).toFixed(2);
 
     daisy.style.setProperty("--size", `${size}px`);
     daisy.style.setProperty("--left", `${left}%`);
