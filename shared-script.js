@@ -138,6 +138,9 @@ function addToCart(productId, notify = true) {
   else cart.push({ id: productId, quantity: 1 });
   saveCart();
   if (notify) showToast(`${product.name} added to your bag.`);
+  if (window.raycraftingTrack) {
+    window.raycraftingTrack("add_to_cart", { item_id: product.id, item_name: product.name, price: product.price });
+  }
 }
 
 function updateQuantity(productId, change) {
@@ -157,7 +160,7 @@ function renderCart() {
   drawerFooter.hidden = cart.length === 0;
   cartItems.innerHTML = cart.map((item) => {
     const product = products.find((entry) => entry.id === item.id);
-    return `<div class="cart-line"><div class="cart-line-art art-${escapeHtml(product.art || "default")} "><img src="${escapeHtml(productImage(product))}" alt="" /></div><div><h3>${escapeHtml(product.name)}</h3><p>${money(product.price)} · ${escapeHtml(product.detail)}</p><div class="qty-control"><button type="button" data-quantity="-1" data-id="${escapeHtml(product.id)}" aria-label="Decrease quantity">−</button><span>${item.quantity}</span><button type="button" data-quantity="1" data-id="${escapeHtml(product.id)}" aria-label="Increase quantity">+</button></div><button class="remove-line" type="button" data-remove="${escapeHtml(product.id)}">Remove</button></div><span class="cart-line-price">${money(product.price * item.quantity)}</span></div>`;
+    return `<div class="cart-line"><div class="cart-line-art art-${escapeHtml(product.art || "default")} "><img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)} thumbnail" /></div><div><h3>${escapeHtml(product.name)}</h3><p>${money(product.price)} · ${escapeHtml(product.detail)}</p><div class="qty-control"><button type="button" data-quantity="-1" data-id="${escapeHtml(product.id)}" aria-label="Decrease quantity">−</button><span>${item.quantity}</span><button type="button" data-quantity="1" data-id="${escapeHtml(product.id)}" aria-label="Increase quantity">+</button></div><button class="remove-line" type="button" data-remove="${escapeHtml(product.id)}">Remove</button></div><span class="cart-line-price">${money(product.price * item.quantity)}</span></div>`;
   }).join("");
   const subtotal = cart.reduce((total, item) => total + products.find((product) => product.id === item.id).price * item.quantity, 0);
   document.querySelector("#cartSubtotal").textContent = money(subtotal);
@@ -220,12 +223,15 @@ function showToast(message) {
 
 function openProduct(product) {
   selectedProduct = product;
+  if (window.raycraftingTrack) {
+    window.raycraftingTrack("view_item", { item_id: product.id, item_name: product.name, price: product.price, category: product.category });
+  }
   const gallery = (Array.isArray(product.images) && product.images.length > 0) ? product.images : [productImage(product)];
   const thumbsHtml = gallery.length > 1 ? `
     <div class="modal-thumbs">
       ${gallery.map((src, i) => `
         <button type="button" class="modal-thumb-btn ${i === 0 ? "active" : ""}" data-src="${escapeHtml(src)}" aria-label="View angle ${i + 1}">
-          <img src="${escapeHtml(src)}" alt="" />
+          <img src="${escapeHtml(src)}" alt="${escapeHtml(product.name)} angle ${i + 1}" />
         </button>
       `).join("")}
     </div>
@@ -655,4 +661,161 @@ function createSparkleBurst(x, y) {
 }
 
 initFairyAtmosphere();
+
+/* =========================================================
+   PRODUCTION UTILITIES: Analytics, Sticky Mobile CTA,
+   Cookie Consent, & Form UX
+   ========================================================= */
+
+// 1. Lightweight Event Analytics
+function trackEvent(eventName, params = {}) {
+  try {
+    if (window.dataLayer && Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({ event: eventName, ...params });
+    }
+    if (window.gtag && typeof window.gtag === "function") {
+      window.gtag("event", eventName, params);
+    }
+  } catch {}
+}
+window.raycraftingTrack = trackEvent;
+trackEvent("page_view", { page_path: window.location.pathname });
+
+// 2. Cookie Consent Banner
+function initCookieConsent() {
+  const banner = document.getElementById("cookieBanner");
+  if (!banner) return;
+  const existing = localStorage.getItem("raycrafting_cookie_consent");
+  if (!existing) {
+    setTimeout(() => { banner.hidden = false; }, 1200);
+  }
+  document.getElementById("cookieAcceptAll")?.addEventListener("click", () => {
+    localStorage.setItem("raycrafting_cookie_consent", "all");
+    banner.hidden = true;
+    trackEvent("consent_given", { level: "all" });
+  });
+  document.getElementById("cookieAcceptEssential")?.addEventListener("click", () => {
+    localStorage.setItem("raycrafting_cookie_consent", "essential");
+    banner.hidden = true;
+    trackEvent("consent_given", { level: "essential" });
+  });
+}
+
+// 3. Sticky Mobile Quick CTA
+function initStickyMobileCta() {
+  const ctaBar = document.getElementById("stickyMobileCta");
+  const ctaBtn = document.getElementById("stickyCtaBtn");
+  if (!ctaBar || !ctaBtn) return;
+
+  function updateStickyBar() {
+    if (window.innerWidth > 768) {
+      ctaBar.hidden = true;
+      document.body.classList.remove("has-sticky-bar");
+      return;
+    }
+
+    const scrollY = window.scrollY || window.pageYOffset;
+    const hero = document.querySelector(".hero");
+    const threshold = hero ? (hero.offsetTop + hero.offsetHeight * 0.6) : 380;
+
+    if (scrollY > threshold) {
+      ctaBar.hidden = false;
+      document.body.classList.add("has-sticky-bar");
+      const count = cartQuantity();
+      if (count > 0) {
+        ctaBtn.innerHTML = `View Bag (${count}) 🛍️`;
+        ctaBtn.setAttribute("href", "#bag");
+        ctaBtn.onclick = function(e) {
+          e.preventDefault();
+          setDrawer(true);
+        };
+      } else {
+        ctaBtn.innerHTML = `Shop Blooms 🌸`;
+        ctaBtn.setAttribute("href", "#shop");
+        ctaBtn.onclick = null;
+      }
+    } else {
+      ctaBar.hidden = true;
+      document.body.classList.remove("has-sticky-bar");
+    }
+  }
+
+  let scrollTicking = false;
+  window.addEventListener("scroll", () => {
+    if (!scrollTicking) {
+      window.requestAnimationFrame(() => {
+        updateStickyBar();
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
+
+  window.addEventListener("resize", updateStickyBar, { passive: true });
+}
+
+// 4. Form Error & Loading State Helpers
+function attachFormUXEnhancements() {
+  // Clear field errors on input
+  document.addEventListener("input", (e) => {
+    const input = e.target;
+    if (input.classList.contains("field-error")) {
+      input.classList.remove("field-error");
+      const parent = input.closest(".field-has-error") || input.parentElement;
+      if (parent) {
+        parent.classList.remove("field-has-error");
+        const msg = parent.querySelector(".field-error-text");
+        if (msg) msg.remove();
+      }
+    }
+  });
+
+  // Custom order form validation feedback
+  const customForm = document.getElementById("customOrderForm");
+  if (customForm) {
+    customForm.addEventListener("submit", (e) => {
+      const email = document.getElementById("customEmail");
+      const desc = document.getElementById("customDescription");
+      let valid = true;
+
+      if (email && (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()))) {
+        email.classList.add("field-error", "shake-field");
+        valid = false;
+      }
+      if (desc && !desc.value.trim()) {
+        desc.classList.add("field-error", "shake-field");
+        valid = false;
+      }
+
+      if (!valid) {
+        e.preventDefault();
+        showToast("Please check the highlighted fields.");
+      } else {
+        const submitBtn = customForm.querySelector("button[type='submit']");
+        if (submitBtn) {
+          submitBtn.classList.add("is-loading");
+          setTimeout(() => submitBtn.classList.remove("is-loading"), 8000);
+        }
+        trackEvent("generate_lead", { form: "custom_order" });
+      }
+    });
+  }
+
+  // Note request form validation feedback
+  const noteForm = document.getElementById("noteRequestForm");
+  if (noteForm) {
+    noteForm.addEventListener("submit", () => {
+      const btn = noteForm.querySelector("button[type='submit']");
+      if (btn) {
+        btn.classList.add("is-loading");
+        setTimeout(() => btn.classList.remove("is-loading"), 8000);
+      }
+      trackEvent("generate_lead", { form: "handwritten_note" });
+    });
+  }
+}
+
+initCookieConsent();
+initStickyMobileCta();
+attachFormUXEnhancements();
 

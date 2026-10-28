@@ -13,6 +13,7 @@
     event.preventDefault();
     var button = customForm.querySelector("button[type=submit]");
     button.disabled = true;
+    button.classList.add("is-loading");
     customStatus.textContent = "Sending your idea…";
     try {
       var data = await submitJson("/api/custom-orders", {
@@ -34,6 +35,7 @@
       customStatus.textContent = error.message;
     } finally {
       button.disabled = false;
+      button.classList.remove("is-loading");
     }
   });
 }());

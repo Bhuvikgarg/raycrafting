@@ -769,11 +769,39 @@ async function verifyCapturedPayment(paymentId, orderId) {
   return payment;
 }
 function serveStatic(req, res, pathname) {
-  const requested = pathname === "/" ? "/index.html" : pathname;
-  const file = path.normalize(path.join(ROOT, requested));
+  let requested = pathname === "/" ? "/index.html" : pathname;
+  let file = path.normalize(path.join(ROOT, requested));
+
+  // Clean URL support (e.g. /privacy -> /privacy.html)
+  if (!fs.existsSync(file) && fs.existsSync(file + ".html")) {
+    file = file + ".html";
+  }
+
   const relative = path.relative(ROOT, file);
-  if (relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return json(res, 404, { error: "Not found" });
-  const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".json": "application/json" };
+  if (relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+    const errorPage = path.join(ROOT, "404.html");
+    const acceptsHtml = !req.headers.accept || req.headers.accept.includes("text/html") || req.headers.accept.includes("*/*");
+    if (fs.existsSync(errorPage) && acceptsHtml) {
+      res.writeHead(404, { ...SECURITY_HEADERS, "Content-Type": "text/html; charset=utf-8" });
+      return fs.createReadStream(errorPage).pipe(res);
+    }
+    return json(res, 404, { error: "Not found" });
+  }
+
+  const types = {
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+    ".json": "application/json",
+    ".xml": "application/xml; charset=utf-8",
+    ".txt": "text/plain; charset=utf-8"
+  };
   res.writeHead(200, { ...SECURITY_HEADERS, "Content-Type": types[path.extname(file)] || "application/octet-stream", "Cache-Control": "public, max-age=300" });
   fs.createReadStream(file).pipe(res);
 }

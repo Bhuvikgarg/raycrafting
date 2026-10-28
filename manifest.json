@@ -1,9 +1,26 @@
 {
-  "name": "Raycrafting",
+  "name": "Raycrafting | Handcrafted Flowers & Keepsakes",
   "short_name": "Raycrafting",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f3ed",
-  "theme_color": "#252629",
-  "description": "Handmade flowers and little keepsakes."
+  "background_color": "#fff9fa",
+  "theme_color": "#c45f7c",
+  "description": "Handmade pipe-cleaner flowers, everlasting potted plants, floral keychains, and thoughtful handmade gifts crafted with love in India.",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
 }

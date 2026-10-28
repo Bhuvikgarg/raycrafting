@@ -423,6 +423,7 @@
           <div class="confirm-actions">
             <button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders <span>→</span></button>
             <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with Bhuvik on WhatsApp</a>
+            <a class="orders-button" id="confirmReceiptLink" href="thank-you.html" style="margin-top:6px;display:block;text-align:center;text-decoration:none;">View Full Order Receipt 📄</a>
             <button class="orders-button" id="confirmCloseBtn" type="button" style="margin-top:6px">Back to Shop</button>
           </div>
         </div>
@@ -567,7 +568,7 @@
     if (linesNode) {
       linesNode.innerHTML = lines.map((item) => {
         const detail = priceInfo(item.product);
-        return `<div class="checkout-line"><img src="${esc(item.product.image || window.RAYCRAFTING_DEFAULT_IMAGE)}" alt=""><div><h4>${esc(item.product.name)}</h4><p>${item.quantity} × ${money(detail.sale)}</p></div><strong>${money(detail.sale * item.quantity)}</strong></div>`;
+        return `<div class="checkout-line"><img src="${esc(item.product.image || window.RAYCRAFTING_DEFAULT_IMAGE)}" alt="${esc(item.product.name)}"><div><h4>${esc(item.product.name)}</h4><p>${item.quantity} × ${money(detail.sale)}</p></div><strong>${money(detail.sale * item.quantity)}</strong></div>`;
       }).join("");
     }
 
@@ -663,7 +664,7 @@
     const authAction = $("#profileAuthAction");
     if (!avatar || !label) return;
     if (customer) {
-      avatar.innerHTML = customer.avatarUrl ? `<img src="${esc(customer.avatarUrl)}" alt="">` : esc(profileInitial());
+      avatar.innerHTML = customer.avatarUrl ? `<img src="${esc(customer.avatarUrl)}" alt="${esc(customer.name || 'Account')} avatar">` : esc(profileInitial());
       label.textContent = customer.name || "Account";
       const displayId = (customer.email && !customer.email.endsWith("@accounts.raycrafting.local"))
         ? customer.email
@@ -747,6 +748,7 @@
       phoneMessage(error.message);
     } finally {
       button.disabled = false;
+      button.classList.remove("is-loading");
     }
   }
 
@@ -764,6 +766,7 @@
       phoneMessage(error.message);
     } finally {
       button.disabled = false;
+      button.classList.remove("is-loading");
     }
   }
 
@@ -1063,21 +1066,31 @@
   function validateAddress() {
     const value = address();
     const selfPickup = value.fulfillmentMethod === "self_pickup";
+    // Clear previous field errors
+    ["addressName", "addressPhone", "addressEmail", "addressLine1", "addressCity", "addressState", "addressPostalCode"].forEach((id) => {
+      const el = $(id);
+      if (el) el.classList.remove("field-error", "shake-field");
+    });
+
     const checks = [
-      [value.name.length >= 2 && value.name.length <= 120, "Enter your full name."],
-      [validIndianPhone(value.phone), "Enter a valid 10-digit Indian mobile number starting with 6–9."],
-      [Boolean(value.email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email), "Enter a valid email address to receive order details & tracking."]
+      [value.name.length >= 2 && value.name.length <= 120, "Enter your full name.", $("#addressName")],
+      [validIndianPhone(value.phone), "Enter a valid 10-digit Indian mobile number starting with 6–9.", $("#addressPhone")],
+      [Boolean(value.email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email), "Enter a valid email address to receive order details & tracking.", $("#addressEmail")]
     ];
     if (!selfPickup) {
       checks.push(
-        [value.line1.length >= 5 && value.line1.length <= 200, "Enter a complete street / house address (at least 5 characters)."],
-        [value.line2.length <= 200, "Address line 2 is too long."],
-        [value.city.length >= 2 && value.city.length <= 80, "Enter a valid city."],
-        [value.state.length >= 2 && value.state.length <= 80, "Enter a valid state."],
-        [validIndianPincode(value.postalCode), "Enter a valid 6-digit Indian PIN code starting with 1–8."]
+        [value.line1.length >= 5 && value.line1.length <= 200, "Enter a complete street / house address (at least 5 characters).", $("#addressLine1")],
+        [value.line2.length <= 200, "Address line 2 is too long.", $("#addressLine2")],
+        [value.city.length >= 2 && value.city.length <= 80, "Enter a valid city.", $("#addressCity")],
+        [value.state.length >= 2 && value.state.length <= 80, "Enter a valid state.", $("#addressState")],
+        [validIndianPincode(value.postalCode), "Enter a valid 6-digit Indian PIN code starting with 1–8.", $("#addressPostalCode")]
       );
     }
     const failed = checks.find((check) => !check[0]);
+    if (failed && failed[2]) {
+      failed[2].classList.add("field-error", "shake-field");
+      failed[2].focus();
+    }
     const message = $("#addressMessage");
     if (message) {
       message.textContent = failed ? failed[1] : (selfPickup ? "Self pickup selected. You can collect your order directly from Bhuvik's studio." : "");
@@ -1184,6 +1197,27 @@
 
   function showOrderConfirmation({ orderId, total, paymentMethod, addressText }) {
     closeCheckout();
+    try {
+      localStorage.setItem("raycrafting_last_order_id", orderId || "");
+      localStorage.setItem("raycrafting_last_order_details", JSON.stringify({
+        id: orderId,
+        total: total,
+        paymentMethod: paymentMethod,
+        address: { line1: addressText },
+        items: cartLines()
+      }));
+    } catch {}
+    if ($("#confirmReceiptLink") && orderId) {
+      $("#confirmReceiptLink").href = `thank-you.html?orderId=${encodeURIComponent(orderId)}`;
+    }
+    if (window.raycraftingTrack) {
+      window.raycraftingTrack("purchase", {
+        transaction_id: orderId,
+        value: total,
+        currency: "INR",
+        payment_type: paymentMethod
+      });
+    }
     $("#confirmOrderId").textContent = orderId ? `#${orderId}` : "#RC";
     $("#confirmTotal").textContent = money(total);
     const isCod = paymentMethod === "cod";
@@ -1533,6 +1567,7 @@
   async function pay() {
     const button = $("#payButton");
     button.disabled = true;
+    button.classList.add("is-loading");
     showMessage("");
     try {
       const delivery = validateAddress();
@@ -1658,6 +1693,7 @@
       showMessage(error.message);
     } finally {
       button.disabled = false;
+      button.classList.remove("is-loading");
     }
   }
 
