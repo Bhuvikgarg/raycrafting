@@ -1314,97 +1314,98 @@ button.is-loading::after {
 }
 
 /* ==========================================
-   Ultra-Smooth Velvet Plum Catalogue Band (Light Mode)
+   Smooth Eased Twilight Velvet Plum Catalogue Band (Light Mode)
    ========================================== */
 .shop-gradient-band {
   width: 100%;
   position: relative;
   z-index: 2;
   background: linear-gradient(180deg,
-    rgba(94, 34, 66, 0) 0%,
-    rgba(94, 34, 66, 0.02) 6%,
-    rgba(94, 34, 66, 0.07) 12%,
-    rgba(94, 34, 66, 0.16) 20%,
-    rgba(94, 34, 66, 0.30) 28%,
-    rgba(94, 34, 66, 0.48) 36%,
-    rgba(94, 34, 66, 0.68) 44%,
-    rgba(94, 34, 66, 0.78) 50%,
-    rgba(94, 34, 66, 0.68) 56%,
-    rgba(94, 34, 66, 0.48) 64%,
-    rgba(94, 34, 66, 0.30) 72%,
-    rgba(94, 34, 66, 0.16) 80%,
-    rgba(94, 34, 66, 0.07) 88%,
-    rgba(94, 34, 66, 0.02) 94%,
-    rgba(94, 34, 66, 0) 100%
+    rgba(255, 245, 248, 0) 0px,
+    #fae4ef 40px,
+    #f2cad9 90px,
+    #de9bb9 160px,
+    #b85d8a 230px,
+    #7a2855 310px,
+    #3f0f2d 390px,
+    #22081c 460px,
+    #22081c calc(100% - 460px),
+    #3f0f2d calc(100% - 390px),
+    #7a2855 calc(100% - 310px),
+    #b85d8a calc(100% - 230px),
+    #de9bb9 calc(100% - 160px),
+    #f2cad9 calc(100% - 90px),
+    #fae4ef calc(100% - 40px),
+    rgba(255, 245, 248, 0) 100%
   );
-  padding: 85px 0 115px;
-  margin: 30px 0 60px;
+  padding: 95px 0 125px;
+  margin: 15px 0 50px;
 }
 .shop-gradient-band .shop {
   padding-block: 0;
 }
 .shop-gradient-band .section-heading h2 {
   color: #ffffff !important;
-  text-shadow: 0 2px 14px rgba(84, 30, 58, 0.4);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
 }
 .shop-gradient-band .section-heading h2 em {
-  color: #ffd0e0 !important;
-  text-shadow: 0 0 20px rgba(255, 208, 224, 0.5);
+  color: #ffb3cc !important;
+  text-shadow: 0 0 24px rgba(255, 179, 204, 0.5);
   font-style: italic;
 }
 .shop-gradient-band .section-heading .eyebrow {
-  color: #ffe0eb !important;
+  color: #ffd6e4 !important;
   font-weight: 700;
   letter-spacing: 0.16em;
 }
 .shop-gradient-band .section-description {
-  color: #faedf3 !important;
-  text-shadow: 0 1px 8px rgba(84, 30, 58, 0.35);
+  color: #f7e6ee !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
 }
 .shop-gradient-band .shop-toolbar {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(45, 14, 38, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 12px 35px rgba(50, 15, 35, 0.25);
+  border: 1.5px solid rgba(255, 180, 205, 0.28);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
   border-radius: 999px;
 }
 .shop-gradient-band .filter-button {
-  color: #ffffff;
+  color: #eed6e3;
   font-weight: 600;
   transition: all 0.2s ease;
 }
 .shop-gradient-band .filter-button:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
 }
 .shop-gradient-band .filter-button.active {
-  background: #ffffff !important;
-  color: #541e3a !important;
+  background: linear-gradient(135deg, #e65c87 0%, #b83863 100%) !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 18px rgba(230, 92, 135, 0.55);
 }
 .shop-gradient-band .sort-control {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
+  background: rgba(56, 18, 48, 0.75);
+  border: 1px solid rgba(255, 180, 205, 0.25);
+  color: #eed6e3;
 }
 .shop-gradient-band .sort-control select {
   color: #ffffff;
   background: transparent;
 }
 .shop-gradient-band .sort-control select option {
-  background: #541e3a;
+  background: #240b20;
   color: #ffffff;
 }
 .shop-gradient-band .search-row {
-  border-bottom-color: rgba(255, 255, 255, 0.4);
+  border-bottom-color: rgba(255, 180, 205, 0.4);
 }
 .shop-gradient-band .search-row input {
   color: #ffffff;
 }
 .shop-gradient-band .search-row input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+  color: #caaebc;
 }
 
 /* ==========================================
