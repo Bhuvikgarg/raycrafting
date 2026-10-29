@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=prod1" />
+    <link rel="stylesheet" href="styles.css?v=prod2" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -87,28 +87,24 @@
           <p class="hero-intro">Handmade pipe-cleaner blooms and small keepsakes for desks, shelves, and the people who make your day brighter.</p>
           <div class="hero-actions">
             <a class="button button-dark" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a>
-            <button class="text-button" type="button" data-scroll="story">Meet the maker <span aria-hidden="true">→</span></button>
+            <a class="button button-light" href="#custom">Have a custom idea? <span aria-hidden="true">→</span></a>
           </div>
           <div class="hero-note"><span class="scribble-star" aria-hidden="true">✳</span><span>Each piece is made by hand, so no two are exactly alike.</span></div>
         </div>
         <div class="hero-image-wrap">
-          <div class="hero-image-frame" id="heroSlideshow" role="region" aria-roledescription="carousel" aria-label="Raycrafting product photos">
+          <div class="hero-image-frame" id="heroSlideshow" role="region" aria-roledescription="carousel" aria-label="Raycrafting product showcase" tabindex="0" title="Tap to explore this piece in the catalog">
             <div class="hero-slides">
-              <img class="hero-slide is-active" data-caption="enchanted illuminated lotus lamp" src="assets/products/illuminated-lotus-blossom-lamp-1.webp" alt="Handcrafted glowing pink lotus flower night light" />
-              <img class="hero-slide" data-caption="lavender dreams pearl-lace bouquet" src="assets/products/lavender-bouquet-pearl-lace-1.webp" alt="Handcrafted lavender stems wrapped in pleated organza and pearl trim" aria-hidden="true" />
-              <img class="hero-slide" data-caption="cozy movie night cocoa &amp; popcorn" src="assets/products/cozy-movie-night-cocoa-popcorn-1.webp" alt="Handcrafted smiling hot cocoa and popcorn duo" aria-hidden="true" />
+              <img class="hero-slide is-active" data-caption="Big size lotus Lamp" data-product-id="illuminated-lotus-blossom-lamp" src="assets/products/illuminated-lotus-blossom-lamp-1.webp" alt="Handcrafted glowing pink lotus flower night light" />
+              <img class="hero-slide" data-caption="Medium sized lotus lamp for diwali" data-product-id="medium-sized-lotus-lamp" src="assets/products/illuminated-lotus-blossom-lamp-2.webp" alt="Handcrafted medium lotus blossom lamp" aria-hidden="true" />
+              <img class="hero-slide" data-caption="Lavender Dreams Pearl-Lace Bouquet" data-product-id="lavender-bouquet-pearl-lace" src="assets/products/lavender-bouquet-pearl-lace-1.webp" alt="Handcrafted lavender stems wrapped in pleated organza and pearl trim" aria-hidden="true" />
+              <img class="hero-slide" data-caption="Potted Red &amp; Velvet Tulips Planter" data-product-id="potted-red-tulips-planter" src="assets/products/potted-red-tulips-planter-1.webp" alt="Handcrafted rich red velvet tulips in handmade planter" aria-hidden="true" />
+              <img class="hero-slide" data-caption="Cozy Movie Night Cocoa &amp; Popcorn Duo" data-product-id="cozy-movie-night-cocoa-popcorn" src="assets/products/cozy-movie-night-cocoa-popcorn-1.webp" alt="Handcrafted smiling hot cocoa and popcorn duo" aria-hidden="true" />
             </div>
             <div class="image-sticker">made<br />slowly</div>
+            <div class="hero-tap-hint"><span>Tap to view in shop ✨</span></div>
           </div>
-          <div class="hero-caption"><span id="heroCounter">01 / 03</span><span id="heroCaption">enchanted illuminated lotus lamp</span></div>
+          <div class="hero-caption" id="heroCaptionWrap" tabindex="0" role="button" title="View product in shop"><span id="heroCounter">01 / 05</span><span id="heroCaption">Big size lotus Lamp</span> <span class="caption-arrow" aria-hidden="true">↗</span></div>
         </div>
-      </section>
-
-      <section class="trust-strip section-shell" aria-label="Raycrafting promises">
-        <div><span class="trust-icon">✳</span><strong>100% Handcrafted</strong><span>shaped with patience</span></div>
-        <div><span class="trust-icon">↺</span><strong>Everlasting Blooms</strong><span>never wither or fade</span></div>
-        <div><span class="trust-icon">📦</span><strong>Crush-Proof Box</strong><span>packed gift-ready</span></div>
-        <div><span class="trust-icon">🔒</span><strong>Secure UPI Checkout</strong><span>quick &amp; 100% safe</span></div>
       </section>
 
       <section class="shop section-shell" id="shop">
@@ -258,6 +254,13 @@
           </div>
         </div>
       </section>
+
+      <section class="trust-strip section-shell trust-strip-footer" aria-label="Raycrafting promises">
+        <div><span class="trust-icon">✳</span><strong>100% Handcrafted</strong><span>shaped with patience</span></div>
+        <div><span class="trust-icon">↺</span><strong>Everlasting Blooms</strong><span>never wither or fade</span></div>
+        <div><span class="trust-icon">📦</span><strong>Crush-Proof Box</strong><span>packed gift-ready</span></div>
+        <div><span class="trust-icon">🔒</span><strong>Secure UPI Checkout</strong><span>quick &amp; 100% safe</span></div>
+      </section>
     </main>
 
     <footer class="site-footer section-shell">
@@ -335,7 +338,7 @@
           <div class="modal-specs" id="modalSpecs"></div>
           <div class="modal-actions-row">
             <button class="button button-dark modal-add-btn" id="modalAdd" type="button">Add to bag <span aria-hidden="true">+</span></button>
-            <button class="button button-buy-now" id="modalBuyNow" type="button">Buy now ⚡</button>
+            <button class="button button-buy-now" id="modalBuyNow" type="button">Buy now</button>
           </div>
           <div class="modal-trust-pill">
             <span>🔒 Safe UPI / Cards</span>
@@ -384,9 +387,9 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="catalog.js?v=20261018v3"></script>
-    <script src="shared-script.js?v=20261018v3"></script>
-    <script src="custom-requests.js?v=20261018v3"></script>
-  <script src="commerce.js?v=20261018v3"></script>
+    <script src="catalog.js?v=20261030v1"></script>
+    <script src="shared-script.js?v=20261030v1"></script>
+    <script src="custom-requests.js?v=20261030v1"></script>
+    <script src="commerce.js?v=20261030v1"></script>
 </body>
 </html>

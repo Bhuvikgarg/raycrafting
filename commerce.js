@@ -502,22 +502,23 @@
         <div class="about-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
           <div class="about-card-header">
             <div>
-              <p class="eyebrow">The person behind the pieces</p>
-              <h2 id="aboutTitle">About Raycrafting.</h2>
+              <p class="eyebrow">The artisan behind Raycrafting</p>
+              <h2 id="aboutTitle">Himanshi Sharma.</h2>
             </div>
-            <button class="commerce-close" id="aboutClose" type="button" aria-label="Close about Raycrafting">×</button>
+            <button class="commerce-close" id="aboutClose" type="button" aria-label="Close about Himanshi Sharma">×</button>
           </div>
           <div class="about-story">
-            <img src="assets/sunflower.jpeg" alt="Handmade orange sunflower in a small dark pot">
+            <img src="assets/sunflower.jpeg" alt="Handcrafted bloom from Himanshi's studio">
             <div>
-              <p>Raycrafting is a small handmade studio creating pipe-cleaner flowers, keepsakes, and thoughtful little gifts that stay bright long after the moment.</p>
-              <p><strong>Made by Himanshi Sharma.</strong> Every piece is shaped, wrapped, and checked by hand in small batches, with a little patience in every twist.</p>
+              <p><strong>Hi, I'm Himanshi Sharma! 🌸</strong> I'm the creator, designer, and hands behind everything at Raycrafting.</p>
+              <p>Every single petal, stem, and cheerful desk buddy is individually shaped, twisted, and inspected by me in small batches with velvety chenille pipe cleaners and everlasting love.</p>
             </div>
           </div>
-          <p>For custom colours, desk companions, return questions, or simply to say hello, reach the studio directly. We keep the shop personal, clear, and kind.</p>
-          <div class="about-links">
-            <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Raycrafting">Email the studio ↗</a>
-            <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Plan a custom order ↗</a>
+          <p style="margin: 12px 0; font-size: 13px; line-height: 1.6; color: var(--muted, #666);">"I believe the smallest handmade things carry the warmest feelings — blooms that never wither, and keepsakes that make your desk feel like home." ✨</p>
+          <div class="about-links" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Himanshi">Email Himanshi ↗</a>
+            <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/917988019623?text=Hi%20Himanshi!%20I%20love%20your%20creations%20on%20Raycrafting!" target="_blank" rel="noopener noreferrer">Chat on WhatsApp 💬</a>
+            <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Custom idea? ↗</a>
           </div>
         </div>
       </div>`
@@ -921,6 +922,7 @@
     }
   }
   window.raycraftingOpenCheckout = openCheckout;
+  window.raycraftingOpenAboutModal = openAboutModal;
 
   function closeCheckout() {
     $("#checkoutModal").hidden = true;

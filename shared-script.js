@@ -64,9 +64,83 @@ function getVisibleProducts() {
   });
 }
 
+// ==========================================
+// Intelligent Contrast & Glowing Aura Engine
+// ==========================================
+const PRODUCT_THEMES = {
+  lotus: {
+    bg: "linear-gradient(150deg, #fff3f6 0%, #fee1eb 100%)",
+    border: "rgba(226, 92, 126, 0.28)",
+    glow: "0 14px 34px rgba(226, 92, 126, 0.28)",
+    badgeColor: "#c45f7c"
+  },
+  lavender: {
+    bg: "linear-gradient(150deg, #f7f4ff 0%, #ebe4ff 100%)",
+    border: "rgba(151, 115, 230, 0.28)",
+    glow: "0 14px 34px rgba(151, 115, 230, 0.28)",
+    badgeColor: "#8654ce"
+  },
+  tulip: {
+    bg: "linear-gradient(150deg, #fff4f2 0%, #fde7e2 100%)",
+    border: "rgba(216, 87, 67, 0.28)",
+    glow: "0 14px 34px rgba(216, 87, 67, 0.26)",
+    badgeColor: "#d85743"
+  },
+  sunshine: {
+    bg: "linear-gradient(150deg, #fffef2 0%, #fef5d5 100%)",
+    border: "rgba(240, 191, 72, 0.35)",
+    glow: "0 14px 34px rgba(240, 191, 72, 0.35)",
+    badgeColor: "#b8820c"
+  },
+  cocoa: {
+    bg: "linear-gradient(150deg, #fcf8f4 0%, #f4e8dc 100%)",
+    border: "rgba(176, 112, 75, 0.28)",
+    glow: "0 14px 34px rgba(176, 112, 75, 0.26)",
+    badgeColor: "#935732"
+  },
+  berry: {
+    bg: "linear-gradient(150deg, #fff3f8 0%, #fde0ee 100%)",
+    border: "rgba(216, 102, 148, 0.28)",
+    glow: "0 14px 34px rgba(216, 102, 148, 0.28)",
+    badgeColor: "#b74272"
+  },
+  mint: {
+    bg: "linear-gradient(150deg, #f3faf6 0%, #e0f4e7 100%)",
+    border: "rgba(78, 153, 111, 0.28)",
+    glow: "0 14px 34px rgba(78, 153, 111, 0.26)",
+    badgeColor: "#3e815a"
+  },
+  amber: {
+    bg: "linear-gradient(150deg, #fff7f1 0%, #feece0 100%)",
+    border: "rgba(235, 126, 74, 0.28)",
+    glow: "0 14px 34px rgba(235, 126, 74, 0.28)",
+    badgeColor: "#c2551a"
+  }
+};
+
+const THEME_KEYS = Object.keys(PRODUCT_THEMES);
+
+function getProductContrastTheme(product) {
+  const str = `${product.id || ""} ${product.name || ""} ${product.category || ""} ${product.art || ""}`.toLowerCase();
+  if (str.includes("lotus") || str.includes("lamp")) return PRODUCT_THEMES.lotus;
+  if (str.includes("lavender") || str.includes("purple") || str.includes("violet")) return PRODUCT_THEMES.lavender;
+  if (str.includes("tulip") || str.includes("rose") || str.includes("red")) return PRODUCT_THEMES.tulip;
+  if (str.includes("daisy") || str.includes("sunshine") || str.includes("egg") || str.includes("toast") || str.includes("star") || str.includes("yellow")) return PRODUCT_THEMES.sunshine;
+  if (str.includes("cocoa") || str.includes("popcorn") || str.includes("cheesecake") || str.includes("cake")) return PRODUCT_THEMES.cocoa;
+  if (str.includes("strawberry") || str.includes("pink") || str.includes("blossom") || str.includes("paw")) return PRODUCT_THEMES.berry;
+  if (str.includes("pot") || str.includes("stem") || str.includes("leaf") || str.includes("green")) return PRODUCT_THEMES.mint;
+  if (str.includes("orange") || str.includes("tangerine") || str.includes("warm")) return PRODUCT_THEMES.amber;
+
+  // Consistent deterministic contrast hash for dynamically added products
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  return PRODUCT_THEMES[THEME_KEYS[hash % THEME_KEYS.length]];
+}
+
 function productMarkup(product) {
+  const theme = getProductContrastTheme(product);
   const liked = localStorage.getItem(`raycrafting-like-${product.id}`) === "true";
-  const badge = product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : "";
+  const badge = product.badge ? `<span class="product-badge" style="background:${theme.badgeColor};color:#fff;">${escapeHtml(product.badge)}</span>` : "";
   const orig = Number(product.original_price || product.originalPrice || 0);
   const oldPriceHtml = orig > product.price ? `<span class="product-price-old">${money(orig)}</span>` : "";
 
@@ -82,7 +156,7 @@ function productMarkup(product) {
   const galleryBadge = gallery.length > 1 ? `<span class="product-gallery-badge">📸 ${gallery.length} views</span>` : "";
   const altAttrs = gallery.length > 1 ? ` data-alt-img="${escapeHtml(gallery[1])}" data-main-img="${escapeHtml(productImage(product))}"` : "";
 
-  return `<article class="product-card" data-product-id="${escapeHtml(product.id)}"${altAttrs}>
+  return `<article class="product-card" data-product-id="${escapeHtml(product.id)}"${altAttrs} style="--card-bg: ${theme.bg}; --card-border: ${theme.border}; --product-glow: ${theme.glow}; --badge-accent: ${theme.badgeColor};">
     <div class="product-image art-${escapeHtml(product.art || "default")}" data-action="details">
       <img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)}, a handmade ${escapeHtml(product.category.toLowerCase())}" loading="lazy" />
       <span class="product-tag">${escapeHtml(product.category)}</span>
@@ -108,7 +182,7 @@ function productMarkup(product) {
           <span>Add to bag +</span>
         </button>
         <button class="action-btn action-btn-buy" type="button" data-action="buy-now" aria-label="Buy ${escapeHtml(product.name)} now">
-          <span>Buy now ⚡</span>
+          <span>Buy now</span>
         </button>
       </div>
     </div>
@@ -229,6 +303,7 @@ function openProduct(product) {
   if (window.raycraftingTrack) {
     window.raycraftingTrack("view_item", { item_id: product.id, item_name: product.name, price: product.price, category: product.category });
   }
+  const theme = getProductContrastTheme(product);
   const gallery = (Array.isArray(product.images) && product.images.length > 0) ? product.images : [productImage(product)];
   const thumbsHtml = gallery.length > 1 ? `
     <div class="modal-thumbs">
@@ -239,9 +314,11 @@ function openProduct(product) {
       `).join("")}
     </div>
   ` : "";
-  document.querySelector("#modalArt").innerHTML = `
+  const modalArtEl = document.querySelector("#modalArt");
+  modalArtEl.style.background = theme.bg;
+  modalArtEl.innerHTML = `
     <div class="modal-gallery-wrap">
-      <img id="modalMainImg" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(product.name)}" />
+      <img id="modalMainImg" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(product.name)}" style="box-shadow: ${theme.glow};" />
       ${thumbsHtml}
     </div>
   `;
@@ -266,11 +343,19 @@ function openProduct(product) {
     oldPriceHtml = ` <span class="product-price-old">${money(orig)}</span>`;
     const pct = Math.round(((orig - product.price) / orig) * 100);
     if (pct >= 5) {
-      discountHtml = ` <span class="modal-discount-pill">${pct}% OFF</span>`;
+      discountHtml = ` <span class="modal-discount-pill" style="background:${theme.badgeColor}22;color:${theme.badgeColor};">${pct}% OFF</span>`;
     }
   }
-  document.querySelector("#modalPrice").innerHTML = `${money(product.price)}${oldPriceHtml}${discountHtml}`;
+  document.querySelector("#modalPrice").innerHTML = `
+    <span class="modal-price-current">${money(product.price)}</span>
+    ${oldPriceHtml}
+    ${discountHtml}
+  `;
   document.querySelector("#modalDetail").textContent = product.detail;
+  const buyNowModalBtn = document.querySelector("#modalBuyNow");
+  if (buyNowModalBtn) {
+    buyNowModalBtn.textContent = "Buy now";
+  }
   const specs = document.querySelector("#modalSpecs");
   if (specs) {
     specs.innerHTML = `
@@ -516,7 +601,9 @@ const heroFrame = document.querySelector("#heroSlideshow");
 const heroSlides = Array.from(document.querySelectorAll(".hero-slide"));
 const heroCounter = document.querySelector("#heroCounter");
 const heroCaption = document.querySelector("#heroCaption");
+const heroCaptionWrap = document.querySelector("#heroCaptionWrap");
 let activeHeroSlide = 0;
+
 function showHeroSlide(index) {
   if (!heroSlides.length) return;
   activeHeroSlide = (index + heroSlides.length) % heroSlides.length;
@@ -528,10 +615,61 @@ function showHeroSlide(index) {
   if (heroCounter) heroCounter.textContent = String(activeHeroSlide + 1).padStart(2, "0") + " / " + String(heroSlides.length).padStart(2, "0");
   if (heroCaption) heroCaption.textContent = heroSlides[activeHeroSlide].dataset.caption || "the little things collection";
 }
+
+function jumpToHeroProduct(productId) {
+  if (!productId) return;
+  const targetProduct = products.find((item) => item.id === productId && isProductActive(item));
+  const card = document.querySelector(`[data-product-id="${productId}"]`);
+  if (card) {
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.remove("hero-highlight-pulse");
+    void card.offsetWidth;
+    card.classList.add("hero-highlight-pulse");
+  } else {
+    document.querySelector("#shop")?.scrollIntoView({ behavior: "smooth" });
+  }
+  if (targetProduct) {
+    setTimeout(() => openProduct(targetProduct), 450);
+  }
+}
+
 if (heroFrame && heroSlides.length > 1) {
   showHeroSlide(0);
-  setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
+  let heroTimer = setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
+
+  heroFrame.addEventListener("mouseenter", () => clearInterval(heroTimer));
+  heroFrame.addEventListener("mouseleave", () => {
+    clearInterval(heroTimer);
+    heroTimer = setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
+  });
+
+  // Tap or click hero card to jump to that product in catalogue
+  heroFrame.addEventListener("click", () => {
+    const activeSlide = heroSlides[activeHeroSlide];
+    if (activeSlide && activeSlide.dataset.productId) {
+      jumpToHeroProduct(activeSlide.dataset.productId);
+    }
+  });
+
+  if (heroCaptionWrap) {
+    heroCaptionWrap.addEventListener("click", () => {
+      const activeSlide = heroSlides[activeHeroSlide];
+      if (activeSlide && activeSlide.dataset.productId) {
+        jumpToHeroProduct(activeSlide.dataset.productId);
+      }
+    });
+  }
 }
+
+// Brand logo click/touch opens Himanshi Sharma Artisan bio
+document.querySelectorAll(".brand").forEach((brandEl) => {
+  brandEl.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (typeof window.raycraftingOpenAboutModal === "function") {
+      window.raycraftingOpenAboutModal();
+    }
+  });
+});
 
 // ==========================================
 // Floating Daisies & Fairy Glitter Atmosphere

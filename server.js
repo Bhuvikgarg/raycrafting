@@ -549,6 +549,27 @@ function readBody(req) {
 function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
   return { salt, hash: crypto.scryptSync(password, salt, 64).toString("hex") };
 }
+function saveBase64Image(dataUrl, prefix = "piece") {
+  if (!dataUrl || typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) return dataUrl;
+  try {
+    const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+    if (!match) return dataUrl;
+    const rawExt = match[1].toLowerCase();
+    const ext = rawExt === "jpeg" || rawExt === "jpg" ? "jpg" : (rawExt === "png" ? "png" : "webp");
+    const buffer = Buffer.from(match[2], "base64");
+    const hash = crypto.createHash("md5").update(buffer).digest("hex").slice(0, 12);
+    const cleanPrefix = String(prefix).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30) || "piece";
+    const fileName = `${cleanPrefix}-${hash}.${ext}`;
+    const uploadsDir = path.join(ROOT, "assets", "uploads");
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    const filePath = path.join(uploadsDir, fileName);
+    fs.writeFileSync(filePath, buffer);
+    return `assets/uploads/${fileName}`;
+  } catch (err) {
+    console.error("Error saving base64 image to disk:", err);
+    return dataUrl;
+  }
+}
 function phoneCustomerEmail(phone) { return "phone_" + phone + "@accounts.raycrafting.local"; }
 function maskedPhone(phone) { return "+91 " + phone.slice(0, 2) + "******" + phone.slice(-2); }
 async function twilioVerifyRequest(pathname, params) {
@@ -802,7 +823,9 @@ function serveStatic(req, res, pathname) {
     ".xml": "application/xml; charset=utf-8",
     ".txt": "text/plain; charset=utf-8"
   };
-  res.writeHead(200, { ...SECURITY_HEADERS, "Content-Type": types[path.extname(file)] || "application/octet-stream", "Cache-Control": "public, max-age=300" });
+  const isAsset = requested.startsWith("/assets/") || [".webp", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".woff2"].includes(path.extname(file));
+  const cacheControl = isAsset ? "public, max-age=31536000, immutable" : "public, max-age=300";
+  res.writeHead(200, { ...SECURITY_HEADERS, "Content-Type": types[path.extname(file)] || "application/octet-stream", "Cache-Control": cacheControl });
   fs.createReadStream(file).pipe(res);
 }
 
@@ -1324,17 +1347,21 @@ async function api(req, res, pathname, body, url) {
     if (req.method === "POST" && pathname === "/api/admin/products/sync") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const products = Array.isArray(body.products) ? body.products : [];
-      const ids = products.map((product) => String(product.id || "")).filter(Boolean);
-      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=COALESCE(excluded.images_json, products.images_json),active=excluded.active`);
+      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=excluded.images_json,badge=COALESCE(excluded.badge, products.badge),dimensions=COALESCE(excluded.dimensions, products.dimensions),materials=COALESCE(excluded.materials, products.materials),care=COALESCE(excluded.care, products.care),active=excluded.active`);
       db.exec("BEGIN");
       try {
-        if (ids.length) db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
-        else db.prepare("UPDATE products SET active=0").run();
+        if (body.pruneOthers === true && Array.isArray(body.products)) {
+          const ids = products.map((product) => String(product.id || "")).filter(Boolean);
+          if (ids.length) db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
+        }
         for (const product of products) {
-          const imgs = Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []);
+          const rawImgs = Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []);
+          const cleanName = String(product.name || "piece");
+          const savedImgs = rawImgs.map(img => saveBase64Image(img, cleanName));
+          const primaryImg = savedImgs[0] || saveBase64Image(product.image, cleanName) || "";
           upsert.run(
             String(product.id),
-            String(product.name || "Untitled product"),
+            cleanName,
             String(product.category || "Other"),
             Number(product.price) || 0,
             Number(product.originalPrice || product.original_price) || 0,
@@ -1342,14 +1369,25 @@ async function api(req, res, pathname, body, url) {
             String(product.description || ""),
             Number(product.featured) || 1,
             String(product.art || "custom"),
-            String(product.image || imgs[0] || ""),
-            JSON.stringify(imgs),
+            primaryImg,
+            JSON.stringify(savedImgs),
+            product.badge || null,
+            product.dimensions || null,
+            product.materials || null,
+            product.care || null,
             product.active === false || product.active === 0 ? 0 : 1
           );
         }
         db.exec("COMMIT");
       } catch (error) { db.exec("ROLLBACK"); throw error; }
       return json(res, 200, { ok: true, count: products.length });
+    }
+    if (req.method === "POST" && pathname === "/api/admin/products/delete") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const productId = String(body.id || "");
+      if (!productId) return json(res, 400, { error: "Product ID required." });
+      db.prepare("UPDATE products SET active=0 WHERE id=?").run(productId);
+      return json(res, 200, { ok: true, id: productId, active: 0 });
     }
     return json(res, 404, { error: "API route not found." });
   } catch (error) { console.error(error); return json(res, error.status || 400, { error: error.message || "Request failed." }); }

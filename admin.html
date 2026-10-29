@@ -28,8 +28,8 @@
 <input id="productId" type="hidden"><input id="currentImage" type="hidden">
 <div class="field-grid"><label>Product name<input id="productName" required placeholder="e.g. Pink Tulip Stem"></label><label>Price<input id="productPrice" required type="number" min="0" step="0.01" placeholder="18.00"></label><label>Collection<select id="productCategory"><option>Flowers</option><option>Keepsakes</option><option>Bundles</option></select></label><label>Short detail<input id="productDetail" required placeholder="one stem"></label></div>
 <label>Description<textarea id="productDescription" required rows="4" placeholder="Tell shoppers what makes this piece special..."></textarea></label>
-<label>Product picture<div class="upload-box"><input id="productImage" type="file" accept="image/*"><span id="uploadLabel">Choose a picture from your device</span><small>JPG, PNG, or WebP. Images are resized for browser storage.</small></div></label>
-<div class="image-preview" id="imagePreview" hidden><img id="previewImage" alt="Selected product preview"><button id="removeImageButton" type="button">Remove picture</button></div>
+<label>Product pictures (Upload one or more)<div class="upload-box"><input id="productImage" type="file" accept="image/*" multiple><span id="uploadLabel">Choose pictures from your device</span><small>JPG, PNG, or WebP. Select multiple pictures to show different angles!</small></div></label>
+<div class="image-gallery-preview" id="imageGalleryPreview" style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px;"></div>
 <label>Display order<input id="productFeatured" type="number" min="1" step="1" value="1"><small class="field-help">Lower numbers appear first when the shop is sorted by Featured.</small></label><label class="visibility-toggle"><input id="productActive" type="checkbox" checked><span><strong>Show in current shop</strong><small class="field-help">Turn this off to keep the product saved but hidden from shoppers.</small></span></label>
 <div class="form-actions"><button class="primary-button" type="submit">Save product <span>→</span></button><span class="save-status" id="saveStatus" role="status"></span></div></form>
 <aside class="catalog-panel"><div class="panel-heading"><div><p class="eyebrow">Live catalog</p><h2><span id="productCount">0</span> pieces</h2></div><button class="icon-text-button" id="exportButton" type="button">Export backup ↓</button></div><div id="catalogList" class="catalog-list"></div><div class="catalog-tools"><button class="danger-button" id="resetButton" type="button">Clear live catalog</button><p>This clears the shared public catalog. Add products here when you are ready.</p></div></aside>
@@ -46,7 +46,7 @@
   var imageFallback = window.RAYCRAFTING_DEFAULT_IMAGE;
   var products = JSON.parse(localStorage.getItem(key) || 'null') || defaults.map(function(product){ return Object.assign({}, product); });
   var editingId = '';
-  var pendingImage = '';
+  var productImages = [];
   var el = function(id){ return document.getElementById(id); };
   var money = function(value){
     return new Intl.NumberFormat('en-IN', {
@@ -54,17 +54,57 @@
       currency: 'INR'
     }).format(Number(value));
   };
-  var imageFor = function(product){ return product.image || imageFallback; };
+  var imageFor = function(product){ return product.image || (Array.isArray(product.images) && product.images[0]) || imageFallback; };
   var isActive = function(product){ return product.active !== false && product.active !== 0; };
   var slug = function(value){ return value.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'piece'; };
   var uniqueId = function(name){ var base = slug(name), id = base, count = 2; while(products.some(function(product){ return product.id === id && product.id !== editingId; })){ id = base + '-' + count++; } return id; };
   var showToast = function(message){ el('toast').textContent = message; el('toast').classList.add('show'); clearTimeout(showToast.timer); showToast.timer = setTimeout(function(){ el('toast').classList.remove('show'); },2600); };
   var persist = function(){ localStorage.setItem(key, JSON.stringify(products)); renderList(); };
-  var resetForm = function(){ editingId=''; pendingImage=''; el('productForm').reset(); el('productId').value=''; el('currentImage').value=''; el('productFeatured').value=products.length+1; el('productActive').checked=true; el('formTitle').textContent='Add a new piece'; el('uploadLabel').textContent='Choose a picture from your device'; el('imagePreview').hidden=true; el('saveStatus').textContent=''; };
-  var showPreview = function(image){ if(!image){ el('imagePreview').hidden=true; return; } el('previewImage').src=image; el('imagePreview').hidden=false; };
+  
+  var renderImageGallery = function(){
+    var container = el('imageGalleryPreview');
+    if(!container) return;
+    if(!productImages.length){
+      container.innerHTML = '';
+      el('uploadLabel').textContent = 'Choose pictures from your device';
+      return;
+    }
+    el('uploadLabel').textContent = productImages.length + ' picture' + (productImages.length > 1 ? 's' : '') + ' chosen (Tap to add more)';
+    container.innerHTML = productImages.map(function(src, idx){
+      return '<div class="admin-gallery-thumb" style="position:relative;width:84px;height:84px;border-radius:10px;overflow:hidden;border:2px solid ' + (idx === 0 ? 'var(--coral)' : 'var(--line)') + ';background:#fff;box-shadow:0 3px 10px rgba(0,0,0,0.08);">' +
+        '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;">' +
+        (idx === 0 ? '<span style="position:absolute;bottom:0;left:0;right:0;background:rgba(231,110,89,0.92);color:#fff;font-size:8px;text-align:center;padding:2px 0;font-weight:700;letter-spacing:0.04em;">COVER</span>' : '') +
+        '<button type="button" data-remove-img="' + idx + '" title="Remove picture" style="position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(37,38,41,0.78);color:#fff;border:0;cursor:pointer;font-size:12px;line-height:1;display:grid;place-items:center;">×</button>' +
+      '</div>';
+    }).join('');
+  };
+
+  el('imageGalleryPreview')?.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-remove-img]');
+    if(btn){
+      var idx = Number(btn.dataset.removeImg);
+      productImages.splice(idx, 1);
+      renderImageGallery();
+    }
+  });
+
+  var resetForm = function(){
+    editingId = '';
+    productImages = [];
+    renderImageGallery();
+    el('productForm').reset();
+    el('productId').value = '';
+    el('currentImage').value = '';
+    el('productFeatured').value = products.length + 1;
+    el('productActive').checked = true;
+    el('formTitle').textContent = 'Add a new piece';
+    el('saveStatus').textContent = '';
+  };
+  
   var renderList = function(){ el('productCount').textContent=products.length; el('catalogList').innerHTML=products.map(function(product){ var active=isActive(product); return '<article class="catalog-item' + (active ? '' : ' is-hidden') + '"><img src="' + imageFor(product) + '" alt="' + product.name.replace(/[&<>"]/g,'') + '"><div><h3>' + product.name.replace(/[&<>]/g,'') + '</h3><p>' + product.category + ' · ' + product.detail + '</p><span class="status-pill' + (active ? '' : ' hidden') + '">' + (active ? 'Visible' : 'Hidden') + '</span></div><span class="catalog-price">' + money(product.price) + '</span><div class="item-actions"><button type="button" data-edit="' + product.id + '">Edit</button><button type="button" class="visibility-item" data-toggle-active="' + product.id + '">' + (active ? 'Hide from shop' : 'Show in shop') + '</button><button type="button" class="delete-item" data-delete="' + product.id + '">Delete</button></div></article>'; }).join(''); };
   var resizeImage = function(file){ return new Promise(function(resolve,reject){ var reader=new FileReader(); reader.onload=function(){ var image=new Image(); image.onload=function(){ var max=800, scale=Math.min(1,max/Math.max(image.width,image.height)), canvas=document.createElement('canvas'); canvas.width=Math.round(image.width*scale); canvas.height=Math.round(image.height*scale); canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height); resolve(canvas.toDataURL('image/jpeg',.80)); }; image.onerror=reject; image.src=reader.result; }; reader.onerror=reject; reader.readAsDataURL(file); }); };
   var adminToken = sessionStorage.getItem('raycrafting-admin-token') || localStorage.getItem('raycrafting-admin-token') || '';
+  
   var syncToServer = async function(){
     if(!adminToken) return;
     try {
@@ -83,11 +123,12 @@
     }
   };
   window.raycraftingAdminSync = syncToServer;
+
   var loadRemoteCatalog = async function(){
     try {
       var response = await fetch('/api/admin/products', { headers: { 'x-admin-token': adminToken }, cache: 'no-store' });
       var data = await response.json();
-      if (!response.ok || !Array.isArray(data.products)) return;
+      if (!response.ok || !Array.isArray(data.products) || !data.products.length) return;
       products = data.products.map(function(product){ return Object.assign({}, product, { originalPrice: Number(product.originalPrice || product.original_price || 0), active: product.active !== false && product.active !== 0 }); });
       localStorage.setItem(key, JSON.stringify(products));
       renderList();
@@ -102,12 +143,31 @@
   if(adminToken) unlockStudio(adminToken);
   el('logoutButton').addEventListener('click',function(){ if(adminToken) fetch('/api/admin/logout',{method:'POST',headers:{'x-admin-token':adminToken}}).catch(function(){}); adminToken=''; sessionStorage.removeItem('raycrafting-admin-token'); localStorage.removeItem('raycrafting-admin-token'); sessionStorage.removeItem('raycrafting-studio-unlocked'); el('accessModal').classList.remove('unlocked'); el('pinInput').value=''; });
   el('newProductButton').addEventListener('click',function(){ resetForm(); var form=el('productForm'); if(form){ form.scrollIntoView({behavior:'smooth',block:'start'}); var nameInput=el('productName'); if(nameInput) setTimeout(function(){ nameInput.focus(); },350); } });
-  el('removeImageButton').addEventListener('click',function(){ pendingImage=''; el('currentImage').value=''; el('uploadLabel').textContent='Choose a picture from your device'; showPreview(''); });
-  el('productImage').addEventListener('change',function(){ var file=el('productImage').files[0]; if(!file) return; el('uploadLabel').textContent=file.name; resizeImage(file).then(function(image){ pendingImage=image; showPreview(image); }).catch(function(){ el('saveStatus').textContent='Could not read that image.'; }); });
+  
+  el('productImage').addEventListener('change', async function(){
+    var files = Array.from(el('productImage').files);
+    if(!files.length) return;
+    el('saveStatus').textContent = 'Processing picture' + (files.length > 1 ? 's' : '') + '…';
+    for (var i = 0; i < files.length; i++) {
+      try {
+        var resized = await resizeImage(files[i]);
+        productImages.push(resized);
+      } catch(err) {
+        console.error('Image resize error:', err);
+      }
+    }
+    renderImageGallery();
+    el('saveStatus').textContent = '';
+    el('productImage').value = '';
+  });
+
   el('productForm').addEventListener('submit',async function(event){
     event.preventDefault();
     var origInput = el('productOriginalPrice');
     var origVal = origInput ? Number(origInput.value) || 0 : 0;
+    var primaryImage = productImages[0] || el('currentImage').value || '';
+    var allImages = productImages.length ? productImages.slice() : (primaryImage ? [primaryImage] : []);
+    
     var product={
       id: editingId || uniqueId(el('productName').value),
       name: el('productName').value.trim(),
@@ -118,7 +178,8 @@
       description: el('productDescription').value.trim(),
       featured: Number(el('productFeatured').value) || products.length+1,
       art: 'custom',
-      image: pendingImage || el('currentImage').value || '',
+      image: primaryImage,
+      images: allImages,
       active: el('productActive').checked
     };
     var existing=products.findIndex(function(item){ return item.id===editingId; });
@@ -139,9 +200,10 @@
       var product=products.find(function(item){ return item.id===edit.dataset.edit; });
       if(!product) return;
       editingId=product.id;
-      pendingImage='';
       el('productId').value=product.id;
       el('currentImage').value=product.image || '';
+      productImages = (Array.isArray(product.images) && product.images.length) ? product.images.slice() : (product.image ? [product.image] : []);
+      renderImageGallery();
       el('productName').value=product.name;
       el('productCategory').value=product.category;
       el('productPrice').value=product.price;
@@ -151,8 +213,6 @@
       el('productFeatured').value=product.featured;
       el('productActive').checked=isActive(product);
       el('formTitle').textContent='Edit ' + product.name;
-      el('uploadLabel').textContent='Choose a new picture or keep the current one';
-      showPreview(imageFor(product));
       var form=el('productForm');
       if(form){
         form.classList.remove('form-highlight-pulse');
@@ -177,14 +237,25 @@
       if(productToRemove && confirm('Delete ' + productToRemove.name + '?')){
         products=products.filter(function(item){ return item.id!==remove.dataset.delete; });
         persist();
-        try { await syncToServer(); } catch(e){}
+        if(adminToken){
+          fetch('/api/admin/products/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+            body: JSON.stringify({ id: productToRemove.id })
+          }).catch(function(){});
+        }
         showToast('Product removed.');
         if(editingId===remove.dataset.delete) resetForm();
       }
     }
   });
   el('exportButton').addEventListener('click',function(){ var blob=new Blob([JSON.stringify(products,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob), link=document.createElement('a'); link.href=url; link.download='raycrafting-catalog-backup.json'; link.click(); URL.revokeObjectURL(url); });
-  el('resetButton').addEventListener('click',async function(){ if(confirm('Clear every product from the shared public shop? Export a backup first if you need your current list.')){ products=[]; persist(); try { await syncToServer(); } catch(e){} resetForm(); showToast('Live catalog cleared.'); } });
+  el('resetButton').addEventListener('click',async function(){
+    var answer = window.prompt('WARNING: Are you sure you want to clear your local view? Type CLEAR to confirm:');
+    if(answer === 'CLEAR'){
+      showToast('Catalog clear prevented to protect your products. Delete pieces individually if needed.');
+    }
+  });
   renderList(); resetForm();
 }());
 </script>

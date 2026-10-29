@@ -3,11 +3,11 @@ window.RAYCRAFTING_DEFAULT_IMAGE = "assets/products/illuminated-lotus-blossom-la
 window.RAYCRAFTING_DEFAULT_PRODUCTS = [
   {
     "id": "illuminated-lotus-blossom-lamp",
-    "name": "Enchanted Illuminated Lotus Blossom Lamp",
+    "name": "Big size lotus Lamp",
     "category": "Flowers",
-    "price": 300,
-    "original_price": 499,
-    "detail": "Handcrafted velvet petals \u00b7 Built-in warm LED glow",
+    "price": 555,
+    "original_price": 650,
+    "detail": "Handcrafted velvet petals · Built-in warm LED glow",
     "description": "A breathtaking handcrafted lotus blossom sculpted from rich pink velvet chenille petals resting on an emerald moss base. Features warm fairy lights glowing gently from within the blossom center, creating a tranquil ambient night light or desk centerpiece.",
     "featured": 1,
     "art": "lotus",
@@ -18,20 +18,41 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/illuminated-lotus-blossom-lamp-3.webp"
     ],
     "badge": "Bestseller",
-    "dimensions": "Diameter: ~14 cm \u00b7 Height: ~9 cm",
+    "dimensions": "Diameter: ~14 cm · Height: ~9 cm",
     "materials": "Plush pink velvet chenille, preserved craft moss base, warm-tone LED micro fairy lights",
-    "care": "Indoor ambient light \u00b7 Dust gently with soft dry cloth \u00b7 Replaceable mini cell battery",
+    "care": "Indoor ambient light · Dust gently with soft dry cloth · Replaceable mini cell battery",
+    "active": 1
+  },
+  {
+    "id": "medium-sized-lotus-lamp",
+    "name": "Medium sized lotus lamp for diwali +(2 wax tea light candles free)",
+    "category": "Flowers",
+    "price": 199,
+    "original_price": 350,
+    "detail": "Beautiful kotus lamp crafted with love using pipe cleaners",
+    "description": "Durability and it's beauty when it illuminates the home ✨",
+    "featured": 2,
+    "art": "lotus",
+    "image": "assets/products/illuminated-lotus-blossom-lamp-2.webp",
+    "images": [
+      "assets/products/illuminated-lotus-blossom-lamp-2.webp",
+      "assets/products/illuminated-lotus-blossom-lamp-3.webp"
+    ],
+    "badge": "Diwali Special",
+    "dimensions": "~14-16 cm tall",
+    "materials": "Velvety chenille stems & craft pot",
+    "care": "Everlasting bloom · Never withers · Zero watering",
     "active": 1
   },
   {
     "id": "lavender-bouquet-pearl-lace",
     "name": "Lavender Dreams Pearl-Lace Bouquet",
     "category": "Flowers",
-    "price": 300,
+    "price": 250,
     "original_price": 399,
-    "detail": "Handcrafted lavender stems \u00b7 Pearl beaded tulle wrap",
+    "detail": "Handcrafted lavender stems · Pearl beaded tulle wrap",
     "description": "Delicate sprigs of soft lavender pipe-cleaner blooms wrapped in pleated sheer organza tulle, finished with an elegant scalloped pearl-bead trim and a pearlescent ribbon bow. An everlasting bouquet that never wilts.",
-    "featured": 2,
+    "featured": 3,
     "art": "lavender",
     "image": "assets/products/lavender-bouquet-pearl-lace-1.webp",
     "images": [
@@ -39,9 +60,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/lavender-bouquet-pearl-lace-2.webp"
     ],
     "badge": "Gift Pick",
-    "dimensions": "Length: ~22 cm \u00b7 Width: ~12 cm",
+    "dimensions": "Length: ~22 cm · Width: ~12 cm",
     "materials": "Fuzzy chenille stems, pleated blush organza, faux pearl bead trimming & satin bow",
-    "care": "Everlasting floral keepsake \u00b7 Keeps its shape forever \u00b7 No water needed",
+    "care": "Everlasting floral keepsake · Keeps its shape forever · No water needed",
     "active": 1
   },
   {
