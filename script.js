@@ -185,7 +185,7 @@ cartItems.addEventListener("click", (event) => {
 
 document.querySelector("#checkoutButton").addEventListener("click", () => {
   const order = cart.map((item) => `${item.quantity} x ${products.find((product) => product.id === item.id).name}`).join(", ");
-  window.location.href = `mailto:hello@raycrafting.co?subject=Raycrafting%20order%20request&body=Hi%20Raycrafting,%0A%0AI'd%20like%20to%20order:%20${encodeURIComponent(order)}.%0A%0AMy%20name:%0ADelivery%20details:`;
+  window.location.href = `mailto:raywithcharm@gmail.com?subject=Raycrafting%20order%20request&body=Hi%20Raycrafting,%0A%0AI'd%20like%20to%20order:%20${encodeURIComponent(order)}.%0A%0AMy%20name:%0ADelivery%20details:`;
 });
 
 document.querySelector("#newsletterForm").addEventListener("submit", (event) => {

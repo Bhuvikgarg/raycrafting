@@ -27,7 +27,7 @@ const RATE_LIMITS = new Map();
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || "";
-const SUPPORT_EMAIL = process.env.RAYCRAFTING_SUPPORT_EMAIL || "hello@raycrafting.co";
+const SUPPORT_EMAIL = process.env.RAYCRAFTING_SUPPORT_EMAIL || "raywithcharm@gmail.com";
 const SUPPORT_PHONE = process.env.RAYCRAFTING_SUPPORT_PHONE || "";
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 const EMAIL_FROM = process.env.RAYCRAFTING_EMAIL_FROM || "";
@@ -257,7 +257,7 @@ function htmlEscape(value = "") { return String(value).replace(/[&<>'"]/g, (char
 async function notifyCustomerOrderStatus(order, status, reason = "") {
   const apiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
   const emailFrom = getSetting("email_from", EMAIL_FROM || "Raycrafting <orders@raycrafting.store>");
-  const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co");
+  const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "raywithcharm@gmail.com");
   const supportPhone = getSetting("support_phone", SUPPORT_PHONE || "");
 
   let recipientEmail = String(order.customer_email || order.email || "").trim().toLowerCase();
@@ -300,7 +300,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badge: "Paid Online",
       badgeBg: "#dfeada",
       badgeColor: "#557351",
-      intro: "Thank you for your order! Your payment was received and Bhuvik is carefully handcrafting your pieces."
+      intro: "Thank you for your order! Your payment was received and Himanshi is carefully handcrafting your pieces."
     },
     processing: {
       headline: "🌸 Order Confirmed & Crafting",
@@ -308,8 +308,8 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badgeBg: "#dfeada",
       badgeColor: "#557351",
       intro: orderData.payment_method === "cod"
-        ? "Thank you for your order! Your Pay on Delivery order is confirmed and Bhuvik has begun handcrafting your pieces."
-        : "The studio has accepted your order and Bhuvik is handcrafting your pieces."
+        ? "Thank you for your order! Your Pay on Delivery order is confirmed and Himanshi has begun handcrafting your pieces."
+        : "The studio has accepted your order and Himanshi is handcrafting your pieces."
     },
     shipped: {
       headline: "📦 Your Order Has Shipped!",
@@ -337,7 +337,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badge: "Cancellation Requested",
       badgeBg: "#fff1cf",
       badgeColor: "#98721a",
-      intro: "We received your request to cancel this order. Bhuvik is reviewing it."
+      intro: "We received your request to cancel this order. Himanshi is reviewing it."
     },
     cancelled: {
       headline: "Order Cancelled",
@@ -351,7 +351,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badge: "Return Requested",
       badgeBg: "#fff1cf",
       badgeColor: "#98721a",
-      intro: "We received your return request under our 3-day handcrafted studio policy. Bhuvik will review the details within 24 hours."
+      intro: "We received your return request under our 3-day handcrafted studio policy. Himanshi will review the details within 24 hours."
     },
     returned: {
       headline: "Return Completed",
@@ -416,7 +416,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
 
   const cleanSupportPhone = String(supportPhone || "").replace(/\D/g, "");
   const whatsappUrl = cleanSupportPhone
-    ? `https://wa.me/${cleanSupportPhone.startsWith("91") ? cleanSupportPhone : "91" + cleanSupportPhone}?text=${encodeURIComponent(`Hi Bhuvik, I have a question regarding order #${orderData.id}`)}`
+    ? `https://wa.me/${cleanSupportPhone.startsWith("91") ? cleanSupportPhone : "91" + cleanSupportPhone}?text=${encodeURIComponent(`Hi Himanshi, I have a question regarding order #${orderData.id}`)}`
     : "";
 
   const html = `
@@ -468,7 +468,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
             <div style="margin-top:6px;color:#7e8087;font-size:11px;">Payment: <strong>${orderData.payment_method === "cod" ? "Pay on Delivery (Doorstep Cash / UPI)" : "Paid Online via Razorpay"}</strong></div>
           </div>
 
-          ${whatsappUrl ? `<div style="text-align:center;margin:22px 0 12px;"><a href="${whatsappUrl}" target="_blank" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:12px;font-weight:600;">💬 Chat with Bhuvik on WhatsApp</a></div>` : ""}
+          ${whatsappUrl ? `<div style="text-align:center;margin:22px 0 12px;"><a href="${whatsappUrl}" target="_blank" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:12px;font-weight:600;">💬 Chat with Himanshi on WhatsApp</a></div>` : ""}
           <div style="text-align:center;font-size:11px;color:#9aa0a6;margin-top:18px;">
             Questions or custom inquiries? Reply to this email or contact <a href="mailto:${htmlEscape(supportEmail)}" style="color:#e76e59;text-decoration:none;">${htmlEscape(supportEmail)}</a>.
           </div>
@@ -541,7 +541,7 @@ function json(res, status, data) {
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let raw = "";
-    req.on("data", (chunk) => { raw += chunk; if (raw.length > 1024 * 1024) reject(new Error("Request too large")); });
+    req.on("data", (chunk) => { raw += chunk; if (raw.length > 50 * 1024 * 1024) reject(new Error("Request too large")); });
     req.on("end", () => { try { req.rawBody = raw; const parsed = raw ? JSON.parse(raw) : {}; resolve(parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {}); } catch { reject(new Error("Invalid JSON")); } });
     req.on("error", reject);
   });
@@ -842,7 +842,7 @@ async function api(req, res, pathname, body, url) {
       const customer = customerFromRequest(req);
       const orderId = id("custom");
       db.prepare("INSERT INTO custom_orders (id,customer_id,name,email,phone,city,state,description,reference_image,status,buyer_price_request,budget_hint,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer ? customer.id : null, name, email, phone, city, state, description || "Reference image supplied.", referenceImage || null, "new", askPrice ? 1 : 0, budgetHint || null, now(), now());
-      return json(res, 201, { ok: true, customOrderId: orderId, message: askPrice ? "Your price quote request is with the studio! Bhuvik will review and send you a custom price quote shortly." : "Your custom idea is with the studio. We’ll review it and contact you within 1 hour." });
+      return json(res, 201, { ok: true, customOrderId: orderId, message: askPrice ? "Your price quote request is with the studio! Himanshi will review and send you a custom price quote shortly." : "Your custom idea is with the studio. We’ll review it and contact you within 1 hour." });
     }
     if (req.method === "POST" && pathname === "/api/note-requests") {
       if (!allowRequest(req, "note-request", 8, 15 * 60 * 1000)) return json(res, 429, { error: "Too many requests. Please try again later." });
@@ -859,7 +859,7 @@ async function api(req, res, pathname, body, url) {
     }
     if (req.method === "GET" && pathname === "/api/config") {
       const supportPhone = getSetting("support_phone", SUPPORT_PHONE || "");
-      const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co");
+      const supportEmail = getSetting("support_email", SUPPORT_EMAIL || "raywithcharm@gmail.com");
       const cleanInsta = parseInstagramUsername(getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""));
       const instagramUrl = cleanInsta ? `https://ig.me/m/${cleanInsta}` : "";
       const bannerQuote = getSetting("banner_quote", "“Where flowers bloom, so does hope.” — Handcrafted with love");
@@ -1002,7 +1002,7 @@ async function api(req, res, pathname, body, url) {
       if (!order) return json(res, 404, { error: "Custom request not found." });
       if (action === "accept") {
         db.prepare("UPDATE custom_orders SET status='accepted',updated_at=? WHERE id=?").run(now(), orderId);
-        return json(res, 200, { ok: true, orderId, status: "accepted", message: "Price quote accepted! Bhuvik will begin handcrafting your piece." });
+        return json(res, 200, { ok: true, orderId, status: "accepted", message: "Price quote accepted! Himanshi will begin handcrafting your piece." });
       } else if (action === "decline" || action === "reject") {
         const note = reason ? `Buyer declined quote: ${reason}` : "Buyer declined quote.";
         db.prepare("UPDATE custom_orders SET status='declined',seller_note=COALESCE(seller_note || ' · ', '') || ?,updated_at=? WHERE id=?").run(note, now(), orderId);
@@ -1267,7 +1267,7 @@ async function api(req, res, pathname, body, url) {
       const cleanInsta = parseInstagramUsername(getSetting("instagram_handle", process.env.INSTAGRAM_HANDLE || ""));
       return json(res, 200, {
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
-        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
+        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "raywithcharm@gmail.com"),
         instagramHandle: cleanInsta,
         instagramUrl: cleanInsta ? `https://ig.me/m/${cleanInsta}` : "",
         bannerQuote: getSetting("banner_quote", "“Where flowers bloom, so does hope.” — Handcrafted with love"),
@@ -1289,7 +1289,7 @@ async function api(req, res, pathname, body, url) {
       return json(res, 200, {
         ok: true,
         supportPhone: getSetting("support_phone", SUPPORT_PHONE || ""),
-        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "hello@raycrafting.co"),
+        supportEmail: getSetting("support_email", SUPPORT_EMAIL || "raywithcharm@gmail.com"),
         instagramHandle: cleanInsta,
         instagramUrl: cleanInsta ? `https://ig.me/m/${cleanInsta}` : "",
         bannerQuote: getSetting("banner_quote", "“Where flowers bloom, so does hope.” — Handcrafted with love"),
@@ -1332,7 +1332,20 @@ async function api(req, res, pathname, body, url) {
         else db.prepare("UPDATE products SET active=0").run();
         for (const product of products) {
           const imgs = Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []);
-          upsert.run(String(product.id), String(product.name || "Untitled product"), String(product.category || "Other"), Number(product.price) || 0, Number(product.originalPrice) || 0, String(product.detail || ""), String(product.description || ""), Number(product.featured) || 1, String(product.art || "custom"), String(product.image || imgs[0] || ""), JSON.stringify(imgs), product.active === false || product.active === 0 ? 0 : 1);
+          upsert.run(
+            String(product.id),
+            String(product.name || "Untitled product"),
+            String(product.category || "Other"),
+            Number(product.price) || 0,
+            Number(product.originalPrice || product.original_price) || 0,
+            String(product.detail || ""),
+            String(product.description || ""),
+            Number(product.featured) || 1,
+            String(product.art || "custom"),
+            String(product.image || imgs[0] || ""),
+            JSON.stringify(imgs),
+            product.active === false || product.active === 0 ? 0 : 1
+          );
         }
         db.exec("COMMIT");
       } catch (error) { db.exec("ROLLBACK"); throw error; }

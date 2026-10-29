@@ -29,7 +29,7 @@
   let customer = null;
   let coupon = { code: "", discount: 0, description: "" };
   let razorpayConfig = null;
-  let supportConfig = { supportEmail: "hello@raycrafting.co", supportPhone: "", instagramHandle: "", instagramUrl: "" };
+  let supportConfig = { supportEmail: "raywithcharm@gmail.com", supportPhone: "", instagramHandle: "", instagramUrl: "" };
   let detectedLocation = null;
   let phoneAuthPending = "";
   let isEditingAddress = false;
@@ -38,14 +38,15 @@
   const money = (value) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(Number(value) || 0);
   const esc = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
   const products = () => {
-    if (Array.isArray(window.RAYCRAFTING_PRODUCTS)) return window.RAYCRAFTING_PRODUCTS;
+    if (Array.isArray(window.RAYCRAFTING_PRODUCTS) && window.RAYCRAFTING_PRODUCTS.length) return window.RAYCRAFTING_PRODUCTS;
     const saved = localStorage.getItem(window.RAYCRAFTING_STORAGE_KEY);
     return saved ? JSON.parse(saved) : (window.RAYCRAFTING_DEFAULT_PRODUCTS || []).map((product) => ({ ...product }));
   };
   const cart = () => JSON.parse(localStorage.getItem("raycrafting-cart") || "[]");
   const priceInfo = (product) => {
     const sale = Number(product.price) || 0;
-    const original = Number(product.originalPrice) > sale ? Number(product.originalPrice) : 0;
+    const origVal = Number(product.originalPrice || product.original_price || 0);
+    const original = origVal > sale ? origVal : 0;
     return { sale, original, percent: original ? Math.round((1 - sale / original) * 100) : 0 };
   };
 
@@ -244,7 +245,7 @@
                     </label>
                     <label class="fulfillment-option">
                       <input type="radio" name="fulfillmentMethod" value="self_pickup">
-                      <span><strong>Self pickup</strong><small>Collect from Bhuvik's studio after order is ready. No delivery fee.</small></span>
+                      <span><strong>Self pickup</strong><small>Collect from Himanshi's studio after order is ready. No delivery fee.</small></span>
                     </label>
                   </div>
                   <div class="location-row" id="locationRow">
@@ -270,7 +271,7 @@
                   <form class="commerce-form" id="addressForm">
                     <div id="addressFormFields">
                       <div class="commerce-grid">
-                        <label>Full name<input id="addressName" required minlength="2" maxlength="120" autocomplete="name" placeholder="Bhuvik Garg"></label>
+                        <label>Full name<input id="addressName" required minlength="2" maxlength="120" autocomplete="name" placeholder="Himanshi Sharma"></label>
                         <label>Phone number<input id="addressPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">10-digit Indian mobile number.</small></label>
                       </div>
                       <label id="addressEmailField">Email address <span class="commerce-note">(for order updates &amp; receipt)</span><input id="addressEmail" type="email" required minlength="5" maxlength="120" autocomplete="email" placeholder="you@example.com"><small class="field-help">We'll email your order details &amp; tracking status here.</small></label>
@@ -339,7 +340,7 @@
                   <h3>Your order</h3>
                   <div class="checkout-lines" id="checkoutLines"></div>
                   <div class="checkout-maker-reassurance">
-                    🌸 <span>Handmade in small batches by Bhuvik · 100% Gift-Ready</span>
+                    🌸 <span>Handmade in small batches by Himanshi · 100% Gift-Ready</span>
                   </div>
                   <div class="checkout-totals" id="checkoutTotals"></div>
                 </section>
@@ -381,10 +382,10 @@
           <div class="support-box">
             <div>
               <strong>Need a hand with an order?</strong>
-              <p>Chat directly with Bhuvik on WhatsApp or email the studio.</p>
+              <p>Chat directly with Himanshi on WhatsApp or email the studio.</p>
             </div>
             <div class="support-links">
-              <a id="chatSupport" href="mailto:hello@raycrafting.co">Email support</a>
+              <a id="chatSupport" href="mailto:raywithcharm@gmail.com">Email support</a>
               <a id="callSupport" href="tel:" hidden>Call support</a>
             </div>
           </div>
@@ -400,7 +401,7 @@
             <div class="confirm-flower-icon">🌸</div>
             <p class="eyebrow">Raycrafting Handcrafted Order</p>
             <h2 id="confirmTitle">Your order is placed!</h2>
-            <p id="confirmSubtitle">We’ve received your order and Bhuvik is carefully preparing your handmade piece.</p>
+            <p id="confirmSubtitle">We’ve received your order and Himanshi is carefully preparing your handmade piece.</p>
           </div>
           <div class="confirm-summary-box">
             <div class="confirm-summary-row">
@@ -422,7 +423,7 @@
           </div>
           <div class="confirm-actions">
             <button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders <span>→</span></button>
-            <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with Bhuvik on WhatsApp</a>
+            <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with Himanshi on WhatsApp</a>
             <a class="orders-button" id="confirmReceiptLink" href="thank-you.html" style="margin-top:6px;display:block;text-align:center;text-decoration:none;">View Full Order Receipt 📄</a>
             <button class="orders-button" id="confirmCloseBtn" type="button" style="margin-top:6px">Back to Shop</button>
           </div>
@@ -443,7 +444,7 @@
             <button class="commerce-close" id="returnClose" type="button" aria-label="Close return modal">×</button>
           </div>
           <div class="return-policy-box">
-            🌸 <strong>Handmade Studio Quality Guarantee:</strong> Every piece is hand-twisted with care by Bhuvik. If your order arrived broken, damaged during transit, or with a craftsmanship defect, we will arrange a replacement or refund within 3 days of delivery.
+            🌸 <strong>Handmade Studio Quality Guarantee:</strong> Every piece is hand-twisted with care by Himanshi. If your order arrived broken, damaged during transit, or with a craftsmanship defect, we will arrange a replacement or refund within 3 days of delivery.
           </div>
           <form class="commerce-form" id="returnForm">
             <input type="hidden" id="returnOrderId" value="">
@@ -459,7 +460,7 @@
             </label>
             <label>Describe the Defect or Damage <span style="color:var(--coral-dark)">*</span>
               <textarea id="returnDetail" required minlength="10" maxlength="500" rows="3" placeholder="Please describe the exact defect or damage in detail..."></textarea>
-              <small class="field-help">Please describe the issue. You can also share unboxing photos/videos with Bhuvik on WhatsApp.</small>
+              <small class="field-help">Please describe the issue. You can also share unboxing photos/videos with Himanshi on WhatsApp.</small>
             </label>
             <div style="display:flex;gap:10px;margin-top:6px;">
               <button class="commerce-action" type="submit" id="submitReturnBtn" style="flex:1;">Submit Return Request <span>→</span></button>
@@ -510,12 +511,12 @@
             <img src="assets/sunflower.jpeg" alt="Handmade orange sunflower in a small dark pot">
             <div>
               <p>Raycrafting is a small handmade studio creating pipe-cleaner flowers, keepsakes, and thoughtful little gifts that stay bright long after the moment.</p>
-              <p><strong>Made by Bhuvik Garg.</strong> Every piece is shaped, wrapped, and checked by hand in small batches, with a little patience in every twist.</p>
+              <p><strong>Made by Himanshi Sharma.</strong> Every piece is shaped, wrapped, and checked by hand in small batches, with a little patience in every twist.</p>
             </div>
           </div>
           <p>For custom colours, desk companions, return questions, or simply to say hello, reach the studio directly. We keep the shop personal, clear, and kind.</p>
           <div class="about-links">
-            <a class="commerce-action" href="mailto:hello@raycrafting.co?subject=Hello%20Raycrafting">Email the studio ↗</a>
+            <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Raycrafting">Email the studio ↗</a>
             <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Plan a custom order ↗</a>
           </div>
         </div>
@@ -1057,7 +1058,7 @@
     });
     const message = $("#addressMessage");
     if (message) {
-      message.textContent = selfPickup ? "Self pickup selected. You can collect your order directly from Bhuvik's studio." : "";
+      message.textContent = selfPickup ? "Self pickup selected. You can collect your order directly from Himanshi's studio." : "";
       message.className = selfPickup ? "commerce-message success" : "commerce-message";
     }
     renderCheckout();
@@ -1093,7 +1094,7 @@
     }
     const message = $("#addressMessage");
     if (message) {
-      message.textContent = failed ? failed[1] : (selfPickup ? "Self pickup selected. You can collect your order directly from Bhuvik's studio." : "");
+      message.textContent = failed ? failed[1] : (selfPickup ? "Self pickup selected. You can collect your order directly from Himanshi's studio." : "");
       message.className = failed ? "commerce-message" : "commerce-message success";
     }
     return { valid: !failed, value, error: failed?.[1] || "" };
@@ -1235,7 +1236,7 @@
       const phone = String(supportConfig.supportPhone || "").replace(/\D/g, "");
       if (phone) {
         const clean = phone.startsWith("91") ? phone : "91" + phone;
-        waBtn.href = `https://wa.me/${clean}?text=${encodeURIComponent(`Hi Bhuvik! I just placed order ${orderId} on Raycrafting (${money(total)}). Excited for my handmade blooms!`)}`;
+        waBtn.href = `https://wa.me/${clean}?text=${encodeURIComponent(`Hi Himanshi! I just placed order ${orderId} on Raycrafting (${money(total)}). Excited for my handmade blooms!`)}`;
         waBtn.style.display = "inline-flex";
       } else {
         waBtn.style.display = "none";
@@ -1349,21 +1350,21 @@
           quoteBox = `
             <div class="custom-quote-box">
               <div class="quote-header">
-                <span class="quote-badge">Bhuvik's Price Quote</span>
+                <span class="quote-badge">Himanshi's Price Quote</span>
                 <strong class="quote-price">${money(req.quoted_price)}</strong>
               </div>
               ${req.seller_note ? `<p class="quote-seller-note"><strong>Maker note:</strong> ${esc(req.seller_note)}</p>` : ""}
               <div class="custom-quote-actions">
                 <button type="button" class="commerce-action quote-accept-btn" data-custom-action="accept" data-custom-id="${esc(req.id)}">✓ Accept Quote (${money(req.quoted_price)})</button>
                 <button type="button" class="orders-button quote-decline-btn" data-custom-action="decline" data-custom-id="${esc(req.id)}">✗ Decline</button>
-                ${phoneDigits ? `<a class="quote-whatsapp-link" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi Bhuvik! Regarding custom request ${req.id} (quote ${money(req.quoted_price)}): `)}">💬 Chat on WhatsApp</a>` : ""}
+                ${phoneDigits ? `<a class="quote-whatsapp-link" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi Himanshi! Regarding custom request ${req.id} (quote ${money(req.quoted_price)}): `)}">💬 Chat on WhatsApp</a>` : ""}
               </div>
             </div>
           `;
         } else if (isAccepted) {
           quoteBox = `
             <div class="custom-accepted-box">
-              🌸 <strong>Quote Accepted (${money(req.quoted_price || 0)})</strong> · Bhuvik has received your confirmation and is handcrafting your custom piece! We will reach out when it is ready.
+              🌸 <strong>Quote Accepted (${money(req.quoted_price || 0)})</strong> · Himanshi has received your confirmation and is handcrafting your custom piece! We will reach out when it is ready.
             </div>
           `;
         }
@@ -1394,7 +1395,7 @@
       <div class="orders-empty-auth">
         <div class="orders-auth-flower">🌸</div>
         <h3>Sign in to view your orders &amp; quotes</h3>
-        <p>Track your handcrafted blooms, review custom price quotes from Bhuvik, or request returns.</p>
+        <p>Track your handcrafted blooms, review custom price quotes from Himanshi, or request returns.</p>
         ${errorMsg && errorMsg !== "Sign in to view your orders." ? `<p class="commerce-message" style="margin-bottom:12px;">${esc(errorMsg)}</p>` : ""}
         <button class="commerce-action" id="ordersPromptSignInBtn" type="button">Sign in to your account <span>→</span></button>
       </div>
@@ -1413,7 +1414,7 @@
     }
     const chatLink = $("#chatSupport");
     if (chatLink) {
-      chatLink.href = `mailto:${encodeURIComponent(supportConfig.supportEmail || "hello@raycrafting.co")}?subject=${encodeURIComponent("Raycrafting order support")}`;
+      chatLink.href = `mailto:${encodeURIComponent(supportConfig.supportEmail || "raywithcharm@gmail.com")}?subject=${encodeURIComponent("Raycrafting order support")}`;
     }
     const phone = String(supportConfig.supportPhone || "").trim();
     const callLink = $("#callSupport");
@@ -1514,7 +1515,7 @@
         })
       });
       closeReturnModal();
-      toast("Return request submitted for review. Bhuvik will reach out shortly.");
+      toast("Return request submitted for review. Himanshi will reach out shortly.");
       loadOrders();
     } catch (error) {
       if (msg) { msg.textContent = error.message; msg.className = "commerce-message"; }
@@ -1550,7 +1551,7 @@
         method: "POST",
         body: JSON.stringify({ orderId, action, reason })
       });
-      toast(res.message || (action === "accept" ? "Quote accepted! Bhuvik will begin crafting your piece." : "Quote declined."));
+      toast(res.message || (action === "accept" ? "Quote accepted! Himanshi will begin crafting your piece." : "Quote declined."));
       loadOrders();
     } catch (error) {
       window.alert(error.message);

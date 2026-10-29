@@ -246,10 +246,14 @@
   function wireProductDiscount() {
     addDiscountField();
     const form = $("productForm"); if (!form) return;
-    form.addEventListener("submit", () => { const name = $("productName").value.trim(); const editingId = $("productId").value; const original = Number($("productOriginalPrice").value) || 0; setTimeout(async () => { const current = products(); const product = current.find((item) => item.id === editingId) || current.find((item) => item.name === name); if (!product) return; product.originalPrice = original > Number(product.price) ? original : 0; localStorage.setItem(key, JSON.stringify(current)); try { await syncProducts(); $("saveStatus").textContent = "Saved to the public shop."; } catch (error) { $("saveStatus").textContent = error.message; showToast(error.message); } decorateCatalog(); }, 80); });
-    document.querySelector("#catalogList").addEventListener("click", (event) => { const edit = event.target.closest("[data-edit]"); const remove = event.target.closest("[data-delete]"); const toggle = event.target.closest("[data-toggle-active]"); if (edit) setTimeout(() => { const product = products().find((item) => item.id === edit.dataset.edit); if ($("productOriginalPrice")) $("productOriginalPrice").value = product?.originalPrice || ""; }, 0); if (remove || toggle) setTimeout(async () => { try { await syncProducts(); $("saveStatus").textContent = toggle ? "Product visibility synced to the public shop." : "Catalog deletion synced to the public shop."; } catch (error) { $("saveStatus").textContent = error.message; showToast(error.message); } }, 100); });
+    document.querySelector("#catalogList").addEventListener("click", (event) => {
+      const edit = event.target.closest("[data-edit]");
+      if (edit) setTimeout(() => {
+        const product = products().find((item) => item.id === edit.dataset.edit);
+        if ($("productOriginalPrice")) $("productOriginalPrice").value = product?.originalPrice || product?.original_price || "";
+      }, 0);
+    });
     $("newProductButton").addEventListener("click", () => { if ($("productOriginalPrice")) $("productOriginalPrice").value = ""; });
-    $("resetButton").addEventListener("click", () => setTimeout(async () => { try { await syncProducts(); $("saveStatus").textContent = "Demo catalog synced to the public shop."; } catch (error) { $("saveStatus").textContent = error.message; showToast(error.message); } }, 100));
     setInterval(decorateCatalog, 800);
   }
 

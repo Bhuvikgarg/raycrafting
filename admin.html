@@ -63,8 +63,26 @@
   var resetForm = function(){ editingId=''; pendingImage=''; el('productForm').reset(); el('productId').value=''; el('currentImage').value=''; el('productFeatured').value=products.length+1; el('productActive').checked=true; el('formTitle').textContent='Add a new piece'; el('uploadLabel').textContent='Choose a picture from your device'; el('imagePreview').hidden=true; el('saveStatus').textContent=''; };
   var showPreview = function(image){ if(!image){ el('imagePreview').hidden=true; return; } el('previewImage').src=image; el('imagePreview').hidden=false; };
   var renderList = function(){ el('productCount').textContent=products.length; el('catalogList').innerHTML=products.map(function(product){ var active=isActive(product); return '<article class="catalog-item' + (active ? '' : ' is-hidden') + '"><img src="' + imageFor(product) + '" alt="' + product.name.replace(/[&<>"]/g,'') + '"><div><h3>' + product.name.replace(/[&<>]/g,'') + '</h3><p>' + product.category + ' · ' + product.detail + '</p><span class="status-pill' + (active ? '' : ' hidden') + '">' + (active ? 'Visible' : 'Hidden') + '</span></div><span class="catalog-price">' + money(product.price) + '</span><div class="item-actions"><button type="button" data-edit="' + product.id + '">Edit</button><button type="button" class="visibility-item" data-toggle-active="' + product.id + '">' + (active ? 'Hide from shop' : 'Show in shop') + '</button><button type="button" class="delete-item" data-delete="' + product.id + '">Delete</button></div></article>'; }).join(''); };
-  var resizeImage = function(file){ return new Promise(function(resolve,reject){ var reader=new FileReader(); reader.onload=function(){ var image=new Image(); image.onload=function(){ var max=1200, scale=Math.min(1,max/Math.max(image.width,image.height)), canvas=document.createElement('canvas'); canvas.width=Math.round(image.width*scale); canvas.height=Math.round(image.height*scale); canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height); resolve(canvas.toDataURL('image/jpeg',.82)); }; image.onerror=reject; image.src=reader.result; }; reader.onerror=reject; reader.readAsDataURL(file); }); };
+  var resizeImage = function(file){ return new Promise(function(resolve,reject){ var reader=new FileReader(); reader.onload=function(){ var image=new Image(); image.onload=function(){ var max=800, scale=Math.min(1,max/Math.max(image.width,image.height)), canvas=document.createElement('canvas'); canvas.width=Math.round(image.width*scale); canvas.height=Math.round(image.height*scale); canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height); resolve(canvas.toDataURL('image/jpeg',.80)); }; image.onerror=reject; image.src=reader.result; }; reader.onerror=reject; reader.readAsDataURL(file); }); };
   var adminToken = sessionStorage.getItem('raycrafting-admin-token') || localStorage.getItem('raycrafting-admin-token') || '';
+  var syncToServer = async function(){
+    if(!adminToken) return;
+    try {
+      var response = await fetch('/api/admin/products/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify({ products: products })
+      });
+      var data = await response.json().catch(function(){ return {}; });
+      if(!response.ok) throw new Error(data.error || 'Server catalog sync failed.');
+      el('saveStatus').textContent = '✓ Saved and live on public shop!';
+      return data;
+    } catch(err) {
+      el('saveStatus').textContent = 'Saved locally, server sync: ' + err.message;
+      throw err;
+    }
+  };
+  window.raycraftingAdminSync = syncToServer;
   var loadRemoteCatalog = async function(){
     try {
       var response = await fetch('/api/admin/products', { headers: { 'x-admin-token': adminToken }, cache: 'no-store' });
@@ -86,10 +104,87 @@
   el('newProductButton').addEventListener('click',function(){ resetForm(); var form=el('productForm'); if(form){ form.scrollIntoView({behavior:'smooth',block:'start'}); var nameInput=el('productName'); if(nameInput) setTimeout(function(){ nameInput.focus(); },350); } });
   el('removeImageButton').addEventListener('click',function(){ pendingImage=''; el('currentImage').value=''; el('uploadLabel').textContent='Choose a picture from your device'; showPreview(''); });
   el('productImage').addEventListener('change',function(){ var file=el('productImage').files[0]; if(!file) return; el('uploadLabel').textContent=file.name; resizeImage(file).then(function(image){ pendingImage=image; showPreview(image); }).catch(function(){ el('saveStatus').textContent='Could not read that image.'; }); });
-  el('productForm').addEventListener('submit',function(event){ event.preventDefault(); var product={ id:editingId || uniqueId(el('productName').value), name:el('productName').value.trim(), category:el('productCategory').value, price:Number(el('productPrice').value), originalPrice:Number(el('productOriginalPrice').value) || 0, detail:el('productDetail').value.trim(), description:el('productDescription').value.trim(), featured:Number(el('productFeatured').value) || products.length+1, art:'custom', image:pendingImage || el('currentImage').value || '', active:el('productActive').checked }; var existing=products.findIndex(function(item){ return item.id===editingId; }); if(existing >= 0) products[existing]=product; else products.push(product); persist(); el('saveStatus').textContent='Saved to your catalog.'; showToast(product.name + ' saved.'); setTimeout(resetForm,700); });
-  el('catalogList').addEventListener('click',function(event){ var edit=event.target.closest('[data-edit]'), remove=event.target.closest('[data-delete]'), toggle=event.target.closest('[data-toggle-active]'); if(edit){ var product=products.find(function(item){ return item.id===edit.dataset.edit; }); if(!product) return; editingId=product.id; pendingImage=''; el('productId').value=product.id; el('currentImage').value=product.image || ''; el('productName').value=product.name; el('productCategory').value=product.category; el('productPrice').value=product.price; el('productDetail').value=product.detail; el('productDescription').value=product.description; el('productFeatured').value=product.featured; el('productActive').checked=isActive(product); el('formTitle').textContent='Edit ' + product.name; el('uploadLabel').textContent='Choose a new picture or keep the current one'; showPreview(imageFor(product)); var form=el('productForm'); if(form){ form.classList.remove('form-highlight-pulse'); void form.offsetWidth; form.classList.add('form-highlight-pulse'); form.scrollIntoView({behavior:'smooth',block:'start'}); var nameInput=el('productName'); if(nameInput) setTimeout(function(){ nameInput.focus(); },350); } } if(toggle){ var productToToggle=products.find(function(item){ return item.id===toggle.dataset.toggleActive; }); if(productToToggle){ productToToggle.active=!isActive(productToToggle); persist(); showToast(productToToggle.name + (isActive(productToToggle) ? ' is visible in the shop.' : ' is hidden from the shop.')); } } if(remove){ var productToRemove=products.find(function(item){ return item.id===remove.dataset.delete; }); if(productToRemove && confirm('Delete ' + productToRemove.name + '?')){ products=products.filter(function(item){ return item.id!==remove.dataset.delete; }); persist(); showToast('Product removed.'); if(editingId===remove.dataset.delete) resetForm(); } } });
+  el('productForm').addEventListener('submit',async function(event){
+    event.preventDefault();
+    var origInput = el('productOriginalPrice');
+    var origVal = origInput ? Number(origInput.value) || 0 : 0;
+    var product={
+      id: editingId || uniqueId(el('productName').value),
+      name: el('productName').value.trim(),
+      category: el('productCategory').value,
+      price: Number(el('productPrice').value),
+      originalPrice: origVal,
+      detail: el('productDetail').value.trim(),
+      description: el('productDescription').value.trim(),
+      featured: Number(el('productFeatured').value) || products.length+1,
+      art: 'custom',
+      image: pendingImage || el('currentImage').value || '',
+      active: el('productActive').checked
+    };
+    var existing=products.findIndex(function(item){ return item.id===editingId; });
+    if(existing >= 0) products[existing]=product; else products.push(product);
+    persist();
+    el('saveStatus').textContent='Saving to live shop…';
+    try {
+      await syncToServer();
+      showToast(product.name + ' saved & live on shop.');
+    } catch(e) {
+      showToast('Saved locally. Sync error: ' + e.message);
+    }
+    setTimeout(resetForm,800);
+  });
+  el('catalogList').addEventListener('click',async function(event){
+    var edit=event.target.closest('[data-edit]'), remove=event.target.closest('[data-delete]'), toggle=event.target.closest('[data-toggle-active]');
+    if(edit){
+      var product=products.find(function(item){ return item.id===edit.dataset.edit; });
+      if(!product) return;
+      editingId=product.id;
+      pendingImage='';
+      el('productId').value=product.id;
+      el('currentImage').value=product.image || '';
+      el('productName').value=product.name;
+      el('productCategory').value=product.category;
+      el('productPrice').value=product.price;
+      if(el('productOriginalPrice')) el('productOriginalPrice').value=product.originalPrice || '';
+      el('productDetail').value=product.detail;
+      el('productDescription').value=product.description;
+      el('productFeatured').value=product.featured;
+      el('productActive').checked=isActive(product);
+      el('formTitle').textContent='Edit ' + product.name;
+      el('uploadLabel').textContent='Choose a new picture or keep the current one';
+      showPreview(imageFor(product));
+      var form=el('productForm');
+      if(form){
+        form.classList.remove('form-highlight-pulse');
+        void form.offsetWidth;
+        form.classList.add('form-highlight-pulse');
+        form.scrollIntoView({behavior:'smooth',block:'start'});
+        var nameInput=el('productName');
+        if(nameInput) setTimeout(function(){ nameInput.focus(); },350);
+      }
+    }
+    if(toggle){
+      var productToToggle=products.find(function(item){ return item.id===toggle.dataset.toggleActive; });
+      if(productToToggle){
+        productToToggle.active=!isActive(productToToggle);
+        persist();
+        try { await syncToServer(); } catch(e){}
+        showToast(productToToggle.name + (isActive(productToToggle) ? ' is visible in the shop.' : ' is hidden from the shop.'));
+      }
+    }
+    if(remove){
+      var productToRemove=products.find(function(item){ return item.id===remove.dataset.delete; });
+      if(productToRemove && confirm('Delete ' + productToRemove.name + '?')){
+        products=products.filter(function(item){ return item.id!==remove.dataset.delete; });
+        persist();
+        try { await syncToServer(); } catch(e){}
+        showToast('Product removed.');
+        if(editingId===remove.dataset.delete) resetForm();
+      }
+    }
+  });
   el('exportButton').addEventListener('click',function(){ var blob=new Blob([JSON.stringify(products,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob), link=document.createElement('a'); link.href=url; link.download='raycrafting-catalog-backup.json'; link.click(); URL.revokeObjectURL(url); });
-  el('resetButton').addEventListener('click',function(){ if(confirm('Clear every product from the shared public shop? Export a backup first if you need your current list.')){ products=[]; persist(); resetForm(); showToast('Live catalog cleared.'); } });
+  el('resetButton').addEventListener('click',async function(){ if(confirm('Clear every product from the shared public shop? Export a backup first if you need your current list.')){ products=[]; persist(); try { await syncToServer(); } catch(e){} resetForm(); showToast('Live catalog cleared.'); } });
   renderList(); resetForm();
 }());
 </script>

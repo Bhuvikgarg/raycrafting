@@ -200,6 +200,9 @@ async function loadPublicProducts() {
     if (!Array.isArray(data.products)) return;
     products = data.products;
     window.RAYCRAFTING_PRODUCTS = products;
+    try {
+      localStorage.setItem(window.RAYCRAFTING_STORAGE_KEY, JSON.stringify(products));
+    } catch {}
     renderProducts();
     renderCart();
   } catch {
@@ -257,8 +260,16 @@ function openProduct(product) {
   document.querySelector("#modalCategory").textContent = product.category;
   document.querySelector("#modalDescription").textContent = product.description;
   const orig = Number(product.original_price || product.originalPrice || 0);
-  const oldPriceHtml = orig > product.price ? ` <span class="product-price-old">${money(orig)}</span>` : "";
-  document.querySelector("#modalPrice").innerHTML = `${money(product.price)}${oldPriceHtml}`;
+  let oldPriceHtml = "";
+  let discountHtml = "";
+  if (orig > product.price) {
+    oldPriceHtml = ` <span class="product-price-old">${money(orig)}</span>`;
+    const pct = Math.round(((orig - product.price) / orig) * 100);
+    if (pct >= 5) {
+      discountHtml = ` <span class="modal-discount-pill">${pct}% OFF</span>`;
+    }
+  }
+  document.querySelector("#modalPrice").innerHTML = `${money(product.price)}${oldPriceHtml}${discountHtml}`;
   document.querySelector("#modalDetail").textContent = product.detail;
   const specs = document.querySelector("#modalSpecs");
   if (specs) {
@@ -444,7 +455,7 @@ fetch("/api/config").then((r) => r.json()).then((cfg) => {
   const vipWa = document.querySelector("#vipWhatsAppBroadcast");
   if (vipWa && cfg.supportPhone) {
     const cleanPhone = String(cfg.supportPhone).replace(/\D/g, "");
-    vipWa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi Bhuvik! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
+    vipWa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi Himanshi! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
   }
   if (cfg.bannerQuote) {
     const quoteEl = document.querySelector("#announcementQuoteText");
