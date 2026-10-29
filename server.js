@@ -98,6 +98,13 @@ db.exec(`
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS seller_inquiries (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    contact TEXT NOT NULL,
+    craft TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS products (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -845,6 +852,23 @@ async function api(req, res, pathname, body, url) {
         couponCode: "WELCOME10",
         discountPercent: 10,
         message: "🎉 Welcome! Use code WELCOME10 at checkout for 10% off your handcrafted blooms."
+      });
+    }
+    if (req.method === "POST" && pathname === "/api/seller-inquiry") {
+      if (!allowRequest(req, "seller", 10)) return json(res, 429, { error: "Too many requests. Try again later." });
+      const name = String(body.name || "").trim().slice(0, 100);
+      const contact = String(body.contact || "").trim().slice(0, 100);
+      const craft = String(body.craft || "").trim().slice(0, 250);
+      if (!name || !contact || !craft) return json(res, 400, { error: "Please provide your name, contact details, and craft type." });
+      const id = "seller_" + crypto.randomBytes(6).toString("hex");
+      try {
+        db.prepare("INSERT INTO seller_inquiries (id, name, contact, craft, created_at) VALUES (?, ?, ?, ?, ?)").run(id, name, contact, craft, now());
+      } catch (err) {
+        console.error("Seller inquiry save error:", err);
+      }
+      return json(res, 200, {
+        ok: true,
+        message: "Thank you for reaching out! Our team will contact you on WhatsApp / phone within 24 hours to onboard your products."
       });
     }
     if (req.method === "POST" && pathname === "/api/custom-orders") {

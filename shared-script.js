@@ -548,6 +548,40 @@ fetch("/api/config").then((r) => r.json()).then((cfg) => {
   }
 }).catch(() => {});
 
+const sellerForm = document.querySelector("#sellerForm");
+if (sellerForm) {
+  sellerForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const btn = sellerForm.querySelector("#sellerSubmitBtn");
+    const msg = document.querySelector("#sellerMessage");
+    const name = document.querySelector("#sellerName")?.value.trim();
+    const contact = document.querySelector("#sellerContact")?.value.trim();
+    const craft = document.querySelector("#sellerCraft")?.value.trim();
+
+    btn.disabled = true;
+    msg.textContent = "Submitting application…";
+
+    try {
+      const res = await fetch("/api/seller-inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, contact, craft })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not submit application.");
+
+      sellerForm.hidden = true;
+      const successCard = document.querySelector("#sellerSuccessCard");
+      if (successCard) successCard.hidden = false;
+      showToast("🎉 Seller application submitted! We will contact you soon.");
+    } catch (err) {
+      msg.textContent = err.message || "Failed to submit. Please chat on WhatsApp directly.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
 document.querySelector("#newsletterForm")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.target; const button = form.querySelector("button"); const message = document.querySelector("#newsletterMessage");

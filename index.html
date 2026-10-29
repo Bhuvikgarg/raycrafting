@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=prod5" />
+    <link rel="stylesheet" href="styles.css?v=prod6" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -245,32 +245,44 @@
         </div>
       </section>
 
-      <section class="newsletter section-shell vip-reward-section" id="vipSection">
-        <div class="vip-reward-copy">
-          <p class="eyebrow">🌸 Instant 10% Discount · VIP Studio Drops</p>
-          <h2>Unlock 10% off your<br /><em>first handcrafted piece.</em></h2>
-          <p class="section-description">Join Himanshi's inner circle for instant 10% savings on your first order, plus first dibs on limited handmade seasonal batches.</p>
-        </div>
-        <div class="vip-reward-container">
-          <form class="newsletter-form" id="newsletterForm">
-            <label for="newsletterEmail">Your Email or 10-digit WhatsApp Number</label>
-            <div>
-              <input id="newsletterEmail" required placeholder="Enter email or WhatsApp number" autocomplete="email" />
-              <button class="button button-dark" type="submit" id="newsletterSubmitBtn">Unlock 10% OFF <span aria-hidden="true">→</span></button>
+      <section class="seller-section section-shell" id="sellerSection">
+        <div class="seller-card">
+          <div class="seller-copy">
+            <p class="eyebrow">🤝 CREATOR &amp; ARTISAN PARTNERSHIP · SELL WITH US</p>
+            <h2>Want to become a seller?<br /><em>List your crafts on Raycrafting.</em></h2>
+            <p class="section-description">Are you an artisan, crochet maker, clay sculptor, or handmade creator? Join our curated boutique and showcase your creations to thousands of craft lovers across India.</p>
+            <div class="seller-perks">
+              <span class="seller-perk">✨ Zero Listing Fee</span>
+              <span class="seller-perk">📦 Packaging &amp; Courier Support</span>
+              <span class="seller-perk">💖 Direct Fast Payouts</span>
+              <span class="seller-perk">📈 Pan-India Customer Reach</span>
             </div>
-            <p class="form-message" id="newsletterMessage" role="status"></p>
-          </form>
-          <div class="vip-unlocked-card" id="vipUnlockedCard" hidden>
-            <div class="vip-unlocked-badge">🎉 10% OFF Coupon Unlocked!</div>
-            <div class="vip-coupon-code-box">
-              <span class="vip-code-text" id="vipCodeText">WELCOME10</span>
-              <button class="button button-dark vip-copy-btn" id="vipCopyBtn" type="button">Copy Code 📋</button>
+          </div>
+          <div class="seller-action-box">
+            <div class="seller-cta-buttons">
+              <a class="button button-whatsapp-seller" id="sellerWhatsAppBtn" href="https://wa.me/918076043004?text=Hi%20Bhuvik%20%26%20Himanshi%2C%20I%20am%20a%20handmade%20creator%20and%20I%20would%20love%20to%20sell%20my%20crafts%20on%20Raycrafting!" target="_blank" rel="noopener noreferrer">
+                <span>💬 Chat on WhatsApp to Sell</span>
+              </a>
+              <a class="button button-email-seller" id="sellerEmailBtn" href="mailto:raywithcharm@gmail.com?subject=Artisan%20Seller%20Application%20-%20Raycrafting&amp;body=Hi%20Bhuvik%20%26%20Himanshi%2C%0A%0AI%20make%20handmade%20crafts%20and%20would%20love%20to%20partner%20with%20Raycrafting.%0A%0AMy%20Craft%20Type%3A%20%0AMy%20Instagram%20or%20Portfolio%3A%20%0AMy%20Phone%20Number%3A%20">
+                <span>✉️ Email Us (raywithcharm@gmail.com)</span>
+              </a>
             </div>
-            <p class="vip-subtext">Apply <strong>WELCOME10</strong> at checkout for 10% off your entire bag · Free shipping on orders over ₹499.</p>
-            <div class="vip-action-links">
-              <a href="#shop" class="button button-light" style="font-size:11px;padding:8px 14px;">Shop the collection 🌸</a>
-              <a id="vipWhatsAppBroadcast" target="_blank" rel="noopener noreferrer" class="button" style="background:#25d366;color:#fff;font-size:11px;padding:8px 14px;" href="#">💬 Chat with Himanshi</a>
-              <a id="vipInstagramDm" target="_blank" rel="noopener noreferrer" class="button" style="background:#e1306c;color:#fff;font-size:11px;padding:8px 14px;" href="#" hidden>📸 Instagram DM</a>
+            <form class="seller-quick-form" id="sellerForm">
+              <p class="seller-form-title">Or share your details &amp; we’ll get in touch:</p>
+              <div class="seller-input-group">
+                <input id="sellerName" required placeholder="Your full name" autocomplete="name" />
+                <input id="sellerContact" required placeholder="WhatsApp / mobile number or email" autocomplete="tel" />
+              </div>
+              <div class="seller-input-row">
+                <input id="sellerCraft" required placeholder="What kind of crafts do you make? (e.g. Clay, Crochet, Resin, Pipe Cleaners)" />
+                <button class="button button-dark" type="submit" id="sellerSubmitBtn">Apply to Sell →</button>
+              </div>
+              <p class="form-message" id="sellerMessage" role="status"></p>
+            </form>
+            <div class="seller-success-card" id="sellerSuccessCard" hidden>
+              <div class="seller-success-badge">🎉 Application Received!</div>
+              <p>Thank you! Our founder will reach out on WhatsApp within 24 hours to onboard your products.</p>
+              <a class="button button-whatsapp-seller" target="_blank" rel="noopener noreferrer" href="https://wa.me/918076043004?text=Hi%20Bhuvik%20%26%20Himanshi%2C%20I%20just%20submitted%20my%20seller%20application%20on%20Raycrafting!">💬 Chat with us directly now</a>
             </div>
           </div>
         </div>
@@ -411,9 +423,9 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="catalog.js?v=20261030v5"></script>
-    <script src="shared-script.js?v=20261030v5"></script>
-    <script src="custom-requests.js?v=20261030v5"></script>
-    <script src="commerce.js?v=20261030v5"></script>
+    <script src="catalog.js?v=20261030v6"></script>
+    <script src="shared-script.js?v=20261030v6"></script>
+    <script src="custom-requests.js?v=20261030v6"></script>
+    <script src="commerce.js?v=20261030v6"></script>
 </body>
 </html>

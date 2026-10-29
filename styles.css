@@ -1314,22 +1314,28 @@ button.is-loading::after {
 }
 
 /* ==========================================
-   Smooth Antique-Rose & Velvet Plum Catalogue Band
+   Ultra-Smooth Velvet Plum Catalogue Band (Light Mode)
    ========================================== */
 .shop-gradient-band {
   width: 100%;
   position: relative;
   z-index: 2;
   background: linear-gradient(180deg,
-    rgba(255, 245, 248, 0) 0%,
-    rgba(247, 222, 233, 0.95) 70px,
-    #cf8ba8 180px,
-    #7d345a 320px,
-    #541e3a 50%,
-    #7d345a calc(100% - 320px),
-    #cf8ba8 calc(100% - 180px),
-    rgba(247, 222, 233, 0.95) calc(100% - 70px),
-    rgba(255, 245, 248, 0) 100%
+    rgba(94, 34, 66, 0) 0%,
+    rgba(94, 34, 66, 0.02) 6%,
+    rgba(94, 34, 66, 0.07) 12%,
+    rgba(94, 34, 66, 0.16) 20%,
+    rgba(94, 34, 66, 0.30) 28%,
+    rgba(94, 34, 66, 0.48) 36%,
+    rgba(94, 34, 66, 0.68) 44%,
+    rgba(94, 34, 66, 0.78) 50%,
+    rgba(94, 34, 66, 0.68) 56%,
+    rgba(94, 34, 66, 0.48) 64%,
+    rgba(94, 34, 66, 0.30) 72%,
+    rgba(94, 34, 66, 0.16) 80%,
+    rgba(94, 34, 66, 0.07) 88%,
+    rgba(94, 34, 66, 0.02) 94%,
+    rgba(94, 34, 66, 0) 100%
   );
   padding: 85px 0 115px;
   margin: 30px 0 60px;
@@ -1626,6 +1632,270 @@ body.theme-dark .modal-specs .modal-spec-row span {
 }
 body.theme-dark .modal-specs .modal-spec-row span strong {
   color: #ffffff !important;
+}
+body.theme-dark .shop-gradient-band {
+  background: transparent !important;
+  background-image: none !important;
+  padding: 20px 0 50px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+body.theme-dark .shop-gradient-band .section-heading h2 {
+  color: #fff !important;
+  text-shadow: none !important;
+}
+body.theme-dark .shop-gradient-band .section-heading h2 em {
+  color: #ff9ec0 !important;
+  text-shadow: 0 0 25px rgba(255, 158, 192, 0.4) !important;
+}
+body.theme-dark .shop-gradient-band .section-heading .eyebrow {
+  color: #ffb8cf !important;
+}
+body.theme-dark .shop-gradient-band .section-description {
+  color: #e2d2dc !important;
+  text-shadow: none !important;
+}
+body.theme-dark .shop-gradient-band .shop-toolbar {
+  background: rgba(36, 17, 33, 0.82) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1.5px solid rgba(255, 180, 205, 0.22) !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35) !important;
+}
+body.theme-dark .shop-gradient-band .filter-button {
+  color: #e2d2dc !important;
+}
+body.theme-dark .shop-gradient-band .filter-button:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+body.theme-dark .shop-gradient-band .filter-button.active {
+  background: linear-gradient(135deg, #e65c87 0%, #b83863 100%) !important;
+  color: #ffffff !important;
+}
+body.theme-dark .shop-gradient-band .sort-control {
+  background: rgba(48, 22, 44, 0.75) !important;
+  color: #e2d2dc !important;
+}
+body.theme-dark .shop-gradient-band .sort-control select {
+  color: #ffffff !important;
+}
+body.theme-dark .shop-gradient-band .sort-control select option {
+  background: #241122 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   Creator & Artisan Partnership (Seller Section)
+   ========================================== */
+.seller-section {
+  margin: 60px auto 40px;
+}
+.seller-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+  background: linear-gradient(145deg, #ffffff 0%, #fff6f9 100%);
+  border: 1.5px solid rgba(220, 160, 185, 0.4);
+  border-radius: 28px;
+  padding: 42px 48px;
+  box-shadow: 0 16px 45px rgba(84, 30, 58, 0.08);
+  align-items: center;
+}
+.seller-copy h2 {
+  font-size: 32px;
+  line-height: 1.2;
+  margin: 10px 0 14px;
+  color: #24141e;
+  font-family: var(--display);
+}
+.seller-copy h2 em {
+  color: #c44f6a;
+  font-style: italic;
+}
+.seller-copy .eyebrow {
+  color: #b82d56;
+  font: 700 11px var(--mono);
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+.seller-copy .section-description {
+  color: #5c4352;
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+.seller-perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.seller-perk {
+  background: #fff0f5;
+  color: #9c2d4f;
+  font: 600 11.5px var(--sans);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(220, 160, 185, 0.35);
+}
+.seller-action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.seller-cta-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.button-whatsapp-seller {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  padding: 13px 22px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35) !important;
+  text-align: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+}
+.button-whatsapp-seller:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.45) !important;
+}
+.button-email-seller {
+  background: #ffffff !important;
+  color: #5c4352 !important;
+  border: 1.5px solid rgba(220, 160, 185, 0.5) !important;
+  font-weight: 600 !important;
+  font-size: 12.5px !important;
+  padding: 10px 18px !important;
+  border-radius: 999px !important;
+  text-align: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s !important;
+}
+.button-email-seller:hover {
+  background: #fff0f5 !important;
+  border-color: #c44f6a !important;
+  color: #9c2d4f !important;
+}
+.seller-quick-form {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(220, 160, 185, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.seller-form-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5c4352;
+}
+.seller-input-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.seller-input-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 8px;
+}
+.seller-quick-form input {
+  height: 42px;
+  padding: 0 14px;
+  background: #ffffff;
+  border: 1px solid rgba(220, 160, 185, 0.4);
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: #24141e;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.seller-quick-form input:focus {
+  border-color: #c44f6a;
+}
+.seller-quick-form .button-dark {
+  height: 42px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.seller-success-card {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  color: #166534;
+}
+.seller-success-badge {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.seller-success-card p {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #15803d;
+}
+
+/* Dark mode for Seller Section */
+body.theme-dark .seller-card {
+  background: #200d1e !important;
+  border-color: rgba(255, 180, 205, 0.22) !important;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45) !important;
+}
+body.theme-dark .seller-copy h2 {
+  color: #ffffff !important;
+}
+body.theme-dark .seller-copy h2 em {
+  color: #ff9ec0 !important;
+}
+body.theme-dark .seller-copy .section-description {
+  color: #d8c2cf !important;
+}
+body.theme-dark .seller-perk {
+  background: rgba(255, 180, 205, 0.12) !important;
+  border-color: rgba(255, 180, 205, 0.25) !important;
+  color: #ffb8ce !important;
+}
+body.theme-dark .button-email-seller {
+  background: #2c1228 !important;
+  border-color: rgba(255, 180, 205, 0.28) !important;
+  color: #ded0d9 !important;
+}
+body.theme-dark .seller-quick-form {
+  background: rgba(36, 17, 33, 0.6) !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+}
+body.theme-dark .seller-form-title {
+  color: #d8c2cf !important;
+}
+body.theme-dark .seller-quick-form input {
+  background: #190918 !important;
+  border-color: rgba(255, 180, 205, 0.25) !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 860px) {
+  .seller-card {
+    grid-template-columns: 1fr;
+    padding: 28px 22px;
+    gap: 24px;
+  }
+  .seller-input-group, .seller-input-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 
