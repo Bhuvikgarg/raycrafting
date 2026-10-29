@@ -545,6 +545,17 @@ function json(res, status, data) {
   });
   res.end(body);
 }
+function sendCsv(res, filename, content) {
+  res.writeHead(200, {
+    ...SECURITY_HEADERS,
+    "Content-Type": "text/csv; charset=utf-8",
+    "Content-Disposition": `attachment; filename="${filename}"`,
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "x-admin-token, Content-Type, Authorization"
+  });
+  res.end(content);
+}
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let raw = "";
@@ -616,7 +627,13 @@ function issueAdminSession() {
   return token;
 }
 function adminTokenFromRequest(req) {
-  const token = String(req.headers["x-admin-token"] || "").trim();
+  let token = String(req.headers["x-admin-token"] || "").trim();
+  if (!token && req.url) {
+    try {
+      const u = new URL(req.url, "http://localhost");
+      token = String(u.searchParams.get("token") || "").trim();
+    } catch {}
+  }
   if (!token) return "";
   let expiresAt = ADMIN_SESSIONS.get(token);
   if (!expiresAt) {
@@ -755,6 +772,24 @@ function calculateCoupon(code, subtotal) {
   const discount = coupon.kind === "percent" ? subtotal * coupon.amount / 100 : coupon.amount;
   return { code: coupon.code, discount: Math.min(subtotal, Math.round(discount * 100) / 100), description: coupon.kind === "percent" ? `${coupon.amount}% off` : `₹${coupon.amount} off` };
 }
+const ORDERS_LEDGER_FILE = path.join(DATA_DIR, "raycrafting_orders_ledger.csv");
+const ORDER_ACTIONS_FILE = path.join(DATA_DIR, "raycrafting_order_actions.csv");
+
+function csvEscape(val) {
+  if (val === null || val === undefined) return '""';
+  const str = String(val).replace(/"/g, '""');
+  return `"${str}"`;
+}
+
+function formatIST(dateStr) {
+  if (!dateStr) return "";
+  try {
+    return new Date(dateStr).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "medium" }) + " IST";
+  } catch {
+    return String(dateStr);
+  }
+}
+
 function orderRows(filter = "confirmed") {
   let where = "WHERE (o.status NOT IN ('pending_payment', 'failed_payment') OR o.payment_method = 'cod')";
   if (filter === "unpaid") where = "WHERE o.status IN ('pending_payment', 'failed_payment') AND (o.payment_method IS NULL OR o.payment_method != 'cod')";
@@ -762,7 +797,108 @@ function orderRows(filter = "confirmed") {
   const orders = db.prepare(`SELECT o.*, c.name customer_name, c.email customer_email, c.phone customer_phone FROM orders o JOIN customers c ON c.id=o.customer_id ${where} ORDER BY o.created_at DESC`).all();
   const items = db.prepare("SELECT * FROM order_items WHERE order_id=?");
   const latestPayment = db.prepare("SELECT * FROM payments WHERE order_id=? ORDER BY created_at DESC, id DESC LIMIT 1");
-  return orders.map((order) => ({ ...order, address: JSON.parse(order.address_json), items: items.all(order.id), latest_payment: latestPayment.get(order.id) || null }));
+  return orders.map((order) => {
+    let address = {};
+    try { address = JSON.parse(order.address_json || "{}"); } catch {}
+    return { ...order, address, items: items.all(order.id), latest_payment: latestPayment.get(order.id) || null };
+  });
+}
+
+function generateOrdersCsv(orders = null) {
+  const allOrders = orders || orderRows("all");
+  const headers = [
+    "Order ID",
+    "Date & Time (IST)",
+    "Customer Name",
+    "Customer Phone",
+    "Customer Email",
+    "Delivery Address",
+    "City",
+    "State",
+    "PIN Code",
+    "Fulfillment Method",
+    "Items Summary",
+    "Total Quantity",
+    "Subtotal (₹)",
+    "Discount (₹)",
+    "Coupon Code",
+    "Shipping Fee (₹)",
+    "Total Order Amount (₹)",
+    "Payment Method",
+    "Order Status",
+    "Payment ID / Ref",
+    "Tracking AWB",
+    "Gift Message",
+    "Customer Request Reason",
+    "Seller Reason / Decision"
+  ];
+
+  const rows = allOrders.map((order) => {
+    const addr = order.address || {};
+    const items = Array.isArray(order.items) ? order.items : [];
+    const itemsSummary = items.map((i) => `${i.quantity}x ${i.name} (₹${i.unit_price})`).join("; ");
+    const totalQty = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+    const street = [addr.line1, addr.line2].filter(Boolean).join(", ");
+
+    return [
+      order.id,
+      formatIST(order.created_at),
+      order.customer_name || addr.name || "",
+      order.customer_phone || addr.phone || "",
+      order.customer_email || addr.email || "",
+      street,
+      addr.city || "",
+      addr.state || "",
+      addr.postalCode || "",
+      order.fulfillment_method || "manual",
+      itemsSummary,
+      totalQty,
+      order.subtotal || 0,
+      order.discount || 0,
+      order.coupon_code || "",
+      order.shipping || 0,
+      order.total || 0,
+      order.payment_method === "cod" ? "Pay on Delivery (COD)" : "Online UPI / Cards",
+      order.status || "processing",
+      order.payment_id || order.razorpay_order_id || "",
+      order.shiprocket_awb || "",
+      order.gift_message || "",
+      order.customer_request_reason || "",
+      order.decision_reason || ""
+    ].map(csvEscape).join(",");
+  });
+
+  return "\uFEFF" + headers.map(csvEscape).join(",") + "\n" + rows.join("\n") + "\n";
+}
+
+function syncOrderLedgerFiles() {
+  try {
+    const csvContent = generateOrdersCsv();
+    fs.writeFileSync(ORDERS_LEDGER_FILE, csvContent, "utf8");
+  } catch (err) {
+    console.error("Failed to sync orders ledger file:", err);
+  }
+}
+
+function recordOrderAction(orderId, actionName, details = "", newStatus = "") {
+  try {
+    if (!fs.existsSync(ORDER_ACTIONS_FILE)) {
+      const header = ["Timestamp (IST)", "Order ID", "Action / Event", "Status", "Details", "Logged At"];
+      fs.writeFileSync(ORDER_ACTIONS_FILE, "\uFEFF" + header.map(csvEscape).join(",") + "\n", "utf8");
+    }
+    const row = [
+      formatIST(now()),
+      orderId,
+      actionName,
+      newStatus,
+      details,
+      now()
+    ].map(csvEscape).join(",");
+    fs.appendFileSync(ORDER_ACTIONS_FILE, row + "\n", "utf8");
+    syncOrderLedgerFiles();
+  } catch (err) {
+    console.error("Failed to record order action:", err);
+  }
 }
 function customerOrderRows(customerId) {
   return orderRows("all").filter((order) => order.customer_id === customerId).map((order) => {
@@ -1134,6 +1270,13 @@ async function api(req, res, pathname, body, url) {
         db.exec("COMMIT");
       } catch (error) { db.exec("ROLLBACK"); throw error; }
 
+      recordOrderAction(
+        orderId,
+        paymentMethod === "cod" ? "ORDER_PLACED_COD" : "ORDER_INITIATED_ONLINE",
+        `Order placed by ${customer.name || address.name} (${customer.phone || address.phone || "No phone"}). Items: ${verified.map((v) => `${v.quantity}x ${v.product.name}`).join(", ")}. Subtotal: ₹${subtotal}, Discount: ₹${coupon.discount}, Shipping: ₹${shipping}, Total: ₹${total}. Fulfillment: ${fulfillmentMethod}`,
+        initialStatus
+      );
+
       if (paymentMethod === "cod") {
         void notifyCustomerOrderStatus({
           id: orderId,
@@ -1162,6 +1305,7 @@ async function api(req, res, pathname, body, url) {
       if (action === "cancel") {
         if (!["pending_payment", "paid", "processing"].includes(order.status)) return json(res, 400, { error: "This order cannot be cancelled in its current status." });
         db.prepare("UPDATE orders SET status='cancel_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
+        recordOrderAction(order.id, "CUSTOMER_CANCEL_REQUESTED", `Customer requested cancellation: ${reason}`, "cancel_requested");
         void notifyCustomerOrderStatus({ ...order, customer_name: customer.name, customer_email: customer.email }, "cancel_requested", reason);
       } else if (action === "return") {
         if (order.status !== "delivered") {
@@ -1173,6 +1317,7 @@ async function api(req, res, pathname, body, url) {
           return json(res, 400, { error: "The 3-day return window has closed. Handcrafted pieces can only be returned within 3 days of delivery for genuine defects." });
         }
         db.prepare("UPDATE orders SET status='return_requested',customer_request_reason=?,updated_at=? WHERE id=?").run(reason, now(), order.id);
+        recordOrderAction(order.id, "CUSTOMER_RETURN_REQUESTED", `Customer requested return: ${reason}`, "return_requested");
         void notifyCustomerOrderStatus({ ...order, customer_name: customer.name, customer_email: customer.email }, "return_requested", reason);
       } else return json(res, 400, { error: "Unsupported order action." });
       return json(res, 200, { ok: true, orderId: order.id, status: action === "cancel" ? "cancel_requested" : "return_requested" });
@@ -1202,6 +1347,7 @@ async function api(req, res, pathname, body, url) {
       if (["paid", "processing", "shipped", "out_for_delivery", "delivered", "cancelled", "returned", "declined"].includes(internalOrder.status)) return json(res, 400, { success: false, error: "This order is no longer awaiting payment." });
       await verifyCapturedPayment(paymentId, orderId);
       db.prepare("UPDATE orders SET status='paid',payment_id=?,failure_reason=NULL,updated_at=? WHERE id=?").run(paymentId, now(), internalOrder.id);
+      recordOrderAction(internalOrder.id, "PAYMENT_CAPTURED", `Razorpay payment verified & captured. Payment ID: ${paymentId}`, "paid");
       void notifyCustomerOrderStatus({ ...internalOrder, customer_name: customer.name, customer_email: customer.email }, "paid", "");
       db.prepare("INSERT INTO payments (order_id,provider,provider_order_id,provider_payment_id,status,raw_json,created_at) VALUES (?,?,?,?,?,?,?)").run(internalOrder.id, "razorpay", orderId, paymentId, "captured", JSON.stringify(body), now());
       return json(res, 200, { success: true, orderId: internalOrder.id, status: "paid" });
@@ -1303,10 +1449,39 @@ async function api(req, res, pathname, body, url) {
       const view = requestUrl.searchParams.get("view") || "confirmed";
       const confirmedCount = db.prepare("SELECT COUNT(*) as count FROM orders WHERE (status NOT IN ('pending_payment', 'failed_payment') OR payment_method = 'cod')").get().count;
       const unpaidCount = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status IN ('pending_payment', 'failed_payment') AND (payment_method IS NULL OR payment_method != 'cod')").get().count;
+      const allOrders = orderRows("all");
+      const confirmedRevenue = allOrders.filter(o => o.status !== "failed_payment" && (o.status !== "pending_payment" || o.payment_method === "cod")).reduce((sum, o) => sum + (Number(o.total) || 0), 0);
       return json(res, 200, {
         orders: orderRows(view),
-        counts: { confirmed: confirmedCount, unpaid: unpaidCount, all: confirmedCount + unpaidCount }
+        counts: { confirmed: confirmedCount, unpaid: unpaidCount, all: confirmedCount + unpaidCount },
+        metrics: {
+          totalOrders: confirmedCount + unpaidCount,
+          confirmedOrders: confirmedCount,
+          totalRevenue: confirmedRevenue,
+          delivered: allOrders.filter(o => o.status === "delivered").length,
+          activeCrafting: allOrders.filter(o => ["paid", "processing", "shipped", "out_for_delivery"].includes(o.status)).length
+        }
       });
+    }
+    if (req.method === "GET" && (pathname === "/api/admin/orders/export-excel" || pathname === "/api/admin/orders/export-csv")) {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const csv = generateOrdersCsv();
+      const filename = `Raycrafting_Orders_Ledger_${new Date().toISOString().slice(0, 10)}.csv`;
+      return sendCsv(res, filename, csv);
+    }
+    if (req.method === "GET" && pathname === "/api/admin/orders/export-actions") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      let actionsCsv = "";
+      try {
+        if (fs.existsSync(ORDER_ACTIONS_FILE)) {
+          actionsCsv = fs.readFileSync(ORDER_ACTIONS_FILE, "utf8");
+        }
+      } catch {}
+      if (!actionsCsv) {
+        actionsCsv = "\uFEFF" + ["Timestamp (IST)", "Order ID", "Action / Event", "Status", "Details", "Logged At"].map(csvEscape).join(",") + "\n";
+      }
+      const filename = `Raycrafting_Order_Audit_Actions_${new Date().toISOString().slice(0, 10)}.csv`;
+      return sendCsv(res, filename, actionsCsv);
     }
     if (req.method === "GET" && pathname === "/api/admin/settings") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
@@ -1352,6 +1527,7 @@ async function api(req, res, pathname, body, url) {
       if (!["shiprocket", "manual"].includes(fulfillmentMethod)) return json(res, 400, { error: "Choose Shiprocket delivery or manual delivery." });
       if (fulfillmentMethod === "shiprocket" && ((!shiprocketToken && (!SHIPROCKET_API_EMAIL || !SHIPROCKET_API_PASSWORD)) || !SHIPROCKET_PICKUP_POSTCODE)) return json(res, 503, { error: "Shiprocket is not configured. Add API credentials and the seller pickup PIN first." });
       db.prepare("UPDATE orders SET fulfillment_method=?,updated_at=? WHERE id=?").run(fulfillmentMethod, now(), order.id);
+      recordOrderAction(order.id, "FULFILLMENT_CHANGED", `Delivery method changed to ${fulfillmentMethod}`, order.status);
       return json(res, 200, { ok: true, orderId: order.id, fulfillmentMethod });
     }
     if (req.method === "POST" && pathname === "/api/admin/orders/status") {
@@ -1364,6 +1540,7 @@ async function api(req, res, pathname, body, url) {
       const changed = order.status !== status;
       const deliveredAt = status === "delivered" ? (order.delivered_at || now()) : order.delivered_at;
       db.prepare("UPDATE orders SET status=?,decision_reason=?,delivered_at=?,updated_at=? WHERE id=?").run(status, reason || null, deliveredAt || null, now(), order.id);
+      recordOrderAction(order.id, "STATUS_UPDATED", `Order status updated to ${status}${reason ? `. Reason / Note: ${reason}` : ""}`, status);
       if (changed) void notifyCustomerOrderStatus(order, status, reason);
       const currentApiKey = getSetting("resend_api_key", RESEND_API_KEY || "");
       return json(res, 200, { ok: true, orderId: order.id, status, decisionReason: reason || null, emailNotificationConfigured: Boolean(currentApiKey) });
@@ -1432,4 +1609,5 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname.startsWith("/api/")) return api(req, res, url.pathname, body, url);
   return serveStatic(req, res, url.pathname);
 });
+syncOrderLedgerFiles();
 server.listen(PORT, () => console.log(`Raycrafting server running at http://127.0.0.1:${PORT}`));
