@@ -740,7 +740,7 @@ function initFairyAtmosphere() {
     const duration = (Math.random() * 10 + 16).toFixed(1);
     const delay = -(Math.random() * 25).toFixed(1);
     const sway = (Math.random() * 70 - 35).toFixed(0) + "px";
-    const opacity = (Math.random() * 0.22 + 0.68).toFixed(2);
+    const opacity = (Math.random() * 0.2 + 0.45).toFixed(2);
 
     daisy.style.setProperty("--size", `${size}px`);
     daisy.style.setProperty("--left", `${left}%`);
@@ -988,8 +988,7 @@ function initTheme() {
   }
 
   const savedTheme = localStorage.getItem("raycrafting-theme");
-  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const initialDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+  const initialDark = savedTheme === "dark";
   applyTheme(initialDark);
 
   if (toggleBtn) {
