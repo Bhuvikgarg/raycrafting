@@ -222,16 +222,16 @@ function setSetting(key, value) {
 const seedPath = path.join(ROOT, "products-seed.json");
 if (fs.existsSync(seedPath)) {
   try {
-    const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
-    const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, category=excluded.category, price=excluded.price, original_price=excluded.original_price, detail=excluded.detail, description=excluded.description, featured=excluded.featured, art=excluded.art, image=CASE WHEN excluded.image != '' THEN excluded.image ELSE products.image END, images_json=excluded.images_json, active=excluded.active, badge=excluded.badge, dimensions=excluded.dimensions, materials=excluded.materials, care=excluded.care`);
-    const seedIds = [];
-    for (const p of seedProducts) {
-      seedIds.push(String(p.id));
-      const imgs = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
-      productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
-    }
-    if (seedIds.length) {
-      db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${seedIds.map(() => "?").join(",")})`).run(...seedIds);
+    const existingCount = Number(db.prepare("SELECT count(*) as count FROM products").get()?.count || 0);
+    // ONLY seed initial products if the products table is completely empty!
+    // Never overwrite customized prices, names, positions, or active statuses on server restart.
+    if (existingCount === 0) {
+      const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
+      const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+      for (const p of seedProducts) {
+        const imgs = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
+        productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
+      }
     }
   } catch (err) {
     console.error("Failed to seed products:", err.message);

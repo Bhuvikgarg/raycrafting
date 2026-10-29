@@ -1,4 +1,4 @@
-window.RAYCRAFTING_STORAGE_KEY = "raycrafting-products-v3";
+window.RAYCRAFTING_STORAGE_KEY = "raycrafting-products";
 window.RAYCRAFTING_DEFAULT_IMAGE = "assets/products/illuminated-lotus-blossom-lamp-1.webp";
 window.RAYCRAFTING_DEFAULT_PRODUCTS = [
   {
@@ -66,32 +66,12 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "active": 1
   },
   {
-    "id": "trio-pearl-lace-bouquets",
-    "name": "Trio Pearl-Lace Mini Bouquets Bundle",
-    "category": "Bundles",
-    "price": 300,
-    "original_price": 450,
-    "detail": "Set of 3 bouquets \u00b7 Sky Blue, Lavender & Ruby",
-    "description": "A delightful collection of three handcrafted miniature floral bouquets in Sky Blue, Royal Lavender, and Ruby Red. Each bouquet is lovingly wrapped in pleated organza and detailed with delicate pearl-beaded lace borders.",
-    "featured": 3,
-    "art": "bundle",
-    "image": "assets/products/trio-pearl-lace-bouquets-1.webp",
-    "images": [
-      "assets/products/trio-pearl-lace-bouquets-1.webp"
-    ],
-    "badge": "Bundle & Save",
-    "dimensions": "3 mini bouquets \u00b7 ~16 cm length each",
-    "materials": "Multi-colored chenille florist stems, sheer organza, pearl ribbon borders",
-    "care": "Display in a vase or gift separately \u00b7 Never fades or wilts",
-    "active": 1
-  },
-  {
     "id": "potted-red-tulips-planter",
     "name": "Potted Red & Velvet Tulips Planter",
     "category": "Flowers",
     "price": 300,
     "original_price": 380,
-    "detail": "Handcrafted tulip cluster \u00b7 Ribbed cup planter",
+    "detail": "Handcrafted tulip cluster · Ribbed cup planter",
     "description": "A vibrant cluster of hand-twisted crimson and deep velvet burgundy tulips standing tall in emerald moss, housed inside a charming ribbed natural-tone cup planter.",
     "featured": 4,
     "art": "tulip",
@@ -101,9 +81,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-red-tulips-planter-2.webp"
     ],
     "badge": "Trending",
-    "dimensions": "Height: ~15 cm \u00b7 Planter diameter: ~7 cm",
+    "dimensions": "Height: ~15 cm · Planter diameter: ~7 cm",
     "materials": "Velvety red chenille wire, florist stems, moss bedding, textured ribbed pot",
-    "care": "Evergreen home decor \u00b7 Zero watering required \u00b7 Dust with soft brush",
+    "care": "Evergreen home decor · Zero watering required · Dust with soft brush",
     "active": 1
   },
   {
@@ -112,7 +92,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 300,
     "original_price": 380,
-    "detail": "Handcrafted sunset tulips \u00b7 Ribbed cup planter",
+    "detail": "Handcrafted sunset tulips · Ribbed cup planter",
     "description": "Radiant tangerine and sunset orange fuzzy tulips nestled in lush moss inside a handcrafted ribbed pot tied with a pure white ribbon accent. Brings year-round warmth and cheer to any room.",
     "featured": 5,
     "art": "tulip-orange",
@@ -122,9 +102,29 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-orange-tulips-planter-2.webp"
     ],
     "badge": "New Bloom",
-    "dimensions": "Height: ~15 cm \u00b7 Planter diameter: ~7 cm",
+    "dimensions": "Height: ~15 cm · Planter diameter: ~7 cm",
     "materials": "Vibrant orange chenille stems, green leaves, faux moss, weighted planter",
-    "care": "Indoor decor \u00b7 Keep in a dry spot \u00b7 Pet and allergy friendly",
+    "care": "Indoor decor · Keep in a dry spot · Pet and allergy friendly",
+    "active": 1
+  },
+  {
+    "id": "trio-pearl-lace-bouquets",
+    "name": "Trio Pearl-Lace Mini Bouquets Bundle",
+    "category": "Bundles",
+    "price": 300,
+    "original_price": 450,
+    "detail": "Set of 3 bouquets · Sky Blue, Lavender & Ruby",
+    "description": "A delightful collection of three handcrafted miniature floral bouquets in Sky Blue, Royal Lavender, and Ruby Red. Each bouquet is lovingly wrapped in pleated organza and detailed with delicate pearl-beaded lace borders.",
+    "featured": 6,
+    "art": "bundle",
+    "image": "assets/products/trio-pearl-lace-bouquets-1.webp",
+    "images": [
+      "assets/products/trio-pearl-lace-bouquets-1.webp"
+    ],
+    "badge": "Bundle & Save",
+    "dimensions": "3 mini bouquets · ~16 cm length each",
+    "materials": "Multi-colored chenille florist stems, sheer organza, pearl ribbon borders",
+    "care": "Display in a vase or gift separately · Never fades or wilts",
     "active": 1
   },
   {
@@ -133,18 +133,18 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 350,
-    "detail": "Soft fuzzy blossom \u00b7 Brass keyring & clasp",
+    "detail": "Soft fuzzy blossom · Brass keyring & clasp",
     "description": "An ultra-soft, cloud-fluffy yellow daisy with a sweet blush-pink center, mounted on an antique brass keyring. Clips effortlessly onto keys, purses, backpacks, or planners.",
-    "featured": 6,
+    "featured": 7,
     "art": "daisy",
     "image": "assets/products/sunshine-daisy-fluffy-keychain-1.webp",
     "images": [
       "assets/products/sunshine-daisy-fluffy-keychain-1.webp"
     ],
     "badge": "Customer Favorite",
-    "dimensions": "Charm diameter: ~7.5 cm \u00b7 Total length with ring: ~12 cm",
+    "dimensions": "Charm diameter: ~7.5 cm · Total length with ring: ~12 cm",
     "materials": "Ultra-plush fuzzy yarn pom blossom, antique brass alloy keyring & chain",
-    "care": "Spot clean gently with damp cloth \u00b7 Air dry",
+    "care": "Spot clean gently with damp cloth · Air dry",
     "active": 1
   },
   {
@@ -153,18 +153,18 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 360,
-    "detail": "Soft cloud kitty paw \u00b7 Embroidered pink toe beans",
+    "detail": "Soft cloud kitty paw · Embroidered pink toe beans",
     "description": "Irresistibly cute snow-white kitten paw keychain featuring plump, hand-stitched strawberry-pink toe beans and paw pad. Soft, fuzzy, and designed to bring smiles every time you reach for your keys.",
-    "featured": 7,
+    "featured": 8,
     "art": "paw",
     "image": "assets/products/fluffy-kitten-paw-keychain-1.webp",
     "images": [
       "assets/products/fluffy-kitten-paw-keychain-1.webp"
     ],
     "badge": "Cute Pick",
-    "dimensions": "Paw size: ~7 cm \u00d7 7 cm \u00b7 Ring length: ~5 cm",
+    "dimensions": "Paw size: ~7 cm × 7 cm · Ring length: ~5 cm",
     "materials": "Fluffy faux-fur chenille, pink yarn embroidery, brass alloy keyring",
-    "care": "Keep dry \u00b7 Spot clean only",
+    "care": "Keep dry · Spot clean only",
     "active": 1
   },
   {
@@ -173,9 +173,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 420,
-    "detail": "Ceramic egg white dish \u00b7 4 interchangeable mood yolks",
+    "detail": "Ceramic egg white dish · 4 interchangeable mood yolks",
     "description": "Artisan clay sunny-side-up fried egg trinket tray with 4 removable yolk discs featuring hand-painted expressive emotions (happy, winking, pouty, and shy). Swap the yolk to match your daily mood, or use as a jewelry and ring dish.",
-    "featured": 8,
+    "featured": 9,
     "art": "egg-tray",
     "image": "assets/products/sunny-side-moods-egg-tray-1.webp",
     "images": [
@@ -183,9 +183,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/sunny-side-moods-egg-tray-2.webp"
     ],
     "badge": "Handmade Original",
-    "dimensions": "Tray: ~11 cm \u00d7 9 cm \u00b7 Yolks: ~3.5 cm diameter",
+    "dimensions": "Tray: ~11 cm × 9 cm · Yolks: ~3.5 cm diameter",
     "materials": "Sculpted clay ceramic, non-toxic acrylic colors, protective gloss sealant",
-    "care": "Wipe with a soft dry cloth \u00b7 Not microwave or dishwasher safe",
+    "care": "Wipe with a soft dry cloth · Not microwave or dishwasher safe",
     "active": 1
   },
   {
@@ -194,9 +194,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 420,
-    "detail": "Pair of 2 handmade buddies \u00b7 Hot cocoa & buttered popcorn",
+    "detail": "Pair of 2 handmade buddies · Hot cocoa & buttered popcorn",
     "description": "The coziest desk companions! Handcrafted from chenille pipe cleaners, this duo features a cheerful steaming hot chocolate mug with marshmallow swirls and a striped retro popcorn tub loaded with golden buttered kernels.",
-    "featured": 9,
+    "featured": 10,
     "art": "cocoa-popcorn",
     "image": "assets/products/cozy-movie-night-cocoa-popcorn-1.webp",
     "images": [
@@ -204,9 +204,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/cozy-movie-night-cocoa-popcorn-2.webp"
     ],
     "badge": "Desk Buddy Duo",
-    "dimensions": "Mug: ~6 cm \u00d7 6 cm \u00b7 Popcorn tub: ~6.5 cm \u00d7 5.5 cm",
+    "dimensions": "Mug: ~6 cm × 6 cm · Popcorn tub: ~6.5 cm × 5.5 cm",
     "materials": "Chenille pipe cleaners, bead eyes, blush detailing, reinforced interior structure",
-    "care": "Display piece \u00b7 Dust gently with soft brush",
+    "care": "Display piece · Dust gently with soft brush",
     "active": 1
   },
   {
@@ -215,9 +215,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 399,
-    "detail": "Set of 3 mini dessert cakes \u00b7 Strong magnetic backing",
+    "detail": "Set of 3 mini dessert cakes · Strong magnetic backing",
     "description": "A delightful patisserie set of 3 tiered miniature cakes handcrafted from soft chenille pipe cleaners in Lavender Cream, Strawberry Shortcake, and Pistachio Mint with bright red cherries. Each piece has a strong magnet to hold notes and photos on your fridge.",
-    "featured": 10,
+    "featured": 11,
     "art": "cake-trio",
     "image": "assets/products/pastel-sweet-cake-magnets-1.webp",
     "images": [
@@ -226,7 +226,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/pastel-sweet-cake-magnets-3.webp"
     ],
     "badge": "Trio Set",
-    "dimensions": "Each cake: ~4 cm \u00d7 4 cm \u00d7 4.5 cm",
+    "dimensions": "Each cake: ~4 cm × 4 cm × 4.5 cm",
     "materials": "Chenille wire pastries, miniature cherries, neodymium ferrite back magnet",
     "care": "Sticks to fridges, magnetic memo boards, and steel cabinets",
     "active": 1
@@ -237,9 +237,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 420,
-    "detail": "5-slice artisan cake \u00b7 Dual heavy-duty magnets per slice",
+    "detail": "5-slice artisan cake · Dual heavy-duty magnets per slice",
     "description": "Intricately detailed golden-baked cheesecake slices crafted from velvety pipe cleaners, piped with fluffy whipped-cream borders and crowned with ruby cherries. Each slice features dual magnetic discs to securely hold recipes or pictures on metal surfaces.",
-    "featured": 11,
+    "featured": 12,
     "art": "cheesecake",
     "image": "assets/products/artisan-cheesecake-slices-magnet-set-1.webp",
     "images": [
@@ -247,7 +247,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/artisan-cheesecake-slices-magnet-set-2.webp"
     ],
     "badge": "Artisan Craft",
-    "dimensions": "Full cake diameter: ~14 cm \u00b7 Each slice length: ~7 cm",
+    "dimensions": "Full cake diameter: ~14 cm · Each slice length: ~7 cm",
     "materials": "Chenille cord cake layers, faux whipped cream, twin rear magnets",
     "care": "Arrange as a whole cake or separate across your fridge",
     "active": 1
@@ -258,9 +258,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 360,
-    "detail": "Layered red velvet slice \u00b7 Cherry flower topping",
+    "detail": "Layered red velvet slice · Cherry flower topping",
     "description": "Luscious layered red velvet cake wedge handcrafted with rich crimson and golden chenille cake layers, decorated with a piped floral rosette and red cherry. Fitted with a heavy-duty back magnet.",
-    "featured": 12,
+    "featured": 13,
     "art": "red-velvet",
     "image": "assets/products/red-velvet-cake-slice-magnet-1.webp",
     "images": [
@@ -268,7 +268,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/red-velvet-cake-slice-magnet-2.webp"
     ],
     "badge": "Sweet Treat",
-    "dimensions": "Length: ~7.5 cm \u00b7 Height: ~5.5 cm",
+    "dimensions": "Length: ~7.5 cm · Height: ~5.5 cm",
     "materials": "Crimson & caramel chenille stems, cherry embellishment, ferrite back magnet",
     "care": "Wipe with dry microfiber cloth",
     "active": 1
@@ -279,18 +279,18 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 350,
-    "detail": "Hand-sculpted toast \u00b7 Melting golden butter pat",
+    "detail": "Hand-sculpted toast · Melting golden butter pat",
     "description": "Whimsical handcrafted clay slice of golden breakfast toast complete with toasted crust edges and a thick melting square of butter. Finished with a protective satin glaze and strong rear magnet.",
-    "featured": 13,
+    "featured": 14,
     "art": "toast",
     "image": "assets/products/buttered-toast-clay-magnet-1.webp",
     "images": [
       "assets/products/buttered-toast-clay-magnet-1.webp"
     ],
     "badge": "Hand Sculpted",
-    "dimensions": "~6 cm \u00d7 5 cm \u00d7 1.2 cm",
+    "dimensions": "~6 cm × 5 cm × 1.2 cm",
     "materials": "Polymer clay, acrylic gouache paint, satin protective glaze, strong magnet",
-    "care": "Water resistant glaze \u00b7 Clean with damp cloth",
+    "care": "Water resistant glaze · Clean with damp cloth",
     "active": 1
   },
   {
@@ -299,16 +299,16 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 350,
-    "detail": "Embossed star biscuit \u00b7 Toasted sugar details",
+    "detail": "Embossed star biscuit · Toasted sugar details",
     "description": "A delightful clay cookie keepsake embossed with a rustic star motif and toasted sugar accents. Brings a touch of celestial cozy warmth to your kitchen or workspace memo board.",
-    "featured": 14,
+    "featured": 15,
     "art": "star-cookie",
     "image": "assets/products/golden-star-cookie-magnet-1.webp",
     "images": [
       "assets/products/golden-star-cookie-magnet-1.webp"
     ],
     "badge": "Cozy Kitchen",
-    "dimensions": "~5.5 cm diameter \u00b7 ~1 cm thickness",
+    "dimensions": "~5.5 cm diameter · ~1 cm thickness",
     "materials": "Oven-baked clay, artist acrylics, protective varnish, magnet backing",
     "care": "Wipe clean with a soft dry cloth",
     "active": 1
@@ -319,9 +319,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 360,
-    "detail": "Two-tier sponge cake \u00b7 4 seeded red strawberries",
+    "detail": "Two-tier sponge cake · 4 seeded red strawberries",
     "description": "Miniature two-tier golden-yellow sponge cake layered with sweet vanilla cream and topped with four realistic seeded strawberries. An eye-catching decorative keepsake for dollhouse collectors or desk decor.",
-    "featured": 15,
+    "featured": 16,
     "art": "strawberry-cake",
     "image": "assets/products/mini-strawberry-shortcake-clay-1.webp",
     "images": [
@@ -329,9 +329,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/mini-strawberry-shortcake-clay-2.webp"
     ],
     "badge": "Miniature Art",
-    "dimensions": "Diameter: ~5 cm \u00b7 Height: ~5.5 cm",
+    "dimensions": "Diameter: ~5 cm · Height: ~5.5 cm",
     "materials": "Air-dry sculpting clay, fine detail acrylics, glossy strawberry glaze",
-    "care": "Decorative keepsake \u00b7 Protect from moisture and direct water",
+    "care": "Decorative keepsake · Protect from moisture and direct water",
     "active": 1
   },
   {
@@ -340,16 +340,16 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 340,
-    "detail": "Scalloped pastel flower \u00b7 Rosette swirl center",
+    "detail": "Scalloped pastel flower · Rosette swirl center",
     "description": "Handcrafted scalloped petal pastry charm with a glossy strawberry-pink spiral swirl. Fitted with a strong magnet for displaying your favorite notes, photos, and postcards.",
-    "featured": 16,
+    "featured": 17,
     "art": "swirl-blossom",
     "image": "assets/products/pink-swirl-blossom-clay-magnet-1.webp",
     "images": [
       "assets/products/pink-swirl-blossom-clay-magnet-1.webp"
     ],
     "badge": "Sweet Accent",
-    "dimensions": "Diameter: ~5 cm \u00b7 Thickness: ~1.5 cm",
+    "dimensions": "Diameter: ~5 cm · Thickness: ~1.5 cm",
     "materials": "Molded clay, pink enamel spiral, high-gloss protective finish, magnet",
     "care": "Clean with a dry lint-free cloth",
     "active": 1

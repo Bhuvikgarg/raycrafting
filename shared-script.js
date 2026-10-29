@@ -643,21 +643,22 @@ if (heroFrame && heroSlides.length > 1) {
     heroTimer = setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
   });
 
-  // Tap or click hero card to jump to that product in catalogue
-  heroFrame.addEventListener("click", () => {
+  // Tap or click hero card: trigger wrapper transition to next slide AND jump to that product in catalogue
+  const handleShowcaseTap = () => {
     const activeSlide = heroSlides[activeHeroSlide];
-    if (activeSlide && activeSlide.dataset.productId) {
-      jumpToHeroProduct(activeSlide.dataset.productId);
-    }
-  });
+    const targetProductId = activeSlide ? activeSlide.dataset.productId : null;
+    showHeroSlide(activeHeroSlide + 1);
+    setTimeout(() => {
+      if (targetProductId) {
+        jumpToHeroProduct(targetProductId);
+      }
+    }, 280);
+  };
+
+  heroFrame.addEventListener("click", handleShowcaseTap);
 
   if (heroCaptionWrap) {
-    heroCaptionWrap.addEventListener("click", () => {
-      const activeSlide = heroSlides[activeHeroSlide];
-      if (activeSlide && activeSlide.dataset.productId) {
-        jumpToHeroProduct(activeSlide.dataset.productId);
-      }
-    });
+    heroCaptionWrap.addEventListener("click", handleShowcaseTap);
   }
 }
 
@@ -967,4 +968,101 @@ function attachFormUXEnhancements() {
 initCookieConsent();
 initStickyMobileCta();
 attachFormUXEnhancements();
+
+/* =========================================================
+   DARK MODE TOGGLE
+   ========================================================= */
+function initTheme() {
+  const toggleBtn = document.querySelector("#themeToggle");
+  const moonIcon = toggleBtn?.querySelector(".theme-icon-moon");
+  const sunIcon = toggleBtn?.querySelector(".theme-icon-sun");
+
+  function applyTheme(isDark) {
+    document.documentElement.classList.toggle("theme-dark", isDark);
+    document.body.classList.toggle("theme-dark", isDark);
+    if (moonIcon && sunIcon) {
+      moonIcon.hidden = isDark;
+      sunIcon.hidden = !isDark;
+    }
+    toggleBtn?.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+  }
+
+  const savedTheme = localStorage.getItem("raycrafting-theme");
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const initialDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+  applyTheme(initialDark);
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const isNowDark = !document.body.classList.contains("theme-dark");
+      applyTheme(isNowDark);
+      localStorage.setItem("raycrafting-theme", isNowDark ? "dark" : "light");
+      showToast(isNowDark ? "🌙 Night mode enabled" : "☀️ Light mode enabled");
+    });
+  }
+}
+
+/* =========================================================
+   SMART BACK NAVIGATION (Keep shopper on site home)
+   ========================================================= */
+function initSmartBackNavigation() {
+  // Push state entry so first back press navigates to site home instead of exiting to external search
+  try {
+    if (!history.state || history.state.raycrafting !== "entry") {
+      history.replaceState({ raycrafting: "entry" }, "", window.location.href);
+      history.pushState({ raycrafting: "home" }, "", window.location.href);
+    }
+  } catch {}
+
+  window.addEventListener("popstate", () => {
+    // 1. Close open modals first
+    const productModal = document.querySelector("#productModal");
+    const aboutModal = document.querySelector("#aboutModal");
+    const checkoutModal = document.querySelector("#checkoutModal");
+    const ordersModal = document.querySelector("#ordersModal");
+    const cartDrawer = document.querySelector("#cartDrawer");
+
+    let closedSomething = false;
+    if (productModal && !productModal.hidden) {
+      closeModal();
+      closedSomething = true;
+    }
+    if (aboutModal && !aboutModal.hidden) {
+      aboutModal.hidden = true;
+      closedSomething = true;
+    }
+    if (checkoutModal && !checkoutModal.hidden) {
+      checkoutModal.hidden = true;
+      closedSomething = true;
+    }
+    if (ordersModal && !ordersModal.hidden) {
+      ordersModal.hidden = true;
+      closedSomething = true;
+    }
+    if (cartDrawer && cartDrawer.classList.contains("open")) {
+      setDrawer(false);
+      closedSomething = true;
+    }
+
+    if (closedSomething) {
+      document.body.style.overflow = "";
+      try { history.pushState({ raycrafting: "home" }, "", window.location.href); } catch {}
+      return;
+    }
+
+    // 2. If scrolled down into the page, scroll smoothly back to the top of home!
+    if (window.scrollY > 80) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      try { history.pushState({ raycrafting: "home" }, "", window.location.href); } catch {}
+      return;
+    }
+
+    // 3. Stay at top of site home
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    try { history.pushState({ raycrafting: "home" }, "", window.location.href); } catch {}
+  });
+}
+
+initTheme();
+initSmartBackNavigation();
 

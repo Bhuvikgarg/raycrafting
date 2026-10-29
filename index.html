@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=prod2" />
+    <link rel="stylesheet" href="styles.css?v=prod3" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -64,10 +64,14 @@
       <nav class="main-nav" aria-label="Main navigation">
         <a href="#shop">Shop</a>
         <a href="#story">Our story</a>
-        <a href="#custom">Custom gifts</a>
+        <a href="#custom" class="nav-custom-link"><span>✨ Custom ideas</span></a>
       </nav>
 
       <div class="header-actions">
+        <button class="icon-button theme-toggle-btn" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <span class="theme-icon-moon" aria-hidden="true">🌙</span>
+          <span class="theme-icon-sun" aria-hidden="true" hidden>☀️</span>
+        </button>
         <button class="icon-button" id="searchToggle" type="button" aria-label="Open search" title="Search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg>
         </button>
@@ -87,7 +91,11 @@
           <p class="hero-intro">Handmade pipe-cleaner blooms and small keepsakes for desks, shelves, and the people who make your day brighter.</p>
           <div class="hero-actions">
             <a class="button button-dark" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a>
-            <a class="button button-light" href="#custom">Have a custom idea? <span aria-hidden="true">→</span></a>
+            <a class="button button-custom-highlight" href="#custom">
+              <span class="custom-sparkle-icon" aria-hidden="true">✨</span>
+              <span>Have a custom idea?</span>
+              <span class="custom-cta-pill">Custom orders →</span>
+            </a>
           </div>
           <div class="hero-note"><span class="scribble-star" aria-hidden="true">✳</span><span>Each piece is made by hand, so no two are exactly alike.</span></div>
         </div>
@@ -107,43 +115,45 @@
         </div>
       </section>
 
-      <section class="shop section-shell" id="shop">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">The current collection</p>
-            <h2>Pick a little<br /><em>bright thing.</em></h2>
+      <div class="shop-gradient-band" id="catalogueBand">
+        <section class="shop section-shell" id="shop">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">The current collection</p>
+              <h2>Pick a little<br /><em>bright thing.</em></h2>
+            </div>
+            <p class="section-description">A rotating edit of cheerful stems, pocket-sized charms, and small gifts for the hard-to-shop-for people.</p>
           </div>
-          <p class="section-description">A rotating edit of cheerful stems, pocket-sized charms, and small gifts for the hard-to-shop-for people.</p>
-        </div>
 
-        <div class="shop-toolbar">
-          <div class="filter-group" id="filterGroup" aria-label="Filter products">
-            <button class="filter-button active" type="button" data-filter="All">All pieces</button>
-            <button class="filter-button" type="button" data-filter="Flowers">Flowers</button>
-            <button class="filter-button" type="button" data-filter="Keepsakes">Keepsakes</button>
-            <button class="filter-button" type="button" data-filter="Bundles">Bundles</button>
-            <button class="filter-button" type="button" data-filter="Under200">Under ₹200</button>
-            <button class="filter-button" type="button" data-filter="Bestsellers">Bestsellers ★</button>
+          <div class="shop-toolbar">
+            <div class="filter-group" id="filterGroup" aria-label="Filter products">
+              <button class="filter-button active" type="button" data-filter="All">All pieces</button>
+              <button class="filter-button" type="button" data-filter="Flowers">Flowers</button>
+              <button class="filter-button" type="button" data-filter="Keepsakes">Keepsakes</button>
+              <button class="filter-button" type="button" data-filter="Bundles">Bundles</button>
+              <button class="filter-button" type="button" data-filter="Under200">Under ₹200</button>
+              <button class="filter-button" type="button" data-filter="Bestsellers">Bestsellers ★</button>
+            </div>
+            <label class="sort-control">Sort by
+              <select id="sortSelect" aria-label="Sort products">
+                <option value="featured">Featured</option>
+                <option value="low">Price: low to high</option>
+                <option value="high">Price: high to low</option>
+                <option value="name">Name</option>
+              </select>
+            </label>
           </div>
-          <label class="sort-control">Sort by
-            <select id="sortSelect" aria-label="Sort products">
-              <option value="featured">Featured</option>
-              <option value="low">Price: low to high</option>
-              <option value="high">Price: high to low</option>
-              <option value="name">Name</option>
-            </select>
-          </label>
-        </div>
 
-        <div class="search-row" id="searchRow" hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg>
-          <input id="searchInput" type="search" placeholder="Search flowers, charms, gifts..." autocomplete="off" />
-          <button id="clearSearch" type="button" aria-label="Clear search">×</button>
-        </div>
+          <div class="search-row" id="searchRow" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg>
+            <input id="searchInput" type="search" placeholder="Search flowers, charms, gifts..." autocomplete="off" />
+            <button id="clearSearch" type="button" aria-label="Clear search">×</button>
+          </div>
 
-        <div class="product-grid" id="productGrid"></div>
-        <p class="empty-state" id="emptyState" hidden>No little thing matches that search yet. Try another word.</p>
-      </section>
+          <div class="product-grid" id="productGrid"></div>
+          <p class="empty-state" id="emptyState" hidden>No little thing matches that search yet. Try another word.</p>
+        </section>
+      </div>
 
       <section class="reviews-section section-shell" id="reviews" aria-labelledby="reviewsTitle">
         <div class="section-heading">
@@ -193,7 +203,18 @@
       </section>
 
       <section class="custom-section section-shell" id="custom" aria-labelledby="customTitle">
-        <div class="custom-copy"><p class="eyebrow">Custom orders</p><h2 id="customTitle">Bring me your <em>idea.</em></h2><p>If you want a custom order, give us any similar image and we’ll review it — or just write a description. An image is better, but your words are welcome too.</p><p class="custom-promise">We’ll review your request and contact you within 1 hour.</p></div>
+        <div class="custom-copy">
+          <p class="eyebrow">✨ Custom orders &amp; commissions</p>
+          <h2 id="customTitle">Bring me your <em>idea.</em></h2>
+          <div class="custom-pills-row">
+            <span class="custom-tag-pill">🌸 Any Flower Bloom</span>
+            <span class="custom-tag-pill">🎨 Custom Color Palette</span>
+            <span class="custom-tag-pill">💌 Free Handwritten Note</span>
+            <span class="custom-tag-pill">⚡ Reply in 1 Hour</span>
+          </div>
+          <p>If you want a custom order, give us any similar image and we’ll review it — or just write a description. An image is better, but your words are welcome too.</p>
+          <p class="custom-promise">We’ll review your request and contact you within 1 hour.</p>
+        </div>
         <form class="custom-form soft-form" id="customOrderForm">
           <div class="form-grid"><label>Your name<input id="customName" name="name" required autocomplete="name" placeholder="Your name"></label><label>Email address<input id="customEmail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label></div>
           <div class="form-grid"><label>Phone <span class="optional">recommended for WhatsApp quote</span><input id="customPhone" name="phone" type="tel" autocomplete="tel" placeholder="10-digit Indian number"></label><label>City <span class="optional">optional</span><input id="customCity" name="city" placeholder="Your city"></label></div>
@@ -387,9 +408,9 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="catalog.js?v=20261030v1"></script>
-    <script src="shared-script.js?v=20261030v1"></script>
-    <script src="custom-requests.js?v=20261030v1"></script>
-    <script src="commerce.js?v=20261030v1"></script>
+    <script src="catalog.js?v=20261030v2"></script>
+    <script src="shared-script.js?v=20261030v2"></script>
+    <script src="custom-requests.js?v=20261030v2"></script>
+    <script src="commerce.js?v=20261030v2"></script>
 </body>
 </html>
