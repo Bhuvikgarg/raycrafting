@@ -1597,6 +1597,207 @@ body.theme-dark .orders-card {
   color: #fdf5f9 !important;
   border-color: rgba(255, 180, 205, 0.2) !important;
 }
+
+/* Commerce Modals in Dark Mode */
+body.theme-dark .commerce-modal,
+.theme-dark .commerce-modal {
+  background: rgba(8, 2, 8, 0.78) !important;
+}
+body.theme-dark .commerce-panel,
+.theme-dark .commerce-panel {
+  background: #1c0b1a !important;
+  color: #fdf5f9 !important;
+  border: 1px solid rgba(255, 180, 205, 0.22) !important;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65) !important;
+}
+body.theme-dark .commerce-head {
+  border-bottom-color: rgba(255, 180, 205, 0.16) !important;
+}
+body.theme-dark .commerce-head h2 {
+  color: #ffffff !important;
+}
+body.theme-dark .commerce-head p {
+  color: #d8c2cf !important;
+}
+body.theme-dark .commerce-close {
+  color: #caaebc !important;
+}
+body.theme-dark .commerce-close:hover {
+  color: #ffffff !important;
+}
+body.theme-dark .checkout-section {
+  border-bottom-color: rgba(255, 180, 205, 0.16) !important;
+}
+body.theme-dark .checkout-section h3 {
+  color: #ffffff !important;
+}
+body.theme-dark .customer-bar {
+  background: #281226 !important;
+  border: 1px solid rgba(255, 180, 205, 0.2) !important;
+  color: #ffd6e5 !important;
+}
+body.theme-dark .customer-bar strong {
+  color: #ffffff !important;
+}
+body.theme-dark .customer-bar button {
+  color: #ff9ec0 !important;
+}
+body.theme-dark .fulfillment-option {
+  background: #251023 !important;
+  border: 1px solid rgba(255, 180, 205, 0.2) !important;
+  color: #fdf5f9 !important;
+}
+body.theme-dark .fulfillment-option:hover {
+  background: #2d1428 !important;
+  border-color: rgba(255, 180, 205, 0.35) !important;
+}
+body.theme-dark .fulfillment-option:has(input:checked) {
+  background: #391433 !important;
+  border-color: #e8708c !important;
+  box-shadow: 0 4px 16px rgba(232, 112, 140, 0.25) !important;
+}
+body.theme-dark .fulfillment-option strong {
+  color: #ffffff !important;
+}
+body.theme-dark .fulfillment-option small {
+  color: #d8c2cf !important;
+}
+body.theme-dark .location-row button {
+  background: rgba(255, 180, 205, 0.1) !important;
+  border-color: rgba(255, 180, 205, 0.25) !important;
+  color: #ffb8ce !important;
+}
+body.theme-dark .location-row small {
+  color: #caaebc !important;
+}
+body.theme-dark .zepto-address-card {
+  background: #251023 !important;
+  border-color: rgba(85, 115, 81, 0.5) !important;
+  color: #fdf5f9 !important;
+}
+body.theme-dark .zepto-address-details strong {
+  color: #ffffff !important;
+}
+body.theme-dark .zepto-address-details p {
+  color: #d8c2cf !important;
+}
+body.theme-dark .commerce-form label {
+  color: #fdf5f9 !important;
+}
+body.theme-dark .commerce-form input,
+body.theme-dark .commerce-form select,
+body.theme-dark .commerce-form textarea {
+  background: #180717 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 180, 205, 0.25) !important;
+}
+body.theme-dark .commerce-form input:focus,
+body.theme-dark .commerce-form textarea:focus {
+  background: #220b20 !important;
+  border-color: #e8708c !important;
+  color: #ffffff !important;
+}
+body.theme-dark .payment-method-card {
+  background: #251023 !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+}
+body.theme-dark .payment-method-card:hover {
+  background: #2d1329 !important;
+  border-color: #e8708c !important;
+}
+body.theme-dark .payment-method-card.active,
+body.theme-dark .payment-method-card:has(input:checked) {
+  background: #391433 !important;
+  border-color: #e8708c !important;
+  box-shadow: 0 4px 16px rgba(232, 112, 140, 0.25) !important;
+}
+body.theme-dark .pm-title-row strong {
+  color: #ffffff !important;
+}
+body.theme-dark .pm-desc {
+  color: #d8c2cf !important;
+}
+body.theme-dark .pm-chip {
+  background: #1c0a1b !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+  color: #ffd4e2 !important;
+}
+body.theme-dark .coupon-chip {
+  background: #2d1228 !important;
+  border-color: #e8708c !important;
+  color: #ffb8ce !important;
+}
+body.theme-dark .coupon-chip.applied {
+  background: #1c2b1a !important;
+  border-color: #557351 !important;
+  color: #9cd495 !important;
+}
+body.theme-dark .checkout-maker-reassurance {
+  background: #251023 !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+  color: #d8c2cf !important;
+}
+body.theme-dark .checkout-maker-reassurance span {
+  color: #ffffff !important;
+}
+body.theme-dark .checkout-trust-badge {
+  background: #251023 !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+}
+body.theme-dark .checkout-trust-badge strong {
+  color: #ffffff !important;
+}
+body.theme-dark .checkout-trust-badge p {
+  color: #d8c2cf !important;
+}
+body.theme-dark .checkout-lines,
+body.theme-dark .checkout-totals {
+  border-color: rgba(255, 180, 205, 0.16) !important;
+}
+body.theme-dark .checkout-line h4 {
+  color: #ffffff !important;
+}
+body.theme-dark .checkout-line p {
+  color: #d8c2cf !important;
+}
+body.theme-dark .checkout-total-row {
+  color: #fdf5f9 !important;
+}
+body.theme-dark .checkout-total-row.total {
+  color: #ffffff !important;
+  border-top-color: rgba(255, 180, 205, 0.2) !important;
+}
+body.theme-dark .confirm-summary-box {
+  background: #251023 !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+  color: #fdf5f9 !important;
+}
+body.theme-dark .order-history-card {
+  background: #231021 !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+  color: #fdf5f9 !important;
+}
+body.theme-dark .order-history-head h3 {
+  color: #ffffff !important;
+}
+body.theme-dark .order-history-items {
+  color: #fdf5f9 !important;
+  border-top-color: rgba(255, 180, 205, 0.15) !important;
+}
+body.theme-dark .custom-quote-box {
+  background: #261124 !important;
+  border-color: rgba(255, 180, 205, 0.25) !important;
+}
+body.theme-dark .quote-seller-note {
+  background: #1b0919 !important;
+  color: #fdf5f9 !important;
+  border-color: rgba(255, 180, 205, 0.2) !important;
+}
+body.theme-dark .return-policy-box {
+  background: #261124 !important;
+  border-color: rgba(255, 180, 205, 0.25) !important;
+  color: #fdf5f9 !important;
+}
 body.theme-dark .about-story p,
 body.theme-dark .about-card p {
   color: #ded0d8 !important;

@@ -142,6 +142,63 @@
         .checkout-layout,.commerce-grid{grid-template-columns:1fr}
         .commerce-head h2{font-size:26px}
       }
+
+      /* Explicit High Contrast Typography in Light Mode */
+      .customer-bar{color:#24141e}.customer-bar strong{color:#24141e}
+      .fulfillment-option strong{color:#24141e}.fulfillment-option small{color:#5a4552}
+      .zepto-address-details strong{color:#24141e}.zepto-address-details p{color:#5a4552}
+      .pm-title-row strong{color:#24141e}.pm-desc{color:#5a4552}
+      .checkout-maker-reassurance{color:#5a4552}.checkout-maker-reassurance span{color:#24141e}
+      .checkout-trust-badge strong{color:#24141e}.checkout-trust-badge p{color:#5a4552}
+
+      /* Full Dark Mode Adaptation for Commerce Modals */
+      body.theme-dark .commerce-panel,.theme-dark .commerce-panel{background:#1c0b1a!important;color:#fdf5f9!important;border:1px solid rgba(255,180,205,0.22)!important;box-shadow:0 25px 80px rgba(0,0,0,0.65)!important}
+      body.theme-dark .commerce-head h2,.theme-dark .commerce-head h2{color:#ffffff!important}
+      body.theme-dark .commerce-head p,.theme-dark .commerce-head p{color:#d8c2cf!important}
+      body.theme-dark .commerce-close,.theme-dark .commerce-close{color:#caaebc!important}
+      body.theme-dark .commerce-close:hover,.theme-dark .commerce-close:hover{color:#ffffff!important}
+      body.theme-dark .checkout-section h3,.theme-dark .checkout-section h3{color:#ffffff!important}
+      body.theme-dark .customer-bar,.theme-dark .customer-bar{background:#281226!important;border:1px solid rgba(255,180,205,0.2)!important;color:#ffd6e5!important}
+      body.theme-dark .customer-bar strong,.theme-dark .customer-bar strong{color:#ffffff!important}
+      body.theme-dark .customer-bar button,.theme-dark .customer-bar button{color:#ff9ec0!important}
+      body.theme-dark .fulfillment-option,.theme-dark .fulfillment-option{background:#251023!important;border:1.5px solid rgba(255,180,205,0.2)!important;color:#fdf5f9!important}
+      body.theme-dark .fulfillment-option:hover,.theme-dark .fulfillment-option:hover{background:#2d1428!important;border-color:rgba(255,180,205,0.35)!important}
+      body.theme-dark .fulfillment-option:has(input:checked),.theme-dark .fulfillment-option:has(input:checked){background:#391433!important;border-color:#e8708c!important;box-shadow:0 4px 16px rgba(232,112,140,0.25)!important}
+      body.theme-dark .fulfillment-option strong,.theme-dark .fulfillment-option strong{color:#ffffff!important}
+      body.theme-dark .fulfillment-option small,.theme-dark .fulfillment-option small{color:#d8c2cf!important}
+      body.theme-dark .location-row button,.theme-dark .location-row button{background:rgba(255,180,205,0.1)!important;border-color:rgba(255,180,205,0.25)!important;color:#ffb8ce!important}
+      body.theme-dark .location-row small,.theme-dark .location-row small{color:#caaebc!important}
+      body.theme-dark .zepto-address-card,.theme-dark .zepto-address-card{background:#251023!important;border-color:rgba(85,115,81,0.5)!important;color:#fdf5f9!important}
+      body.theme-dark .zepto-address-details strong,.theme-dark .zepto-address-details strong{color:#ffffff!important}
+      body.theme-dark .zepto-address-details p,.theme-dark .zepto-address-details p{color:#d8c2cf!important}
+      body.theme-dark .commerce-form label,.theme-dark .commerce-form label{color:#fdf5f9!important}
+      body.theme-dark .commerce-form input,body.theme-dark .commerce-form select,body.theme-dark .commerce-form textarea,.theme-dark .commerce-form input,.theme-dark .commerce-form select,.theme-dark .commerce-form textarea{background:#180717!important;color:#ffffff!important;border-color:rgba(255,180,205,0.25)!important}
+      body.theme-dark .commerce-form input:focus,body.theme-dark .commerce-form textarea:focus,.theme-dark .commerce-form input:focus,.theme-dark .commerce-form textarea:focus{background:#220b20!important;border-color:#e8708c!important;color:#ffffff!important}
+      body.theme-dark .payment-method-card,.theme-dark .payment-method-card{background:#251023!important;border-color:rgba(255,180,205,0.2)!important}
+      body.theme-dark .payment-method-card:hover,.theme-dark .payment-method-card:hover{background:#2d1329!important;border-color:#e8708c!important}
+      body.theme-dark .payment-method-card.active,body.theme-dark .payment-method-card:has(input:checked),.theme-dark .payment-method-card.active,.theme-dark .payment-method-card:has(input:checked){background:#391433!important;border-color:#e8708c!important;box-shadow:0 4px 16px rgba(232,112,140,0.25)!important}
+      body.theme-dark .pm-title-row strong,.theme-dark .pm-title-row strong{color:#ffffff!important}
+      body.theme-dark .pm-desc,.theme-dark .pm-desc{color:#d8c2cf!important}
+      body.theme-dark .pm-chip,.theme-dark .pm-chip{background:#1c0a1b!important;border-color:rgba(255,180,205,0.2)!important;color:#ffd4e2!important}
+      body.theme-dark .coupon-chip,.theme-dark .coupon-chip{background:#2d1228!important;border-color:#e8708c!important;color:#ffb8ce!important}
+      body.theme-dark .coupon-chip.applied,.theme-dark .coupon-chip.applied{background:#1c2b1a!important;border-color:#557351!important;color:#9cd495!important}
+      body.theme-dark .checkout-maker-reassurance,.theme-dark .checkout-maker-reassurance{background:#251023!important;border-color:rgba(255,180,205,0.2)!important;color:#d8c2cf!important}
+      body.theme-dark .checkout-maker-reassurance span,.theme-dark .checkout-maker-reassurance span{color:#ffffff!important}
+      body.theme-dark .checkout-trust-badge,.theme-dark .checkout-trust-badge{background:#251023!important;border-color:rgba(255,180,205,0.2)!important}
+      body.theme-dark .checkout-trust-badge strong,.theme-dark .checkout-trust-badge strong{color:#ffffff!important}
+      body.theme-dark .checkout-trust-badge p,.theme-dark .checkout-trust-badge p{color:#d8c2cf!important}
+      body.theme-dark .checkout-lines,body.theme-dark .checkout-totals,.theme-dark .checkout-lines,.theme-dark .checkout-totals{border-color:rgba(255,180,205,0.16)!important}
+      body.theme-dark .checkout-line h4,.theme-dark .checkout-line h4{color:#ffffff!important}
+      body.theme-dark .checkout-line p,.theme-dark .checkout-line p{color:#d8c2cf!important}
+      body.theme-dark .checkout-total-row,.theme-dark .checkout-total-row{color:#fdf5f9!important}
+      body.theme-dark .checkout-total-row.total,.theme-dark .checkout-total-row.total{color:#ffffff!important;border-top-color:rgba(255,180,205,0.2)!important}
+      body.theme-dark #payButton,.theme-dark #payButton{background:linear-gradient(135deg,#e76e59 0%,#c44f6a 100%)!important;color:#ffffff!important;box-shadow:0 4px 18px rgba(231,110,89,0.4)!important}
+      body.theme-dark .confirm-summary-box,.theme-dark .confirm-summary-box{background:#251023!important;border-color:rgba(255,180,205,0.2)!important;color:#fdf5f9!important}
+      body.theme-dark .confirm-celebration h2,.theme-dark .confirm-celebration h2{color:#ffffff!important}
+      body.theme-dark .confirm-celebration p,.theme-dark .confirm-celebration p{color:#d8c2cf!important}
+      body.theme-dark .order-history-card,.theme-dark .order-history-card{background:#231021!important;border-color:rgba(255,180,205,0.2)!important;color:#fdf5f9!important}
+      body.theme-dark .order-history-head h3,.theme-dark .order-history-head h3{color:#ffffff!important}
+      body.theme-dark .order-history-items,.theme-dark .order-history-items{color:#fdf5f9!important;border-top-color:rgba(255,180,205,0.15)!important}
     `;
     document.head.appendChild(style);
 
@@ -245,7 +302,7 @@
                     </label>
                     <label class="fulfillment-option">
                       <input type="radio" name="fulfillmentMethod" value="self_pickup">
-                      <span><strong>Self pickup</strong><small>Collect from Himanshi's studio after order is ready. No delivery fee.</small></span>
+                      <span><strong>Self pickup</strong><small>Collect from our studio after order is ready. No delivery fee.</small></span>
                     </label>
                   </div>
                   <div class="location-row" id="locationRow">
@@ -271,7 +328,7 @@
                   <form class="commerce-form" id="addressForm">
                     <div id="addressFormFields">
                       <div class="commerce-grid">
-                        <label>Full name<input id="addressName" required minlength="2" maxlength="120" autocomplete="name" placeholder="Himanshi Sharma"></label>
+                        <label>Full name<input id="addressName" required minlength="2" maxlength="120" autocomplete="name" placeholder="Bhuvik Garg"></label>
                         <label>Phone number<input id="addressPhone" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">10-digit Indian mobile number.</small></label>
                       </div>
                       <label id="addressEmailField">Email address <span class="commerce-note">(for order updates &amp; receipt)</span><input id="addressEmail" type="email" required minlength="5" maxlength="120" autocomplete="email" placeholder="you@example.com"><small class="field-help">We'll email your order details &amp; tracking status here.</small></label>
@@ -340,7 +397,7 @@
                   <h3>Your order</h3>
                   <div class="checkout-lines" id="checkoutLines"></div>
                   <div class="checkout-maker-reassurance">
-                    🌸 <span>Handmade in small batches by Himanshi · 100% Gift-Ready</span>
+                    🌸 <span>Handmade in small batches with love · 100% Gift-Ready</span>
                   </div>
                   <div class="checkout-totals" id="checkoutTotals"></div>
                 </section>
@@ -401,7 +458,7 @@
             <div class="confirm-flower-icon">🌸</div>
             <p class="eyebrow">Raycrafting Handcrafted Order</p>
             <h2 id="confirmTitle">Your order is placed!</h2>
-            <p id="confirmSubtitle">We’ve received your order and Himanshi is carefully preparing your handmade piece.</p>
+            <p id="confirmSubtitle">We’ve received your order and our studio is carefully preparing your handmade piece.</p>
           </div>
           <div class="confirm-summary-box">
             <div class="confirm-summary-row">
@@ -423,7 +480,7 @@
           </div>
           <div class="confirm-actions">
             <button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders <span>→</span></button>
-            <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with Himanshi on WhatsApp</a>
+            <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with our studio on WhatsApp</a>
             <a class="orders-button" id="confirmReceiptLink" href="thank-you.html" style="margin-top:6px;display:block;text-align:center;text-decoration:none;">View Full Order Receipt 📄</a>
             <button class="orders-button" id="confirmCloseBtn" type="button" style="margin-top:6px">Back to Shop</button>
           </div>
@@ -444,7 +501,7 @@
             <button class="commerce-close" id="returnClose" type="button" aria-label="Close return modal">×</button>
           </div>
           <div class="return-policy-box">
-            🌸 <strong>Handmade Studio Quality Guarantee:</strong> Every piece is hand-twisted with care by Himanshi. If your order arrived broken, damaged during transit, or with a craftsmanship defect, we will arrange a replacement or refund within 3 days of delivery.
+            🌸 <strong>Handmade Studio Quality Guarantee:</strong> Every piece is hand-twisted with care by our studio artists. If your order arrived broken, damaged during transit, or with a craftsmanship defect, we will arrange a replacement or refund within 3 days of delivery.
           </div>
           <form class="commerce-form" id="returnForm">
             <input type="hidden" id="returnOrderId" value="">
@@ -1060,7 +1117,7 @@
     });
     const message = $("#addressMessage");
     if (message) {
-      message.textContent = selfPickup ? "Self pickup selected. You can collect your order directly from Himanshi's studio." : "";
+      message.textContent = selfPickup ? "Self pickup selected. You can collect your order directly from our studio." : "";
       message.className = selfPickup ? "commerce-message success" : "commerce-message";
     }
     renderCheckout();
@@ -1096,7 +1153,7 @@
     }
     const message = $("#addressMessage");
     if (message) {
-      message.textContent = failed ? failed[1] : (selfPickup ? "Self pickup selected. You can collect your order directly from Himanshi's studio." : "");
+      message.textContent = failed ? failed[1] : (selfPickup ? "Self pickup selected. You can collect your order directly from our studio." : "");
       message.className = failed ? "commerce-message" : "commerce-message success";
     }
     return { valid: !failed, value, error: failed?.[1] || "" };

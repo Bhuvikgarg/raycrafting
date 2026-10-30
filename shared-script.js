@@ -540,7 +540,7 @@ fetch("/api/config").then((r) => r.json()).then((cfg) => {
   const vipWa = document.querySelector("#vipWhatsAppBroadcast");
   if (vipWa && cfg.supportPhone) {
     const cleanPhone = String(cfg.supportPhone).replace(/\D/g, "");
-    vipWa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi Himanshi! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
+    vipWa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
   }
   if (cfg.bannerQuote) {
     const quoteEl = document.querySelector("#announcementQuoteText");
