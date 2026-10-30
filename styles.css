@@ -41,12 +41,54 @@ img { display: block; max-width: 100%; }
 .icon-button, .close-button { border: 0; background: none; padding: 8px; display: grid; place-items: center; }
 .icon-button svg, .cart-button svg, .search-row svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
 .profile-area { position: relative; z-index: 101; }
-.profile-menu { width: min(260px, calc(100vw - 24px)); position: absolute; z-index: 200; top: calc(100% + 10px); right: 0; padding: 12px; background: #ffffff !important; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 16px 45px rgba(75, 55, 64, 0.22); }
+.profile-menu {
+  width: min(260px, calc(100vw - 24px));
+  position: absolute;
+  z-index: 200;
+  top: calc(100% + 10px);
+  right: 0;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(220, 160, 185, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 16px 45px rgba(75, 55, 64, 0.18);
+}
 .profile-menu[hidden] { display: none; }
-.profile-menu-label { margin: 4px 8px 10px; color: var(--muted); font: 9px var(--mono); text-transform: uppercase; letter-spacing: .06em; word-break: break-word; overflow-wrap: anywhere; line-height: 1.4; }
-.profile-menu button, .profile-menu a { width: 100%; display: block; border: 0; background: transparent; padding: 10px 8px; color: var(--ink); text-align: left; font-size: 11px; border-radius: 4px; }
-.profile-menu button:hover, .profile-menu a:hover { background: #fdf2f5; color: var(--coral-dark); }
-.profile-menu button:last-child { margin-top: 5px; border-top: 1px solid var(--line); padding-top: 12px; color: var(--coral-dark); }
+.profile-menu-label {
+  margin: 4px 8px 8px;
+  color: #7b5969;
+  font: 600 10px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.profile-menu button, .profile-menu a {
+  width: 100%;
+  display: block;
+  border: 0;
+  background: transparent;
+  padding: 9px 12px;
+  color: #24141e !important;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.profile-menu button:hover, .profile-menu a:hover {
+  background: #fff0f5 !important;
+  color: #b82d56 !important;
+}
+.profile-menu button:last-child {
+  margin-top: 6px;
+  border-top: 1px solid rgba(220, 160, 185, 0.35);
+  padding-top: 11px;
+  color: #b82d56 !important;
+  font-weight: 600;
+}
 .profile-button { border: 1px solid var(--line); background: transparent; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; font-size: 11px; }
 .profile-button:hover { border-color: var(--coral); color: var(--coral-dark); }
 .profile-avatar { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--sage); color: var(--ink); font: 11px var(--mono); overflow: hidden; }
@@ -66,8 +108,8 @@ h1 em, h2 em { color: var(--coral); font-style: italic; }
 .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 22px; margin-top: 33px; }
 .button { border: 1px solid transparent; min-height: 46px; padding: 12px 17px; display: inline-flex; align-items: center; justify-content: center; gap: 25px; font-size: 12px; font-weight: 600; transition: transform .2s ease, background .2s ease, color .2s ease; }
 .button:hover { transform: translateY(-2px); }
-.button-dark { background: var(--ink); color: var(--white); }
-.button-dark:hover { background: var(--coral-dark); }
+.button-dark { background: #24141e; color: #ffffff !important; }
+.button-dark:hover { background: var(--coral-dark); color: #ffffff !important; }
 .button-light { border-color: rgba(255,253,249,.55); color: var(--white); }
 .button-light:hover { background: var(--white); color: var(--ink); }
 .text-button { border: 0; padding: 0; background: none; font-size: 12px; font-weight: 600; }
@@ -346,7 +388,6 @@ body { background: linear-gradient(180deg, #fff9fa 0%, var(--paper) 48%, #fffaf6
 .brand-mark::before, .brand-mark::after { background: var(--coral-dark); }
 .site-header { border-bottom: 1px solid rgba(196, 95, 124, .12); }
 .main-nav a:hover, .footer-links a:hover, .icon-button:hover, .cart-button:hover { color: var(--coral-dark); }
-.profile-menu button:hover, .profile-menu a:hover { background: #fff0f4; color: var(--coral-dark); }
 .profile-button { border-color: rgba(196, 95, 124, .22); border-radius: 999px; background: rgba(255, 253, 253, .55); }
 .profile-avatar { background: #f7d1dc; color: var(--coral-dark); }
 .cart-button b { background: var(--coral-dark); }
@@ -354,8 +395,8 @@ body { background: linear-gradient(180deg, #fff9fa 0%, var(--paper) 48%, #fffaf6
 .eyebrow-dot { background: var(--coral); box-shadow: 0 0 0 4px rgba(229, 141, 165, .15); }
 h1 em, h2 em { color: var(--coral-dark); }
 .button { border-radius: 999px; }
-.button-dark { background: #6a4657; }
-.button-dark:hover { background: var(--coral-dark); }
+.button-dark { background: #24141e; color: #ffffff !important; }
+.button-dark:hover { background: var(--coral-dark); color: #ffffff !important; }
 .text-button:hover { color: var(--coral-dark); }
 .scribble-star, .trust-icon, .empty-flower { color: var(--coral); }
 .hero-image-frame { background: #f6dce5; border: 1px solid rgba(196, 95, 124, .16); border-radius: 30px 30px 30px 8px; box-shadow: var(--shadow); }
@@ -1534,6 +1575,86 @@ body.theme-dark .cart-button {
   border-color: rgba(255, 180, 205, 0.2);
   color: #fdf5f9;
 }
+body.theme-dark .profile-avatar,
+.theme-dark .profile-avatar {
+  background: #2a1126 !important;
+  color: #ffb8cf !important;
+  border: 1px solid rgba(255, 180, 205, 0.25) !important;
+}
+body.theme-dark .brand-mark,
+.theme-dark .brand-mark {
+  border-color: rgba(255, 180, 205, 0.4) !important;
+  background: #2a1126 !important;
+  color: #ff9ec0 !important;
+}
+body.theme-dark .brand-mark::before,
+body.theme-dark .brand-mark::after,
+.theme-dark .brand-mark::before,
+.theme-dark .brand-mark::after {
+  background: #ff9ec0 !important;
+}
+body.theme-dark .cart-button b,
+.theme-dark .cart-button b {
+  color: #ffffff !important;
+}
+body.theme-dark .toast,
+.theme-dark .toast {
+  background: #251023 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 180, 205, 0.3) !important;
+}
+/* Profile Dropdown Menu in Dark Mode */
+body.theme-dark .profile-menu,
+.theme-dark .profile-menu {
+  background: #200d1e !important;
+  border: 1px solid rgba(255, 180, 205, 0.24) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7) !important;
+}
+body.theme-dark .profile-menu-label,
+.theme-dark .profile-menu-label {
+  color: #ffb8cf !important;
+}
+body.theme-dark .profile-menu button,
+body.theme-dark .profile-menu a,
+.theme-dark .profile-menu button,
+.theme-dark .profile-menu a {
+  color: #fdf5f9 !important;
+  background: transparent !important;
+}
+body.theme-dark .profile-menu button:hover,
+body.theme-dark .profile-menu a:hover,
+.theme-dark .profile-menu button:hover,
+.theme-dark .profile-menu a:hover {
+  background: rgba(255, 180, 205, 0.14) !important;
+  color: #ff9ec0 !important;
+}
+body.theme-dark .profile-menu button:last-child,
+.theme-dark .profile-menu button:last-child {
+  border-top: 1px solid rgba(255, 180, 205, 0.22) !important;
+  color: #ff85a2 !important;
+  background: rgba(255, 133, 162, 0.1) !important;
+  font-weight: 600 !important;
+}
+body.theme-dark .profile-menu button:last-child:hover,
+.theme-dark .profile-menu button:last-child:hover {
+  background: rgba(255, 133, 162, 0.22) !important;
+  color: #ffffff !important;
+}
+/* Primary Button in Dark Mode */
+body.theme-dark .button-dark,
+.theme-dark .button-dark {
+  background: #fdf5f9 !important;
+  color: #1a0818 !important;
+  font-weight: 600 !important;
+  border: none !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+}
+body.theme-dark .button-dark:hover,
+.theme-dark .button-dark:hover {
+  background: #ff85a2 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 22px rgba(255, 133, 162, 0.45) !important;
+}
 body.theme-dark .hero-image-frame {
   background: linear-gradient(145deg, #2c1228, #1a0a19);
   border-color: rgba(255, 180, 205, 0.2);
@@ -1591,11 +1712,38 @@ body.theme-dark .cart-line h3 {
   color: #fff;
 }
 body.theme-dark .about-card,
+body.theme-dark .account-card,
 body.theme-dark .checkout-card,
-body.theme-dark .orders-card {
+body.theme-dark .orders-card,
+.theme-dark .about-card,
+.theme-dark .account-card,
+.theme-dark .checkout-card,
+.theme-dark .orders-card {
   background: #200d1e !important;
   color: #fdf5f9 !important;
   border-color: rgba(255, 180, 205, 0.2) !important;
+}
+body.theme-dark .account-card h2,
+.theme-dark .account-card h2 {
+  color: #ffffff !important;
+}
+body.theme-dark .account-card p,
+.theme-dark .account-card p {
+  color: #d8c2cf !important;
+}
+body.theme-dark .account-detail,
+.theme-dark .account-detail {
+  background: #2a1126 !important;
+  border: 1px solid rgba(255, 180, 205, 0.2) !important;
+  color: #fdf5f9 !important;
+}
+body.theme-dark .account-detail strong,
+.theme-dark .account-detail strong {
+  color: #ffffff !important;
+}
+body.theme-dark .account-detail p,
+.theme-dark .account-detail p {
+  color: #d8c2cf !important;
 }
 
 /* Commerce Modals in Dark Mode */
