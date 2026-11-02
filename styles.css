@@ -1377,19 +1377,16 @@ button.is-loading::after {
   overflow: hidden;
   background: linear-gradient(180deg,
     rgba(255, 245, 248, 0) 0px,
-    rgba(252, 230, 240, 0.4) 60px,
-    rgba(244, 203, 222, 0.7) 130px,
-    rgba(223, 155, 188, 0.88) 210px,
-    #9c3d6c 300px,
-    #631b43 390px,
-    #3b0d28 480px,
-    #2a071c 570px,
-    #2a071c calc(100% - 500px),
-    #3b0d28 calc(100% - 410px),
-    #631b43 calc(100% - 320px),
-    #9c3d6c calc(100% - 230px),
-    rgba(223, 155, 188, 0.8) calc(100% - 140px),
-    rgba(252, 230, 240, 0.4) calc(100% - 70px),
+    rgba(240, 185, 208, 0.3) 20px,
+    rgba(186, 76, 122, 0.7) 45px,
+    #5c163d 65px,
+    #2a071c 85px,
+    #220517 110px,
+    #220517 calc(100% - 110px),
+    #2a071c calc(100% - 85px),
+    #5c163d calc(100% - 65px),
+    rgba(186, 76, 122, 0.7) calc(100% - 45px),
+    rgba(240, 185, 208, 0.3) calc(100% - 20px),
     rgba(255, 245, 248, 0) 100%
   );
   padding: 85px 0 115px;
@@ -1400,21 +1397,21 @@ button.is-loading::after {
 }
 .shop-gradient-band .section-heading h2 {
   color: #ffffff !important;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 .shop-gradient-band .section-heading h2 em {
-  color: #ffb3cc !important;
-  text-shadow: 0 0 24px rgba(255, 179, 204, 0.5);
+  color: #ff9ec0 !important;
+  text-shadow: none !important;
   font-style: italic;
 }
 .shop-gradient-band .section-heading .eyebrow {
-  color: #ffd6e4 !important;
+  color: #ffb8cf !important;
   font-weight: 700;
   letter-spacing: 0.16em;
 }
 .shop-gradient-band .section-description {
-  color: #f7e6ee !important;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  color: #eed8e4 !important;
+  text-shadow: none !important;
 }
 .shop-gradient-band .shop-toolbar {
   background: rgba(45, 14, 38, 0.85);
