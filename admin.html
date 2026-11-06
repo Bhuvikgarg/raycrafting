@@ -44,13 +44,22 @@
 </main>
 <div class="access-modal" id="accessModal"><form class="access-card" id="accessForm"><span class="access-mark">R</span><p class="eyebrow">Raycrafting seller access</p><h2>Unlock your studio.</h2><p>Enter your studio PIN to edit the catalog.</p><label>Studio PIN<input id="pinInput" type="password" autocomplete="current-password" required autofocus></label><button class="primary-button" type="submit">Enter studio <span>→</span></button><p class="access-error" id="accessError"></p><small>Your seller PIN is checked securely by the backend.</small></form></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="catalog.js"></script>
+<script src="catalog.js?v=20261107v1"></script>
 <script>
 (function(){
   var key = window.RAYCRAFTING_STORAGE_KEY;
   var defaults = window.RAYCRAFTING_DEFAULT_PRODUCTS;
   var imageFallback = window.RAYCRAFTING_DEFAULT_IMAGE;
-  var products = JSON.parse(localStorage.getItem(key) || 'null') || defaults.map(function(product){ return Object.assign({}, product); });
+  var savedRaw = JSON.parse(localStorage.getItem(key) || 'null');
+  var products;
+  if (!savedRaw || !Array.isArray(savedRaw) || !savedRaw.length) {
+    products = defaults.map(function(product){ return Object.assign({}, product); });
+  } else {
+    var savedIds = {};
+    savedRaw.forEach(function(p){ if(p && p.id) savedIds[p.id] = true; });
+    var missing = defaults.filter(function(p){ return !savedIds[p.id]; });
+    products = savedRaw.concat(missing.map(function(p){ return Object.assign({}, p); }));
+  }
   var editingId = '';
   var productImages = [];
   var el = function(id){ return document.getElementById(id); };

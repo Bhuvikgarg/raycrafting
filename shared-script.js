@@ -18,7 +18,22 @@ let cart = JSON.parse(localStorage.getItem("raycrafting-cart") || "[]");
 
 function loadProducts() {
   const saved = localStorage.getItem(window.RAYCRAFTING_STORAGE_KEY);
-  return saved ? JSON.parse(saved) : window.RAYCRAFTING_DEFAULT_PRODUCTS.map((product) => ({ ...product }));
+  const defaults = window.RAYCRAFTING_DEFAULT_PRODUCTS || [];
+  if (!saved) return defaults.map((product) => ({ ...product }));
+  try {
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed) || !parsed.length) return defaults.map((product) => ({ ...product }));
+    const savedIds = new Set(parsed.map((p) => p && p.id));
+    const missing = defaults.filter((p) => p && !savedIds.has(p.id));
+    if (missing.length) {
+      const merged = parsed.concat(missing.map((p) => ({ ...p })));
+      try { localStorage.setItem(window.RAYCRAFTING_STORAGE_KEY, JSON.stringify(merged)); } catch {}
+      return merged;
+    }
+    return parsed;
+  } catch {
+    return defaults.map((product) => ({ ...product }));
+  }
 }
 
 function productImage(product) {
