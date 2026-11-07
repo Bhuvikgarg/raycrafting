@@ -402,6 +402,12 @@ function renderProducts() {
   const visible = getVisibleProducts();
   productGrid.innerHTML = visible.map(productMarkup).join("");
   emptyState.hidden = visible.length > 0;
+  productGrid.querySelectorAll(".product-image img").forEach((img) => {
+    if (img.complete) {
+      img.classList.add("is-loaded");
+      if (img.parentElement) img.parentElement.classList.add("is-loaded");
+    }
+  });
 }
 
 function saveCart() {
@@ -559,16 +565,32 @@ function openProduct(product, modalOptions = {}) {
   modalArtEl.style.background = theme.bg;
   modalArtEl.innerHTML = `
     <div class="modal-gallery-wrap">
-      <img id="modalMainImg" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(product.name)}" style="box-shadow: ${theme.glow};" />
+      <div class="modal-img-container shadcn-skeleton" style="position:relative; overflow:hidden; border-radius:18px; width:100%; max-width:320px; aspect-ratio:1/1; margin:0 auto; display:flex; align-items:center; justify-content:center;">
+        <img id="modalMainImg" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(product.name)}" style="box-shadow: ${theme.glow}; width:100%; height:100%; object-fit:cover; border-radius:18px;" loading="lazy" decoding="async" onload="this.classList.add('is-loaded'); this.parentElement.classList.add('is-loaded');" onerror="this.classList.add('is-loaded'); this.parentElement.classList.add('is-loaded');" />
+      </div>
       ${thumbsHtml}
     </div>
   `;
+
+  const initialMainImg = document.querySelector("#modalMainImg");
+  if (initialMainImg && initialMainImg.complete) {
+    initialMainImg.classList.add("is-loaded");
+    if (initialMainImg.parentElement) initialMainImg.parentElement.classList.add("is-loaded");
+  }
 
   const modalArt = document.querySelector("#modalArt");
   modalArt.querySelectorAll(".modal-thumb-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const mainImg = document.querySelector("#modalMainImg");
-      if (mainImg) mainImg.src = btn.dataset.src;
+      if (mainImg) {
+        if (mainImg.parentElement) mainImg.parentElement.classList.remove("is-loaded");
+        mainImg.classList.remove("is-loaded");
+        mainImg.src = btn.dataset.src;
+        if (mainImg.complete) {
+          mainImg.classList.add("is-loaded");
+          if (mainImg.parentElement) mainImg.parentElement.classList.add("is-loaded");
+        }
+      }
       modalArt.querySelectorAll(".modal-thumb-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
     });
@@ -636,10 +658,16 @@ function openProduct(product, modalOptions = {}) {
           const selNameEl = document.querySelector("#selectedColorName");
           if (selNameEl) selNameEl.textContent = selectedProductOption.name;
           
-          // Switch main image to selected color option photo
+          // Switch main image to selected color option photo with skeleton shimmer
           const mainImg = document.querySelector("#modalMainImg");
           if (mainImg && selectedProductOption.image) {
+            if (mainImg.parentElement) mainImg.parentElement.classList.remove("is-loaded");
+            mainImg.classList.remove("is-loaded");
             mainImg.src = selectedProductOption.image;
+            if (mainImg.complete) {
+              mainImg.classList.add("is-loaded");
+              if (mainImg.parentElement) mainImg.parentElement.classList.add("is-loaded");
+            }
           }
           
           // Sync gallery thumbnails
