@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=prod26" />
+    <link rel="stylesheet" href="styles.css?v=prod27" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -240,16 +240,22 @@
           <p class="custom-promise">We’ll review your request and contact you within 1 hour.</p>
         </div>
         <form class="custom-form soft-form" id="customOrderForm">
-          <div class="form-grid"><label>Your name<input id="customName" name="name" required autocomplete="name" placeholder="Your name"></label><label>Email address<input id="customEmail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label></div>
-          <div class="form-grid"><label>Phone <span class="optional">recommended for WhatsApp quote</span><input id="customPhone" name="phone" type="tel" autocomplete="tel" placeholder="10-digit Indian number"></label><label>City <span class="optional">optional</span><input id="customCity" name="city" placeholder="Your city"></label></div>
+          <div class="form-grid">
+            <label>Your name<input id="customName" name="name" required autocomplete="name" placeholder="Your name"></label>
+            <label>Email address<input id="customEmail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+          </div>
+          <div class="form-grid">
+            <label>Phone <span class="optional">recommended for WhatsApp quote</span><input id="customPhone" name="phone" type="tel" autocomplete="tel" placeholder="10-digit Indian number"></label>
+            <label>City <span class="optional">optional</span><input id="customCity" name="city" placeholder="Your city"></label>
+          </div>
           <label>State / Union Territory <span class="optional">optional</span><select id="customState" name="state"><option value="">Choose a state</option></select></label>
           <label>Tell us your idea<textarea id="customDescription" name="description" rows="4" maxlength="3000" placeholder="Colours, flowers, size, occasion, name, specific details — anything that helps..."></textarea></label>
-          <div class="custom-quote-option-box" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff8f4;padding:12px 14px;border:1.5px dashed #f2c7bc;border-radius:6px;margin:8px 0;">
-            <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;margin:0;cursor:pointer;">
-              <input type="checkbox" id="customAskPrice" style="width:auto;margin:0;accent-color:var(--coral);" checked>
+          <div class="custom-quote-option-box">
+            <label class="checkbox-label" for="customAskPrice">
+              <input type="checkbox" id="customAskPrice" checked>
               <span>Ask for exact price quote first (we will review &amp; reply with price)</span>
             </label>
-            <input id="customBudget" placeholder="Expected budget (₹, optional)" style="padding:7px 10px;font-size:11.5px;max-width:210px;margin:0;">
+            <input id="customBudget" class="budget-input" placeholder="Expected budget (₹, optional)">
           </div>
           <label class="upload-box">Reference image <span class="optional">recommended</span><input id="customImage" type="file" accept="image/png,image/jpeg,image/webp"><small>Upload a similar image and we’ll review it. JPG, PNG, or WebP; maximum 5 MB before resizing.</small></label>
           <div class="custom-upload-preview" id="customImagePreview" hidden><img id="customPreviewImage" alt="Your reference image preview"><button type="button" id="removeCustomImage">Remove image</button></div>
@@ -492,7 +498,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="catalog.js?v=20261107v8"></script>
-    <script src="shared-script.js?v=20261107v12"></script>
+    <script src="shared-script.js?v=20261107v13"></script>
     <script src="custom-requests.js?v=20261107v8"></script>
     <script src="commerce.js?v=20261107v10"></script>
 </body>

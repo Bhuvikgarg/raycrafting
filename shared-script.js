@@ -899,7 +899,7 @@ async function loadCommunityReviews() {
     const res = await fetch("/api/reviews");
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data.reviews) && data.reviews.length > 0) {
+      if (Array.isArray(data.reviews)) {
         communityReviews = data.reviews;
         try { localStorage.setItem("raycrafting_reviews", JSON.stringify(communityReviews)); } catch {}
         renderCommunityReviews(communityReviews);
@@ -913,7 +913,7 @@ async function loadCommunityReviews() {
   // Local storage fallback
   try {
     const cached = JSON.parse(localStorage.getItem("raycrafting_reviews") || "null");
-    if (Array.isArray(cached) && cached.length > 0) {
+    if (Array.isArray(cached)) {
       communityReviews = cached;
       renderCommunityReviews(communityReviews);
       return;
@@ -934,20 +934,23 @@ function renderCommunityReviews(reviews) {
     grid.innerHTML = `
       <div class="reviews-empty-state">
         <div class="empty-icon-wrap" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
           </svg>
         </div>
-        <h3>No craft notes yet</h3>
-        <p>Bought a handcrafted bloom or companion? Tell everyone how it looks on your desk!</p>
-        <button class="button button-dark" type="button" id="emptyWriteReviewBtn">WRITE THE FIRST REVIEW</button>
+        <h3>No comments yet</h3>
+        <p>Comments and craft notes will appear here once verified buyers review their handcrafted pieces. Ordered a piece? Leave your review below!</p>
+        <button class="button button-dark" type="button" id="emptyWriteReviewBtn">WRITE A REVIEW</button>
       </div>
     `;
     const emptyBtn = grid.querySelector("#emptyWriteReviewBtn");
     if (emptyBtn) emptyBtn.addEventListener("click", () => openReviewModal());
-    if (scoreEl) scoreEl.textContent = "5.0 / 5 Rating";
-    if (starsEl) starsEl.textContent = "★★★★★";
-    if (countEl) countEl.textContent = "from craft lovers";
+    if (scoreEl) scoreEl.textContent = "No comments yet";
+    if (starsEl) {
+      starsEl.textContent = "";
+      starsEl.style.display = "none";
+    }
+    if (countEl) countEl.textContent = "Reviews appear after purchase";
     return;
   }
 
@@ -956,8 +959,11 @@ function renderCommunityReviews(reviews) {
   const avg = (totalScore / reviews.length).toFixed(1);
   const roundedStars = Math.round(Number(avg));
   if (scoreEl) scoreEl.textContent = `${avg} / 5 Rating`;
-  if (starsEl) starsEl.textContent = "★".repeat(Math.max(1, Math.min(5, roundedStars)));
-  if (countEl) countEl.textContent = `from ${reviews.length} craft lover${reviews.length === 1 ? "" : "s"}`;
+  if (starsEl) {
+    starsEl.style.display = "block";
+    starsEl.textContent = "★".repeat(Math.max(1, Math.min(5, roundedStars)));
+  }
+  if (countEl) countEl.textContent = `from ${reviews.length} verified buyer${reviews.length === 1 ? "" : "s"}`;
 
   grid.innerHTML = reviews.map((r) => {
     const starCount = Math.max(1, Math.min(5, Number(r.rating) || 5));
