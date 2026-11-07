@@ -36,7 +36,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Golden Lotus Light",
         "image": "assets/products/illuminated-lotus-blossom-lamp-3.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "medium-sized-lotus-lamp",
@@ -67,7 +69,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Golden Candle Glow",
         "image": "assets/products/illuminated-lotus-blossom-lamp-3.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "lavender-bouquet-pearl-lace",
@@ -98,7 +102,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Silk Ribbon Wrap",
         "image": "assets/products/lavender-bouquet-pearl-lace-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "potted-red-tulips-planter",
@@ -129,7 +135,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Burgundy Bloom",
         "image": "assets/products/potted-red-tulips-planter-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "potted-orange-tulips-planter",
@@ -160,7 +168,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Golden Amber",
         "image": "assets/products/potted-orange-tulips-planter-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "trio-pearl-lace-bouquets",
@@ -180,7 +190,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "3 mini bouquets \u00b7 ~16 cm length each",
     "materials": "Multi-colored chenille florist stems, sheer organza, pearl ribbon borders",
     "care": "Display in a vase or gift separately \u00b7 Never fades or wilts",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "sunshine-daisy-fluffy-keychain",
@@ -200,7 +212,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Charm diameter: ~7.5 cm \u00b7 Total length with ring: ~12 cm",
     "materials": "Ultra-plush fuzzy yarn pom blossom, antique brass alloy keyring & chain",
     "care": "Spot clean gently with damp cloth \u00b7 Air dry",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "fluffy-kitten-paw-keychain",
@@ -220,7 +234,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Paw size: ~7 cm \u00d7 7 cm \u00b7 Ring length: ~5 cm",
     "materials": "Fluffy faux-fur chenille, pink yarn embroidery, brass alloy keyring",
     "care": "Keep dry \u00b7 Spot clean only",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "sunny-side-moods-egg-tray",
@@ -251,7 +267,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Playful Wink Yolk",
         "image": "assets/products/sunny-side-moods-egg-tray-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "cozy-movie-night-cocoa-popcorn",
@@ -282,7 +300,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Buttered Popcorn Buddy",
         "image": "assets/products/cozy-movie-night-cocoa-popcorn-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "pastel-sweet-cake-magnets",
@@ -318,7 +338,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Mint Matcha",
         "image": "assets/products/pastel-sweet-cake-magnets-3.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "artisan-cheesecake-slices-magnet-set",
@@ -349,7 +371,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Single Cherry Wedge",
         "image": "assets/products/artisan-cheesecake-slices-magnet-set-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "red-velvet-cake-slice-magnet",
@@ -380,7 +404,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Cherry Blossom Topping",
         "image": "assets/products/red-velvet-cake-slice-magnet-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "buttered-toast-clay-magnet",
@@ -400,7 +426,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~6 cm \u00d7 5 cm \u00d7 1.2 cm",
     "materials": "Polymer clay, acrylic gouache paint, satin protective glaze, strong magnet",
     "care": "Water resistant glaze \u00b7 Clean with damp cloth",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "golden-star-cookie-magnet",
@@ -420,7 +448,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~5.5 cm diameter \u00b7 ~1 cm thickness",
     "materials": "Oven-baked clay, artist acrylics, protective varnish, magnet backing",
     "care": "Wipe clean with a soft dry cloth",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "mini-strawberry-shortcake-clay",
@@ -451,7 +481,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Fresh Berry Detail",
         "image": "assets/products/mini-strawberry-shortcake-clay-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "pink-swirl-blossom-clay-magnet",
@@ -471,7 +503,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Diameter: ~5 cm \u00b7 Thickness: ~1.5 cm",
     "materials": "Molded clay, pink enamel spiral, high-gloss protective finish, magnet",
     "care": "Clean with a dry lint-free cloth",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "ocean-breeze-blue-lily-bouquet",
@@ -517,7 +551,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Ocean Deluxe Wrap",
         "image": "assets/products/ocean-breeze-blue-lily-bouquet-5.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "blushing-rose-pearl-lace-bouquet",
@@ -548,7 +584,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Pure White Lace",
         "image": "assets/products/blushing-rose-pearl-lace-bouquet-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "petite-fluffy-blossom-teddy-bouquet",
@@ -584,7 +622,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Lavender Twilight",
         "image": "assets/products/petite-fluffy-blossom-teddy-bouquet-3.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "springtime-pink-tulip-daisy-bouquet",
@@ -604,7 +644,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~26 cm tall \u00b7 ~18 cm wide",
     "materials": "Soft velvet pipe cleaners, florist wrap paper, satin ribbon",
     "care": "Everlasting bloom \u00b7 Zero watering needed",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "radiant-golden-sunflower-bouquet",
@@ -624,7 +666,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~27 cm tall \u00b7 ~17 cm wide",
     "materials": "Velvety chenille stems, florist wrap paper, ribbon",
     "care": "Everlasting bloom \u00b7 Never withers",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "rainbow-wildflower-daisy-stems-bundle",
@@ -644,7 +688,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Stems ~20 cm long \u00b7 Blossom diameter ~4.5 cm",
     "materials": "Multi-color plush pipe cleaners, flexible florist wire core",
     "care": "Wipe with dry cloth \u00b7 Bend stems into desired shape",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "illuminated-golden-lily-night-lamp",
@@ -675,7 +721,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Frog Base Garden Nightlight",
         "image": "assets/products/illuminated-golden-lily-night-lamp-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "pink-lotus-tea-light-candle-lamp",
@@ -695,7 +743,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~14 cm diameter \u00b7 ~6 cm height",
     "materials": "Velvet chenille pipe cleaners, battery-operated LED tea light candle",
     "care": "Clean with soft brush \u00b7 Battery included and easily replaceable",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "chocolate-fudge-rose-birthday-cake",
@@ -736,7 +786,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Keepsake Gift Box",
         "image": "assets/products/chocolate-fudge-rose-birthday-cake-4.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "nazar-evil-eye-floral-wall-hanging",
@@ -756,7 +808,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~25 cm total hanging length \u00b7 ~10 cm wide",
     "materials": "Chenille velvet, faux pearl beads, satin ribbon, hanging loop",
     "care": "Hang in car, doorway, or bedroom \u00b7 Dust gently",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "melting-pop-art-cola-can-sculpture",
@@ -776,7 +830,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~12 cm tall \u00b7 ~8 cm wide",
     "materials": "Aluminum beverage can, sculpted polymer drip with high-gloss lacquer finish",
     "care": "Wipe with microfiber cloth \u00b7 For decorative display",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "potted-smiling-sunflower-planter",
@@ -796,7 +852,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~16 cm tall \u00b7 ~9 cm pot diameter",
     "materials": "Soft chenille stems, craft pot base",
     "care": "Everlasting bloom \u00b7 Zero watering needed",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "potted-pink-stargazer-lily-planter",
@@ -816,7 +874,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~17 cm tall \u00b7 ~9 cm pot diameter",
     "materials": "Chenille stems, ribbed desktop pot",
     "care": "Everlasting bloom \u00b7 Keep dry",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "potted-crimson-velvet-rose-planter",
@@ -836,7 +896,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~16 cm tall \u00b7 ~9 cm pot diameter",
     "materials": "Plush chenille pipe cleaners, ribbed pot base",
     "care": "Everlasting bloom \u00b7 Dust gently",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "potted-lavender-dreams-desk-planter",
@@ -867,7 +929,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Gift Box Edition",
         "image": "assets/products/potted-lavender-dreams-desk-planter-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "twin-pastel-garden-potted-duo",
@@ -898,7 +962,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Velvet Garden Tulip",
         "image": "assets/products/twin-pastel-garden-potted-duo-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "sweet-bunny-strawberry-garden-pot",
@@ -918,7 +984,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~17 cm tall \u00b7 ~9 cm wide",
     "materials": "Ultra-soft chenille stems, miniature craft pot, hand-sculpted details",
     "care": "Gentle dry dusting \u00b7 Decorative desk piece",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "fluffy-bunny-ear-floral-headband",
@@ -938,7 +1006,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Standard flexible headband \u00b7 Ear height ~14 cm",
     "materials": "Chenille velvet, flexible wrapped headband base, craft roses",
     "care": "Store flat \u00b7 Spot clean only",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "sweet-bunny-mini-pouch-pearl-wristlet",
@@ -958,7 +1028,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Charm ~7 cm \u00b7 Wristlet loop ~12 cm",
     "materials": "Plush pipe cleaners, high-luster faux pearl beads, gold-tone keyring",
     "care": "Wipe with dry cloth",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "handcrafted-floral-pearl-wristlet-collection",
@@ -1004,7 +1076,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Garden Blossom",
         "image": "assets/products/handcrafted-floral-pearl-wristlet-collection-5.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "petite-bloom-handmade-ring-collection",
@@ -1050,7 +1124,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Pastel Ring Set",
         "image": "assets/products/petite-bloom-handmade-ring-collection-5.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "kawaii-bakery-pastry-keepsake-trio",
@@ -1086,7 +1162,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Cute Onigiri",
         "image": "assets/products/kawaii-bakery-pastry-keepsake-trio-3.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "kawaii-smiling-ice-cream-cone-charms",
@@ -1117,7 +1195,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
         "name": "Matcha & Sunshine",
         "image": "assets/products/kawaii-smiling-ice-cream-cone-charms-2.webp"
       }
-    ]
+    ],
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "fluffy-pastel-flower-coasters-charms",
@@ -1137,7 +1217,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~9 cm diameter each",
     "materials": "High-density plush chenille fibers",
     "care": "Hand fluff gently \u00b7 Keep dry",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "artisan-sliced-party-cake-platter",
@@ -1157,7 +1239,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Full wheel ~18 cm diameter \u00b7 Slice ~7 cm long",
     "materials": "Velvet chenille pipe cleaners, metal keyring attachment loops",
     "care": "Decorative keepsake / charm collection",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "kawaii-shooting-star-and-kitty-charms",
@@ -1177,7 +1261,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "Each charm ~6 cm \u00b7 Gold keyring included",
     "materials": "Plush chenille, gold keyring loops",
     "care": "Clip to backpacks, keys, or pouches",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   },
   {
     "id": "smiling-golden-toast-and-berry-charms",
@@ -1197,6 +1283,8 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "dimensions": "~5 cm x 4.5 cm each",
     "materials": "Polymer craft clay with protective semi-gloss glaze",
     "care": "Wipe with dry cloth",
-    "active": 1
+    "active": 1,
+    "showColors": true,
+    "show_colors": 1
   }
 ];

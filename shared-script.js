@@ -345,7 +345,8 @@ function productMarkup(product) {
   }
 
   let colorSelectorHtml = "";
-  if (Array.isArray(product.options) && product.options.length > 1) {
+  const colorsActive = product.showColors !== false && product.show_colors !== 0;
+  if (colorsActive && Array.isArray(product.options) && product.options.length > 1) {
     colorSelectorHtml = `
       <div class="card-color-selector" data-action="none">
         <div class="card-color-header">
@@ -499,10 +500,16 @@ async function loadPublicProducts() {
     const defaultMap = new Map((window.RAYCRAFTING_DEFAULT_PRODUCTS || []).map((d) => [d.id, d]));
     const normalized = data.products.map((p) => {
       const def = defaultMap.get(p.id);
-      const opts = (Array.isArray(p.options) && p.options.length) ? p.options : (def && def.options ? def.options : []);
+      const colorsActive = p.showColors !== false && p.show_colors !== 0;
+      let opts = [];
+      if (colorsActive) {
+        opts = (Array.isArray(p.options) && p.options.length) ? p.options : (def && def.options ? def.options : []);
+      }
       return {
         ...p,
         options: opts,
+        showColors: colorsActive,
+        show_colors: colorsActive ? 1 : 0,
         price: Number(p.price) || 0,
         originalPrice: Number(p.originalPrice || p.original_price || 0),
         original_price: Number(p.original_price || p.originalPrice || 0)
@@ -590,7 +597,8 @@ function openProduct(product, modalOptions = {}) {
   // Render Color Choice Options if product has options
   const colorSection = document.querySelector("#modalColorChoiceSection");
   if (colorSection) {
-    if (Array.isArray(product.options) && product.options.length > 1) {
+    const colorsActive = product.showColors !== false && product.show_colors !== 0;
+    if (colorsActive && Array.isArray(product.options) && product.options.length > 1) {
       colorSection.hidden = false;
       colorSection.innerHTML = `
         <div class="product-color-choice-wrap ${modalOptions.promptColorChoice ? "highlight-pulse" : ""}" id="modalColorChoiceWrap">
@@ -755,8 +763,9 @@ productGrid.addEventListener("click", (event) => {
   }
 
   if (event.target.closest("[data-action='buy-now']")) {
-    const selectedColor = card.dataset.selectedOption || (Array.isArray(product.options) && product.options.length ? product.options[0].name : null);
-    const selectedImage = card.dataset.selectedImage || (Array.isArray(product.options) && product.options.length ? product.options[0].image : null);
+    const colorsActive = product.showColors !== false && product.show_colors !== 0;
+    const selectedColor = colorsActive ? (card.dataset.selectedOption || (Array.isArray(product.options) && product.options.length ? product.options[0].name : null)) : null;
+    const selectedImage = colorsActive ? (card.dataset.selectedImage || (Array.isArray(product.options) && product.options.length ? product.options[0].image : null)) : null;
     addToCart(product.id, false, selectedColor ? { name: selectedColor, image: selectedImage } : null);
     if (typeof window.raycraftingOpenCheckout === "function") {
       window.raycraftingOpenCheckout();
@@ -768,8 +777,9 @@ productGrid.addEventListener("click", (event) => {
 
   const addBtn = event.target.closest("[data-action='add']");
   if (addBtn) {
-    const selectedColor = card.dataset.selectedOption || (Array.isArray(product.options) && product.options.length ? product.options[0].name : null);
-    const selectedImage = card.dataset.selectedImage || (Array.isArray(product.options) && product.options.length ? product.options[0].image : null);
+    const colorsActive = product.showColors !== false && product.show_colors !== 0;
+    const selectedColor = colorsActive ? (card.dataset.selectedOption || (Array.isArray(product.options) && product.options.length ? product.options[0].name : null)) : null;
+    const selectedImage = colorsActive ? (card.dataset.selectedImage || (Array.isArray(product.options) && product.options.length ? product.options[0].image : null)) : null;
     addToCart(product.id, true, selectedColor ? { name: selectedColor, image: selectedImage } : null);
     const originalHtml = addBtn.innerHTML;
     addBtn.innerHTML = `<span>Added!</span>`;

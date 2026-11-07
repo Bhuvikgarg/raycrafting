@@ -213,6 +213,7 @@ ensureColumn("products", "materials", "TEXT");
 ensureColumn("products", "care", "TEXT");
 ensureColumn("products", "images_json", "TEXT");
 ensureColumn("products", "options_json", "TEXT");
+ensureColumn("products", "show_colors", "INTEGER DEFAULT 1");
 ensureColumn("order_items", "selected_option", "TEXT");
 ensureColumn("orders", "gift_message", "TEXT");
 ensureColumn("custom_orders", "quoted_price", "REAL");
@@ -1225,14 +1226,23 @@ async function api(req, res, pathname, body, url) {
       });
     }
     if (req.method === "GET" && pathname === "/api/products") {
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,show_colors,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       const mapped = products.map((product) => {
         let images = [];
         try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
         if (!images.length && product.image) images = [product.image];
         let options = [];
         try { options = product.options_json ? JSON.parse(product.options_json) : []; } catch {}
-        return { ...product, images, options, originalPrice: product.original_price || 0 };
+        const showColors = product.show_colors !== 0 && product.show_colors !== false;
+        return {
+          ...product,
+          images,
+          options: showColors ? options : [],
+          rawOptions: options,
+          showColors,
+          show_colors: showColors ? 1 : 0,
+          originalPrice: product.original_price || 0
+        };
       });
       return json(res, 200, {
         products: applyCustomPriceOverrides(mapped)
@@ -1240,14 +1250,23 @@ async function api(req, res, pathname, body, url) {
     }
     if (req.method === "GET" && pathname === "/api/admin/products") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,show_colors,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
       const mapped = products.map((product) => {
         let images = [];
         try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
         if (!images.length && product.image) images = [product.image];
         let options = [];
         try { options = product.options_json ? JSON.parse(product.options_json) : []; } catch {}
-        return { ...product, images, options, originalPrice: product.original_price || 0, active: product.active !== 0 };
+        const showColors = product.show_colors !== 0 && product.show_colors !== false;
+        return {
+          ...product,
+          images,
+          options,
+          showColors,
+          show_colors: showColors ? 1 : 0,
+          originalPrice: product.original_price || 0,
+          active: product.active !== 0
+        };
       });
       return json(res, 200, {
         products: applyCustomPriceOverrides(mapped)
@@ -1730,7 +1749,7 @@ async function api(req, res, pathname, body, url) {
     if (req.method === "POST" && pathname === "/api/admin/products/sync") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const products = Array.isArray(body.products) ? body.products : [];
-      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=excluded.images_json,options_json=excluded.options_json,badge=COALESCE(excluded.badge, products.badge),dimensions=COALESCE(excluded.dimensions, products.dimensions),materials=COALESCE(excluded.materials, products.materials),care=COALESCE(excluded.care, products.care),active=excluded.active`);
+      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,show_colors,badge,dimensions,materials,care,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=excluded.images_json,options_json=excluded.options_json,show_colors=excluded.show_colors,badge=COALESCE(excluded.badge, products.badge),dimensions=COALESCE(excluded.dimensions, products.dimensions),materials=COALESCE(excluded.materials, products.materials),care=COALESCE(excluded.care, products.care),active=excluded.active`);
       const customUpsert = db.prepare(`INSERT INTO custom_prices (product_id, price, original_price, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(product_id) DO UPDATE SET price=excluded.price, original_price=excluded.original_price, updated_at=excluded.updated_at`);
       db.exec("BEGIN");
       try {
@@ -1768,6 +1787,16 @@ async function api(req, res, pathname, body, url) {
             optionsJson = existingRow ? existingRow.options_json : null;
           }
 
+          let showColorsVal = 1;
+          if (product.showColors === false || product.show_colors === 0) {
+            showColorsVal = 0;
+          } else if (product.showColors === true || product.show_colors === 1) {
+            showColorsVal = 1;
+          } else {
+            const existingRow = db.prepare("SELECT show_colors FROM products WHERE id=?").get(String(product.id));
+            showColorsVal = existingRow && existingRow.show_colors !== null ? existingRow.show_colors : 1;
+          }
+
           upsert.run(
             String(product.id),
             cleanName,
@@ -1781,6 +1810,7 @@ async function api(req, res, pathname, body, url) {
             primaryImg,
             JSON.stringify(savedImgs),
             optionsJson,
+            showColorsVal,
             product.badge || null,
             product.dimensions || null,
             product.materials || null,
@@ -1796,17 +1826,20 @@ async function api(req, res, pathname, body, url) {
         }
         db.exec("COMMIT");
         try {
-          const allRows = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
+          const allRows = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,show_colors,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
           const cleanProds = allRows.map(p => {
             let imgs = [];
             try { imgs = JSON.parse(p.images_json || "[]"); } catch(e){}
             if (!imgs.length && p.image) imgs = [p.image];
             let opts = [];
             try { opts = JSON.parse(p.options_json || "[]"); } catch(e){}
+            const showColors = p.show_colors !== 0 && p.show_colors !== false;
             return {
               ...p,
               images: imgs,
               options: opts,
+              showColors,
+              show_colors: showColors ? 1 : 0,
               original_price: p.original_price || 0,
               originalPrice: p.original_price || 0
             };
@@ -1817,6 +1850,16 @@ async function api(req, res, pathname, body, url) {
         }
       } catch (error) { db.exec("ROLLBACK"); throw error; }
       return json(res, 200, { ok: true, count: products.length });
+    }
+    if (req.method === "POST" && pathname === "/api/admin/products/toggle-colors") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
+      const productId = String(body.id || "");
+      if (!productId) return json(res, 400, { error: "Product ID required." });
+      const current = db.prepare("SELECT id, show_colors FROM products WHERE id=?").get(productId);
+      if (!current) return json(res, 404, { error: "Product not found." });
+      const nextVal = typeof body.showColors === "boolean" ? (body.showColors ? 1 : 0) : (current.show_colors === 0 ? 1 : 0);
+      db.prepare("UPDATE products SET show_colors=? WHERE id=?").run(nextVal, productId);
+      return json(res, 200, { ok: true, id: productId, showColors: nextVal === 1, show_colors: nextVal });
     }
     if (req.method === "POST" && pathname === "/api/admin/products/delete") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });

@@ -54,7 +54,11 @@
 <label>Product pictures &amp; color variants (Upload one or more)<div class="upload-box"><input id="productImage" type="file" accept="image/*" multiple><span id="uploadLabel">Choose pictures from your device</span><small>JPG, PNG, or WebP. Select multiple pictures to set color choices &amp; angles!</small></div></label>
 <div style="display:flex;gap:8px;align-items:center;margin:6px 0 12px;"><input id="addPhotoUrlInput" type="text" placeholder="Or paste photo path/URL (e.g. assets/products/...) then click Add" style="margin:0;padding:8px 12px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:#fff;flex:1;"><button id="addPhotoUrlBtn" type="button" class="order-btn" style="padding:8px 12px!important;white-space:nowrap;font-weight:600;color:var(--coral-dark);">+ Add Photo</button></div>
 <div class="image-gallery-preview" id="imageGalleryPreview" style="display:flex;flex-direction:column;gap:8px;margin:10px 0 16px;"></div>
-<label>Position on shop (1 = first item shoppers see)<input id="productFeatured" type="number" min="1" step="1" value="1"><small class="field-help">Lower position numbers appear first in the catalogue. (e.g. 1-7 for Flowers, 8+ for Keepsakes &amp; Clay)</small></label><label class="visibility-toggle"><input id="productActive" type="checkbox" checked><span><strong>Show in current shop</strong><small class="field-help">Turn this off to keep the product saved but hidden from shoppers.</small></span></label>
+<label>Position on shop (1 = first item shoppers see)<input id="productFeatured" type="number" min="1" step="1" value="1"><small class="field-help">Lower position numbers appear first in the catalogue. (e.g. 1-7 for Flowers, 8+ for Keepsakes &amp; Clay)</small></label>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 16px;">
+  <label class="visibility-toggle" style="margin:0;"><input id="productActive" type="checkbox" checked><span><strong>Show piece in live shop</strong><small class="field-help">Turn this off to hide the entire piece from shoppers.</small></span></label>
+  <label class="visibility-toggle" style="margin:0;"><input id="productShowColors" type="checkbox" checked><span><strong>Show colors in live shop</strong><small class="field-help">Turn this off to hide color choices from shoppers.</small></span></label>
+</div>
 <div class="form-actions"><button class="primary-button" type="submit">Save product</button><span class="save-status" id="saveStatus" role="status"></span></div></form>
 <aside class="catalog-panel"><div class="panel-heading"><div><p class="eyebrow">Live catalog</p><h2><span id="productCount">0</span> pieces</h2></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><button class="icon-text-button" id="sortFlowersTopBtn" type="button" title="Arrange Flowers at the top, clay items down" style="border:1px solid var(--coral);padding:4px 9px;border-radius:999px;color:var(--coral-dark);">Flowers to top</button><button class="icon-text-button" id="exportButton" type="button">Export backup ↓</button></div></div><div id="catalogList" class="catalog-list"></div><div class="catalog-tools"><button class="danger-button" id="resetButton" type="button">Clear live catalog</button><p>This clears the shared public catalog. Add products here when you are ready.</p></div></aside>
 </section>
@@ -62,7 +66,7 @@
 </main>
 <div class="access-modal" id="accessModal"><form class="access-card" id="accessForm"><span class="access-mark">R</span><p class="eyebrow">Raycrafting seller access</p><h2>Unlock your studio.</h2><p>Enter your studio PIN to edit the catalog.</p><label>Studio PIN<input id="pinInput" type="password" autocomplete="current-password" required autofocus></label><button class="primary-button" type="submit">Enter studio</button><p class="access-error" id="accessError"></p><small>Your seller PIN is checked securely by the backend.</small></form></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="catalog.js?v=20261108v2"></script>
+<script src="catalog.js?v=20261108v3"></script>
 <script>
 (function(){
   (function autoMigrateAdminCatalogCache() {
@@ -175,10 +179,15 @@
     while(productColorNames.length < productImages.length) { productColorNames.push(''); }
     if(productColorNames.length > productImages.length) { productColorNames.length = productImages.length; }
 
+    var assignedColorsCount = productColorNames.filter(function(n){ return (n || '').trim().length > 0; }).length;
+
     var html = '<div style="width:100%;display:flex;flex-direction:column;gap:8px;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 2px;">' +
-      '<span style="font-size:11px;font-weight:700;color:var(--ink);letter-spacing:0.02em;">PICTURES &amp; COLOR OPTIONS (' + productImages.length + ')</span>' +
-      '<span style="font-size:10px;color:var(--muted);">Edit color name beside each photo</span>' +
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 2px;flex-wrap:wrap;gap:8px;">' +
+      '<div>' +
+        '<span style="font-size:11px;font-weight:700;color:var(--ink);letter-spacing:0.02em;">PICTURES &amp; COLOR OPTIONS (' + productImages.length + ' photo' + (productImages.length > 1 ? 's' : '') + ', ' + assignedColorsCount + ' color' + (assignedColorsCount === 1 ? '' : 's') + ')</span>' +
+        '<span style="font-size:10px;color:var(--muted);display:block;">You can remove color options anytime without deleting your photos.</span>' +
+      '</div>' +
+      (assignedColorsCount > 0 ? '<button type="button" class="order-btn" id="clearAllColorsBtn" style="padding:4px 9px!important;color:#a74232!important;border-color:rgba(167,66,50,0.3)!important;font-size:10px!important;cursor:pointer;" title="Remove all color options without deleting your photos">✕ Clear All Colors (Keep Photos)</button>' : '') +
     '</div>';
 
     html += productImages.map(function(src, idx){
@@ -187,16 +196,19 @@
         '<div style="position:relative;width:66px;height:66px;flex-shrink:0;border-radius:8px;overflow:hidden;border:2px solid ' + (idx === 0 ? 'var(--coral)' : 'var(--line)') + ';background:#f8f8f8;">' +
           '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;">' +
           (idx === 0 ? '<span style="position:absolute;bottom:0;left:0;right:0;background:rgba(231,110,89,0.92);color:#fff;font-size:8px;text-align:center;padding:2px 0;font-weight:700;letter-spacing:0.04em;">COVER</span>' : '') +
-          '<button type="button" data-remove-img="' + idx + '" title="Remove picture" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(37,38,41,0.78);color:#fff;border:0;cursor:pointer;font-size:11px;line-height:1;display:grid;place-items:center;">×</button>' +
+          '<button type="button" data-remove-img="' + idx + '" title="Delete this photo from product" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(37,38,41,0.78);color:#fff;border:0;cursor:pointer;font-size:11px;line-height:1;display:grid;place-items:center;">×</button>' +
         '</div>' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">' +
-            '<label style="font-size:11px;font-weight:600;color:var(--ink);margin:0;">Color Name beside photo</label>' +
-            '<span style="font-size:10px;color:var(--muted);font-family:var(--mono);">Photo #' + (idx + 1) + (idx === 0 ? ' (Default)' : '') + '</span>' +
+            '<label style="font-size:11px;font-weight:600;color:var(--ink);margin:0;">Color Name for this photo</label>' +
+            '<span style="font-size:10px;color:var(--muted);font-family:var(--mono);">Photo #' + (idx + 1) + (idx === 0 ? ' (Cover)' : '') + '</span>' +
           '</div>' +
           '<div style="display:flex;gap:6px;align-items:center;">' +
-            '<input type="text" class="color-name-input" data-img-idx="' + idx + '" placeholder="e.g. Lavender, Cherry Red, Pink Bloom" value="' + escapeHtml(colorName) + '" style="margin:0;flex:1;box-sizing:border-box;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:#fcfcfc;">' +
-            (colorName.trim() ? '<span style="font-size:10px;color:#2e7d32;font-weight:600;white-space:nowrap;" title="Active color choice in shop">✓ Active</span>' : '<span style="font-size:10px;color:var(--muted);white-space:nowrap;" title="Optional color name">Optional</span>') +
+            '<input type="text" class="color-name-input" data-img-idx="' + idx + '" placeholder="e.g. Lavender, Cherry Red (leave empty for no color)" value="' + escapeHtml(colorName) + '" style="margin:0;flex:1;box-sizing:border-box;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:#fcfcfc;">' +
+            (colorName.trim() ?
+              '<button type="button" class="order-btn" data-clear-color-idx="' + idx + '" style="padding:6px 9px!important;color:#a74232!important;border-color:rgba(167,66,50,0.3)!important;white-space:nowrap;font-size:10px!important;cursor:pointer;" title="Remove color option for this photo (keeps photo intact)">✕ Remove Color</button>' :
+              '<span style="font-size:10px;color:var(--muted);white-space:nowrap;padding:0 4px;" title="No color assigned to this picture">Photo only</span>'
+            ) +
           '</div>' +
         '</div>' +
       '</div>';
@@ -207,12 +219,32 @@
   };
 
   el('imageGalleryPreview')?.addEventListener('click', function(e){
-    var btn = e.target.closest('[data-remove-img]');
-    if(btn){
-      var idx = Number(btn.dataset.removeImg);
+    var removeImgBtn = e.target.closest('[data-remove-img]');
+    if(removeImgBtn){
+      var idx = Number(removeImgBtn.dataset.removeImg);
       productImages.splice(idx, 1);
       productColorNames.splice(idx, 1);
       renderImageGallery();
+      return;
+    }
+
+    var clearColorBtn = e.target.closest('[data-clear-color-idx]');
+    if(clearColorBtn){
+      var idx = Number(clearColorBtn.dataset.clearColorIdx);
+      if(!isNaN(idx) && idx >= 0 && idx < productColorNames.length){
+        productColorNames[idx] = '';
+        renderImageGallery();
+        showToast('Color option removed for Photo #' + (idx + 1) + '. Picture kept intact.');
+      }
+      return;
+    }
+
+    var clearAllBtn = e.target.closest('#clearAllColorsBtn');
+    if(clearAllBtn){
+      productColorNames = productImages.map(function(){ return ''; });
+      renderImageGallery();
+      showToast('All color options removed. Pictures kept untouched.');
+      return;
     }
   });
 
@@ -222,20 +254,6 @@
       var idx = Number(inp.dataset.imgIdx);
       if(!isNaN(idx) && idx >= 0 && idx < productImages.length){
         productColorNames[idx] = inp.value;
-        var statusSpan = inp.nextElementSibling;
-        if(statusSpan){
-          if(inp.value.trim()){
-            statusSpan.style.color = '#2e7d32';
-            statusSpan.style.fontWeight = '600';
-            statusSpan.textContent = '✓ Active';
-            statusSpan.title = 'Active color choice in shop';
-          } else {
-            statusSpan.style.color = 'var(--muted)';
-            statusSpan.style.fontWeight = 'normal';
-            statusSpan.textContent = 'Optional';
-            statusSpan.title = 'Optional color name';
-          }
-        }
       }
     }
   });
@@ -250,6 +268,7 @@
     el('currentImage').value = '';
     el('productFeatured').value = products.length + 1;
     el('productActive').checked = true;
+    if(el('productShowColors')) el('productShowColors').checked = true;
     el('formTitle').textContent = 'Add a new piece';
     el('saveStatus').textContent = '';
   };
@@ -289,6 +308,9 @@
     el('productDescription').value = product.description;
     el('productFeatured').value = product.featured;
     el('productActive').checked = isActive(product);
+    if(el('productShowColors')) {
+      el('productShowColors').checked = (product.showColors !== false && product.show_colors !== 0);
+    }
     el('formTitle').textContent = 'Edit ' + product.name;
 
     var form = el('productForm');
@@ -309,6 +331,7 @@
       var origVal = (origNum && !isNaN(origNum)) ? origNum : '';
       var opts = (Array.isArray(product.options) && product.options.length) ? product.options : [];
       var hasColors = opts.length > 0;
+      var colorsShownInShop = (product.showColors !== false && product.show_colors !== 0);
       return '<article class="catalog-item' + (active ? '' : ' is-hidden') + '" data-id="' + product.id + '">' +
         '<span class="catalog-pos-badge" title="Position #' + pos + ' on shop">#' + pos + '</span>' +
         '<img src="' + imageFor(product) + '" alt="' + escapeHtml(product.name) + '">' +
@@ -316,9 +339,13 @@
           '<h3>' + escapeHtml(product.name) + '</h3>' +
           '<p>' + escapeHtml(product.category) + ' · ' + escapeHtml(product.detail) + '</p>' +
           '<div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap;">' +
-            '<span class="status-pill' + (active ? '' : ' hidden') + '">' + (active ? 'Visible' : 'Hidden') + '</span>' +
+            '<span class="status-pill' + (active ? '' : ' hidden') + '">' + (active ? 'Piece Visible' : 'Piece Hidden') + '</span>' +
             '<span style="font-size:10px;color:var(--muted);font-family:var(--mono);">Rank #' + pos + '</span>' +
-            (hasColors ? '<span class="status-pill colors-pill" data-toggle-colors="' + product.id + '" style="background:#fce7f0;color:#9e2a4b;border:1px solid rgba(196,79,106,0.25);font-weight:600;cursor:pointer;" title="Click to view/hide ' + opts.length + ' colors">🎨 ' + opts.length + ' Color' + (opts.length > 1 ? 's' : '') + '</span>' : '') +
+            (hasColors ? (
+              colorsShownInShop ?
+                '<span class="status-pill colors-pill" data-toggle-colors="' + product.id + '" style="background:#eaf6ea;color:#2e7d32;border:1px solid rgba(46,125,50,0.3);font-weight:600;cursor:pointer;" title="Click to preview ' + opts.length + ' colors (currently SHOWN in live shop)">🎨 Colors: Shown (' + opts.length + ')</span>' :
+                '<span class="status-pill colors-pill" data-toggle-colors="' + product.id + '" style="background:#fbe0da;color:#a74232;border:1px solid rgba(167,66,50,0.25);font-weight:600;cursor:pointer;" title="Click to preview ' + opts.length + ' colors (currently HIDDEN from live shop)">🎨 Colors: Hidden (' + opts.length + ')</span>'
+            ) : '<span class="status-pill" style="background:#f4f4f4;color:#888;">No Colors</span>') +
           '</div>' +
         '</div>' +
         '<div class="catalog-price catalog-price-editor" data-id="' + product.id + '">' +
@@ -336,17 +363,20 @@
           '<button type="button" class="order-btn" data-move-up="' + product.id + '" title="Move Up (Show earlier on shop)"' + (idx === 0 ? ' disabled' : '') + '>↑ Up</button>' +
           '<button type="button" class="order-btn" data-move-down="' + product.id + '" title="Move Down (Show later on shop)"' + (idx === products.length - 1 ? ' disabled' : '') + '>↓ Down</button>' +
           '<button type="button" data-edit="' + product.id + '">Edit</button>' +
-          '<button type="button" class="visibility-item" data-toggle-active="' + product.id + '">' + (active ? 'Hide' : 'Show') + '</button>' +
-          '<button type="button" class="colors-toggle-item" data-toggle-colors="' + product.id + '" style="color:#b82d56;font-weight:600;">Show colors</button>' +
+          '<button type="button" class="visibility-item" data-toggle-active="' + product.id + '">' + (active ? 'Hide piece' : 'Show piece') + '</button>' +
+          '<button type="button" class="colors-toggle-item" data-toggle-colors-visibility="' + product.id + '" style="' + (colorsShownInShop ? 'color:#a74232;' : 'color:#2e7d32;font-weight:600;') + '" title="Toggle whether shoppers see color options in live shop">' + (colorsShownInShop ? 'Hide colors' : 'Show colors') + '</button>' +
           '<button type="button" class="delete-item" data-delete="' + product.id + '">Delete</button>' +
         '</div>' +
         '<div id="colors-preview-' + product.id + '" class="admin-colors-preview" hidden style="grid-column:1/-1;width:100%;box-sizing:border-box;background:#fff8fa;border:1px solid rgba(196,79,106,0.22);border-radius:10px;padding:12px 14px;margin-top:8px;">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(196,79,106,0.15);">' +
             '<div style="display:flex;align-items:center;gap:6px;">' +
               '<strong style="font-size:12px;color:#9e2a4b;">🎨 Colors &amp; Variants (' + opts.length + ')</strong>' +
-              '<span style="font-size:10px;color:var(--muted);">' + (hasColors ? 'Interactive selection in shop' : 'No options configured yet') + '</span>' +
+              '<span style="font-size:10px;color:' + (colorsShownInShop ? '#2e7d32' : '#a74232') + ';font-weight:600;">' + (colorsShownInShop ? '● Shown in live shop' : '○ Hidden from live shop') + '</span>' +
             '</div>' +
-            '<button type="button" data-edit-colors="' + product.id + '" style="border:0;background:#b82d56;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;">' + (hasColors ? '✎ Edit colors' : '+ Add colors') + '</button>' +
+            '<div style="display:flex;gap:6px;">' +
+              '<button type="button" data-toggle-colors-visibility="' + product.id + '" style="border:1px solid ' + (colorsShownInShop ? '#a74232' : '#2e7d32') + ';background:#fff;color:' + (colorsShownInShop ? '#a74232' : '#2e7d32') + ';border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;">' + (colorsShownInShop ? 'Hide in shop' : 'Show in shop') + '</button>' +
+              '<button type="button" data-edit-colors="' + product.id + '" style="border:0;background:#b82d56;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;">' + (hasColors ? '✎ Edit colors' : '+ Add colors') + '</button>' +
+            '</div>' +
           '</div>' +
           (hasColors ? (
             '<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px;">' +
@@ -546,6 +576,9 @@
         return Object.assign({}, product, {
           price: Number(product.price) || 0,
           originalPrice: Number(product.originalPrice || product.original_price || 0),
+          options: Array.isArray(product.options) ? product.options : [],
+          showColors: product.showColors !== false && product.show_colors !== 0,
+          show_colors: (product.showColors !== false && product.show_colors !== 0) ? 1 : 0,
           active: product.active !== false && product.active !== 0
         });
       });
@@ -633,6 +666,8 @@
       image: primaryImage,
       images: allImages,
       options: options,
+      showColors: el('productShowColors') ? el('productShowColors').checked : true,
+      show_colors: (el('productShowColors') && el('productShowColors').checked) ? 1 : 0,
       active: el('productActive').checked
     };
     var existing=products.findIndex(function(item){ return item.id===editingId; });
@@ -653,19 +688,55 @@
     if(moveUp){ moveProduct(moveUp.dataset.moveUp, -1); return; }
     if(moveDown){ moveProduct(moveDown.dataset.moveDown, 1); return; }
     var edit=event.target.closest('[data-edit]'), remove=event.target.closest('[data-delete]'), toggle=event.target.closest('[data-toggle-active]');
+    var toggleColorsVis=event.target.closest('[data-toggle-colors-visibility]');
     var toggleColors=event.target.closest('[data-toggle-colors]');
     var editColors=event.target.closest('[data-edit-colors]');
+
+    if(toggleColorsVis){
+      var pId = toggleColorsVis.dataset.toggleColorsVisibility;
+      var prod = products.find(function(item){ return item.id === pId; });
+      if(prod){
+        var opts = (Array.isArray(prod.options) && prod.options.length) ? prod.options : [];
+        if(!opts.length){
+          loadProductIntoForm(prod);
+          var form = el('productForm');
+          if(form){
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(function(){
+              var firstInp = document.querySelector('#imageGalleryPreview .color-name-input') || el('productImage');
+              if(firstInp){
+                firstInp.focus();
+                firstInp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 350);
+          }
+          showToast(prod.name + ' has no colors yet. Type color names beside photos to add them!');
+          return;
+        }
+
+        var currentShown = (prod.showColors !== false && prod.show_colors !== 0);
+        var nextShown = !currentShown;
+        prod.showColors = nextShown;
+        prod.show_colors = nextShown ? 1 : 0;
+        persist();
+        if(adminToken){
+          fetch('/api/admin/products/toggle-colors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+            body: JSON.stringify({ id: pId, showColors: nextShown })
+          }).catch(function(){});
+        }
+        try { debouncedSyncToServer(); } catch(e){}
+        showToast(prod.name + (nextShown ? ' colors are now SHOWN in the live shop.' : ' colors are now HIDDEN in the live shop.'));
+      }
+      return;
+    }
 
     if(toggleColors){
       var pId = toggleColors.dataset.toggleColors;
       var drawer = el('colors-preview-' + pId);
-      var btn = document.querySelector('.colors-toggle-item[data-toggle-colors="' + pId + '"]');
       if(drawer){
-        var isHidden = drawer.hidden;
-        drawer.hidden = !isHidden;
-        if(btn){
-          btn.textContent = isHidden ? 'Hide colors' : 'Show colors';
-        }
+        drawer.hidden = !drawer.hidden;
       }
       return;
     }
