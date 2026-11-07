@@ -155,6 +155,9 @@ h1 em, h2 em { color: var(--coral); font-style: italic; }
 .product-image { height: 310px; position: relative; overflow: hidden; background: transparent; cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: center; }
 .product-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; box-shadow: var(--product-glow, 0 8px 22px rgba(0,0,0,0.06)); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease; }
 .product-card:hover .product-image img { transform: scale(1.04); filter: brightness(1.02); }
+.product-badge-stack { position: absolute; left: 12px; top: 12px; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; pointer-events: none; }
+.product-badge-stack .product-tag { position: static !important; display: inline-flex; align-items: center; padding: 4px 8px; background: rgba(255, 253, 249, 0.94); backdrop-filter: blur(4px); border-radius: 999px; font: 600 9.5px var(--mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--coral-dark); box-shadow: 0 2px 8px rgba(37, 38, 41, 0.08); }
+.product-badge-stack .product-discount-pill { position: static !important; display: inline-flex; align-items: center; padding: 3px 8px; background: var(--coral); color: #fff; border-radius: 999px; font: 700 9.5px var(--mono); letter-spacing: 0.02em; box-shadow: 0 2px 8px rgba(231, 110, 89, 0.35); }
 .product-image .product-tag { position: absolute; left: 13px; top: 13px; z-index: 2; padding: 5px 9px; background: rgba(255, 253, 249, 0.94); backdrop-filter: blur(4px); border-radius: 999px; font: 600 10px var(--mono); text-transform: uppercase; letter-spacing: 0.04em; box-shadow: 0 2px 8px rgba(37, 38, 41, 0.08); }
 .product-discount-pill { position: absolute; right: 52px; top: 12px; z-index: 2; padding: 4px 9px; background: var(--coral); color: #fff; border-radius: 999px; font: 700 10px var(--mono); letter-spacing: 0.02em; box-shadow: 0 2px 8px rgba(231, 110, 89, 0.35); }
 .product-image .wish-button { position: absolute; top: 10px; right: 10px; z-index: 2; width: 33px; height: 33px; border: 0; background: rgba(255, 253, 249, 0.92); backdrop-filter: blur(4px); border-radius: 50%; font-size: 18px; line-height: 1; display: grid; place-items: center; transition: transform 0.2s ease, background 0.2s ease; }
@@ -2394,6 +2397,144 @@ body.theme-dark .seller-quick-form input {
   body:not(.theme-dark) .shop-gradient-band .section-description {
     color: #634b57 !important;
     text-shadow: none !important;
+  }
+
+  /* Mobile Content Padding, Card Spacing & Overflow Fixes */
+  .section-shell,
+  .site-header {
+    width: calc(100% - 36px) !important;
+    max-width: calc(100% - 36px) !important;
+    padding-inline: 4px !important;
+    margin-inline: auto !important;
+    box-sizing: border-box !important;
+  }
+  .hero-copy {
+    padding-inline: 4px !important;
+  }
+  .hero-note {
+    margin-top: 24px !important;
+    padding-inline: 4px !important;
+    font-size: 11.5px !important;
+    line-height: 1.45 !important;
+    word-break: break-word !important;
+  }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 22px 14px !important;
+    margin-top: 24px !important;
+    padding-inline: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .product-card {
+    border-radius: 20px !important;
+    box-shadow: 0 6px 20px rgba(78, 24, 53, 0.08) !important;
+  }
+  .product-image {
+    height: 215px !important;
+    padding: 8px !important;
+  }
+  .product-image img {
+    border-radius: 14px !important;
+  }
+  .product-info {
+    padding: 12px 12px 16px !important;
+    gap: 8px !important;
+  }
+  .product-heading h3 {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .product-heading p {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .product-price-box {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+  .product-price {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+  }
+  .product-price-old {
+    font-size: 11.5px !important;
+  }
+  .product-actions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+  }
+  .action-btn {
+    padding: 9px 8px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+  }
+  .footer-links {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 26px 18px !important;
+    margin-top: 24px !important;
+    justify-content: start !important;
+    width: 100% !important;
+  }
+  .footer-links div {
+    min-width: 0 !important;
+  }
+  .footer-links div:nth-child(3) {
+    grid-column: 1 / -1 !important;
+    padding-top: 12px !important;
+    border-top: 1px dashed rgba(196, 95, 124, 0.22) !important;
+  }
+  .footer-links a {
+    word-break: break-word !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+  .footer-links div:nth-child(3) a {
+    font-size: 13.5px !important;
+  }
+  body {
+    padding-bottom: 110px !important;
+  }
+  .site-footer {
+    padding-bottom: 130px !important;
+  }
+  .channel-floats {
+    right: 14px !important;
+    bottom: 22px !important;
+    gap: 10px !important;
+    z-index: 99 !important;
+  }
+  body.has-sticky-bar .channel-floats {
+    bottom: 76px !important;
+  }
+  .channel-float {
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
+  }
+  .channel-float span {
+    display: none !important;
+  }
+  .channel-float svg {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
   }
 }
 

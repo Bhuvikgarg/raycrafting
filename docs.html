@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function(){
+      var token = sessionStorage.getItem('raycrafting-admin-token') || localStorage.getItem('raycrafting-admin-token');
+      if (!token) {
+        window.location.replace('/admin');
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raycrafting Engineering & System Architecture Documentation</title>
   <meta name="description" content="A comprehensive, practical engineering guide and architectural walkthrough of the Raycrafting e-commerce platform." />

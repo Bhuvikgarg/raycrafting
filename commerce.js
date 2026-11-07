@@ -665,22 +665,11 @@
   }
 
   function decorateProducts() {
-    const map = new Map(products().map((product) => [product.id, product]));
-    document.querySelectorAll(".product-card[data-product-id]").forEach((card) => {
-      const product = map.get(card.dataset.productId);
-      if (!product) return;
-      const info = priceInfo(product);
-      const price = card.querySelector(".product-price");
-      if (!price) return;
-      price.innerHTML = `<span class="discount-display"><span class="current-price">${money(info.sale)}</span>${info.original ? `<span class="old-price">${money(info.original)}</span><span class="sale-badge">${info.percent}% off</span>` : ""}</span>`;
-    });
+    // shared-script.js is the authoritative renderer for product prices and discount tags
   }
 
   function decorateModal(product) {
-    if (!product) return;
-    const info = priceInfo(product);
-    const node = $("#modalPrice");
-    if (node) node.innerHTML = `<span class="discount-display"><span class="current-price">${money(info.sale)}</span>${info.original ? `<span class="old-price">${money(info.original)}</span><span class="sale-badge">${info.percent}% off</span>` : ""}</span>`;
+    // shared-script.js is the authoritative renderer for modal product prices
   }
 
   async function loadCustomer() {

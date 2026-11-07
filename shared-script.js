@@ -203,9 +203,11 @@ function productMarkup(product) {
   return `<article class="product-card" data-product-id="${escapeHtml(product.id)}"${altAttrs} style="--card-bg: ${theme.bg}; --card-border: ${theme.border}; --product-glow: ${theme.glow}; --badge-accent: ${theme.badgeColor};">
     <div class="product-image art-${escapeHtml(product.art || "default")}" data-action="details">
       <img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)}, a handmade ${escapeHtml(product.category.toLowerCase())}" loading="lazy" decoding="async" width="400" height="400" />
-      <span class="product-tag">${escapeHtml(product.category)}</span>
+      <div class="product-badge-stack">
+        <span class="product-tag">${escapeHtml(product.category)}</span>
+        ${discountPill}
+      </div>
       ${badge}
-      ${discountPill}
       ${galleryBadge}
       <button class="wish-button ${liked ? "active" : ""}" type="button" data-action="like" aria-label="${liked ? "Remove" : "Add"} ${escapeHtml(product.name)} ${liked ? "from" : "to"} wishlist">${liked ? "♥" : "♡"}</button>
       <div class="product-quick-view-overlay" data-action="details">
