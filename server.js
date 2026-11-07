@@ -169,6 +169,12 @@ db.exec(`
     token TEXT PRIMARY KEY,
     expires_at INTEGER NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS custom_prices (
+    product_id TEXT PRIMARY KEY,
+    price REAL NOT NULL,
+    original_price REAL DEFAULT 0,
+    updated_at TEXT NOT NULL
+  );
 `);
 
 function ensureColumn(table, column, definition) {
@@ -240,8 +246,35 @@ if (fs.existsSync(seedPath)) {
         productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
       }
     }
+    // Re-apply any user custom prices on startup so user-set prices are never lost
+    const savedCustom = db.prepare("SELECT product_id, price, original_price FROM custom_prices").all();
+    for (const cp of savedCustom) {
+      db.prepare("UPDATE products SET price=?, original_price=? WHERE id=?").run(cp.price, cp.original_price, cp.product_id);
+    }
   } catch (err) {
     console.error("Failed to seed products:", err.message);
+  }
+}
+
+function applyCustomPriceOverrides(products) {
+  try {
+    const customList = db.prepare("SELECT product_id, price, original_price FROM custom_prices").all();
+    if (!customList.length) return products;
+    const customMap = new Map(customList.map(r => [r.product_id, r]));
+    return products.map(p => {
+      const c = customMap.get(p.id);
+      if (c) {
+        return {
+          ...p,
+          price: c.price,
+          original_price: c.original_price,
+          originalPrice: c.original_price
+        };
+      }
+      return p;
+    });
+  } catch(e) {
+    return products;
   }
 }
 const couponInsert = db.prepare(`INSERT OR IGNORE INTO coupons (code,kind,amount,minimum_subtotal,active) VALUES (?,?,?,?,1)`);
@@ -1064,25 +1097,27 @@ async function api(req, res, pathname, body, url) {
     }
     if (req.method === "GET" && pathname === "/api/products") {
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
+      const mapped = products.map((product) => {
+        let images = [];
+        try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
+        if (!images.length && product.image) images = [product.image];
+        return { ...product, images, originalPrice: product.original_price || 0 };
+      });
       return json(res, 200, {
-        products: products.map((product) => {
-          let images = [];
-          try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
-          if (!images.length && product.image) images = [product.image];
-          return { ...product, images, originalPrice: product.original_price || 0 };
-        })
+        products: applyCustomPriceOverrides(mapped)
       });
     }
     if (req.method === "GET" && pathname === "/api/admin/products") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
+      const mapped = products.map((product) => {
+        let images = [];
+        try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
+        if (!images.length && product.image) images = [product.image];
+        return { ...product, images, originalPrice: product.original_price || 0, active: product.active !== 0 };
+      });
       return json(res, 200, {
-        products: products.map((product) => {
-          let images = [];
-          try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
-          if (!images.length && product.image) images = [product.image];
-          return { ...product, images, originalPrice: product.original_price || 0, active: product.active !== 0 };
-        })
+        products: applyCustomPriceOverrides(mapped)
       });
     }
     if (req.method === "POST" && pathname === "/api/admin/auth") {
@@ -1549,6 +1584,7 @@ async function api(req, res, pathname, body, url) {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const products = Array.isArray(body.products) ? body.products : [];
       const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=excluded.images_json,badge=COALESCE(excluded.badge, products.badge),dimensions=COALESCE(excluded.dimensions, products.dimensions),materials=COALESCE(excluded.materials, products.materials),care=COALESCE(excluded.care, products.care),active=excluded.active`);
+      const customUpsert = db.prepare(`INSERT INTO custom_prices (product_id, price, original_price, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(product_id) DO UPDATE SET price=excluded.price, original_price=excluded.original_price, updated_at=excluded.updated_at`);
       db.exec("BEGIN");
       try {
         if (body.pruneOthers === true && Array.isArray(body.products)) {
@@ -1560,12 +1596,14 @@ async function api(req, res, pathname, body, url) {
           const cleanName = String(product.name || "piece");
           const savedImgs = rawImgs.map(img => saveBase64Image(img, cleanName));
           const primaryImg = savedImgs[0] || saveBase64Image(product.image, cleanName) || "";
+          const finalPrice = Number(product.price) || 0;
+          const finalOrigPrice = Number(product.originalPrice || product.original_price) || 0;
           upsert.run(
             String(product.id),
             cleanName,
             String(product.category || "Other"),
-            Number(product.price) || 0,
-            Number(product.originalPrice || product.original_price) || 0,
+            finalPrice,
+            finalOrigPrice,
             String(product.detail || ""),
             String(product.description || ""),
             Number(product.featured) || 1,
@@ -1577,6 +1615,12 @@ async function api(req, res, pathname, body, url) {
             product.materials || null,
             product.care || null,
             product.active === false || product.active === 0 ? 0 : 1
+          );
+          customUpsert.run(
+            String(product.id),
+            finalPrice,
+            finalOrigPrice,
+            new Date().toISOString()
           );
         }
         db.exec("COMMIT");

@@ -16,23 +16,46 @@ let activeFilter = "All";
 let selectedProduct = null;
 let cart = JSON.parse(localStorage.getItem("raycrafting-cart") || "[]");
 
+function applyUserCustomPrices(list) {
+  try {
+    const raw = localStorage.getItem("raycrafting_user_prices");
+    if (!raw) return list;
+    const custom = JSON.parse(raw);
+    if (!custom || typeof custom !== "object") return list;
+    return list.map((p) => {
+      if (custom[p.id]) {
+        const c = custom[p.id];
+        return {
+          ...p,
+          price: (c.price !== undefined && c.price !== null) ? Number(c.price) : p.price,
+          originalPrice: (c.originalPrice !== undefined) ? Number(c.originalPrice) : (p.originalPrice || p.original_price || 0),
+          original_price: (c.originalPrice !== undefined) ? Number(c.originalPrice) : (p.original_price || p.originalPrice || 0)
+        };
+      }
+      return p;
+    });
+  } catch {
+    return list;
+  }
+}
+
 function loadProducts() {
   const saved = localStorage.getItem(window.RAYCRAFTING_STORAGE_KEY);
   const defaults = window.RAYCRAFTING_DEFAULT_PRODUCTS || [];
-  if (!saved) return defaults.map((product) => ({ ...product }));
+  if (!saved) return applyUserCustomPrices(defaults.map((product) => ({ ...product })));
   try {
     const parsed = JSON.parse(saved);
-    if (!Array.isArray(parsed) || !parsed.length) return defaults.map((product) => ({ ...product }));
+    if (!Array.isArray(parsed) || !parsed.length) return applyUserCustomPrices(defaults.map((product) => ({ ...product })));
     const savedIds = new Set(parsed.map((p) => p && p.id));
     const missing = defaults.filter((p) => p && !savedIds.has(p.id));
     if (missing.length) {
-      const merged = parsed.concat(missing.map((p) => ({ ...p })));
+      const merged = applyUserCustomPrices(parsed.concat(missing.map((p) => ({ ...p }))));
       try { localStorage.setItem(window.RAYCRAFTING_STORAGE_KEY, JSON.stringify(merged)); } catch {}
       return merged;
     }
-    return parsed;
+    return applyUserCustomPrices(parsed);
   } catch {
-    return defaults.map((product) => ({ ...product }));
+    return applyUserCustomPrices(defaults.map((product) => ({ ...product })));
   }
 }
 
@@ -287,7 +310,7 @@ async function loadPublicProducts() {
     if (!response.ok) return;
     const data = await response.json();
     if (!Array.isArray(data.products)) return;
-    products = data.products;
+    products = applyUserCustomPrices(data.products);
     window.RAYCRAFTING_PRODUCTS = products;
     try {
       localStorage.setItem(window.RAYCRAFTING_STORAGE_KEY, JSON.stringify(products));

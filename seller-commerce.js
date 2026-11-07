@@ -45,6 +45,24 @@
       const edit = item.querySelector("[data-edit]");
       const product = edit && map.get(edit.dataset.edit);
       if (!product) return;
+
+      const sellingInput = item.querySelector(".quick-selling-price");
+      const origInput = item.querySelector(".quick-orig-price");
+      if (sellingInput || origInput) {
+        if (sellingInput && document.activeElement !== sellingInput) {
+          if (Number(sellingInput.value) !== Number(product.price)) {
+            sellingInput.value = product.price;
+          }
+        }
+        if (origInput && document.activeElement !== origInput) {
+          const expectedOrig = (product.originalPrice !== undefined && product.originalPrice !== null && product.originalPrice !== 0) ? product.originalPrice : "";
+          if (origInput.value != expectedOrig) {
+            origInput.value = expectedOrig;
+          }
+        }
+        return;
+      }
+
       const old = Number(product.originalPrice) > Number(product.price) ? `<del>${money(product.originalPrice)}</del> ` : "";
       const price = item.querySelector(".catalog-price");
       if (price) price.innerHTML = `${old}${money(product.price)}`;

@@ -22,6 +22,23 @@
 .order-btn{border:1px solid var(--line)!important;background:#fff!important;border-radius:4px!important;padding:2px 7px!important;font-size:10px!important;cursor:pointer;font-family:var(--sans)}
 .order-btn:hover:not(:disabled){background:var(--coral-dark)!important;color:#fff!important;border-color:var(--coral-dark)!important}
 .order-btn:disabled{opacity:.28;cursor:not-allowed}
+.catalog-price-editor{display:flex;flex-direction:column;align-items:flex-end;gap:4px;align-self:start;max-width:240px;margin-left:auto}
+@media(min-width:1100px){.catalog-price-editor{flex-direction:row;flex-wrap:wrap;justify-content:flex-end;align-items:center}}
+.quick-price-chip{display:inline-flex;align-items:center;gap:3px;background:#fbf8f3;border:1px solid var(--line);border-radius:6px;padding:3px 7px;cursor:text;transition:all .15s ease;margin:0}
+.quick-price-chip:hover{background:#fff;border-color:rgba(37,38,41,.32)}
+.quick-price-chip:focus-within{background:#fff;border-color:var(--coral);box-shadow:0 0 0 2px rgba(231,110,89,.2)}
+.orig-price-chip{opacity:.72}
+.orig-price-chip:hover,.orig-price-chip:focus-within{opacity:1}
+.orig-price-chip .chip-label{font:500 9.5px var(--mono);color:var(--muted);text-decoration:line-through;white-space:nowrap;user-select:none}
+.selling-price-chip{background:#fffdf9;border-color:rgba(231,110,89,.35)}
+.selling-price-chip .chip-label{font:700 12px var(--mono);color:var(--coral-dark);white-space:nowrap;user-select:none}
+.quick-price-input{width:54px;border:0!important;background:transparent!important;padding:0!important;margin:0!important;font:600 12px var(--mono)!important;color:var(--ink)!important;text-align:right;outline:none!important;box-shadow:none!important}
+.quick-orig-price{width:46px;font-size:10px!important;color:var(--muted)!important;text-decoration:line-through}
+.quick-orig-price:focus{text-decoration:none;color:var(--ink)!important}
+.quick-price-input::-webkit-outer-spin-button,.quick-price-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.quick-price-input[type=number]{-moz-appearance:textfield}
+.quick-price-status{width:100%;text-align:right;font:600 9px var(--mono);color:#2e7d32;min-height:12px;line-height:12px;opacity:0;transform:translateY(-2px);transition:opacity .2s ease,transform .2s ease;pointer-events:none}
+.quick-price-status.visible{opacity:1;transform:translateY(0)}
 @media(max-width:800px){.admin-header,.admin-shell{width:calc(100% - 34px)}.admin-hero{display:block;padding:55px 0 40px}.admin-intro{margin-top:25px}.studio-grid{grid-template-columns:1fr}.catalog-panel{order:-1}}@media(max-width:500px){.admin-header{height:65px}.header-actions{gap:10px;font-size:11px}.header-actions button{font-size:9px}.admin-hero h1{font-size:56px}.product-form,.catalog-panel{padding:22px}.field-grid{grid-template-columns:1fr}.form-heading h2,.panel-heading h2{font-size:26px}.quiet-button{font-size:9px}.access-card{padding:28px}.access-card h2{font-size:35px}}
 </style>
 </head>
@@ -44,7 +61,7 @@
 </main>
 <div class="access-modal" id="accessModal"><form class="access-card" id="accessForm"><span class="access-mark">R</span><p class="eyebrow">Raycrafting seller access</p><h2>Unlock your studio.</h2><p>Enter your studio PIN to edit the catalog.</p><label>Studio PIN<input id="pinInput" type="password" autocomplete="current-password" required autofocus></label><button class="primary-button" type="submit">Enter studio <span>→</span></button><p class="access-error" id="accessError"></p><small>Your seller PIN is checked securely by the backend.</small></form></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="catalog.js?v=20261107v1"></script>
+<script src="catalog.js?v=20261107v2"></script>
 <script>
 (function(){
   var key = window.RAYCRAFTING_STORAGE_KEY;
@@ -63,6 +80,42 @@
   var editingId = '';
   var productImages = [];
   var el = function(id){ return document.getElementById(id); };
+
+  var recordUserPriceChange = function(productId, price, originalPrice) {
+    try {
+      var raw = localStorage.getItem('raycrafting_user_prices') || '{}';
+      var custom = JSON.parse(raw);
+      custom[productId] = {
+        price: Number(price),
+        originalPrice: Number(originalPrice || 0),
+        updatedAt: Date.now()
+      };
+      localStorage.setItem('raycrafting_user_prices', JSON.stringify(custom));
+    } catch(e){}
+  };
+
+  var applyUserCustomPrices = function(list) {
+    try {
+      var raw = localStorage.getItem('raycrafting_user_prices');
+      if (!raw) return list;
+      var custom = JSON.parse(raw);
+      if (!custom || typeof custom !== 'object') return list;
+      return list.map(function(p){
+        if (custom[p.id]) {
+          var c = custom[p.id];
+          return Object.assign({}, p, {
+            price: (c.price !== undefined && c.price !== null) ? Number(c.price) : p.price,
+            originalPrice: (c.originalPrice !== undefined) ? Number(c.originalPrice) : (p.originalPrice || 0)
+          });
+        }
+        return p;
+      });
+    } catch(e) {
+      return list;
+    }
+  };
+
+  products = applyUserCustomPrices(products);
   var money = function(value){
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -122,6 +175,8 @@
     el('catalogList').innerHTML = products.map(function(product, idx){
       var active = isActive(product);
       var pos = idx + 1;
+      var origNum = Number(product.originalPrice !== undefined ? product.originalPrice : product.original_price);
+      var origVal = (origNum && !isNaN(origNum)) ? origNum : '';
       return '<article class="catalog-item' + (active ? '' : ' is-hidden') + '" data-id="' + product.id + '">' +
         '<span class="catalog-pos-badge" title="Position #' + pos + ' on shop">#' + pos + '</span>' +
         '<img src="' + imageFor(product) + '" alt="' + product.name.replace(/[&<>"]/g,'') + '">' +
@@ -133,7 +188,17 @@
             '<span style="font-size:10px;color:var(--muted);font-family:var(--mono);">Rank #' + pos + '</span>' +
           '</div>' +
         '</div>' +
-        '<span class="catalog-price">' + money(product.price) + '</span>' +
+        '<div class="catalog-price catalog-price-editor" data-id="' + product.id + '">' +
+          '<label class="quick-price-chip orig-price-chip" title="MRP / Regular price (strike-through discount on shop)">' +
+            '<span class="chip-label">MRP ₹</span>' +
+            '<input type="number" class="quick-price-input quick-orig-price" data-id="' + product.id + '" data-field="originalPrice" value="' + origVal + '" placeholder="0" min="0" step="any" aria-label="Original MRP price">' +
+          '</label>' +
+          '<label class="quick-price-chip selling-price-chip" title="Selling price (what shoppers pay)">' +
+            '<span class="chip-label">₹</span>' +
+            '<input type="number" class="quick-price-input quick-selling-price" data-id="' + product.id + '" data-field="price" value="' + product.price + '" placeholder="0" min="0" step="any" aria-label="Selling price">' +
+          '</label>' +
+          '<span class="quick-price-status" id="priceStatus-' + product.id + '" role="status"></span>' +
+        '</div>' +
         '<div class="item-actions">' +
           '<button type="button" class="order-btn" data-move-up="' + product.id + '" title="Move Up (Show earlier on shop)"' + (idx === 0 ? ' disabled' : '') + '>↑ Up</button>' +
           '<button type="button" class="order-btn" data-move-down="' + product.id + '" title="Move Down (Show later on shop)"' + (idx === products.length - 1 ? ' disabled' : '') + '>↓ Down</button>' +
@@ -201,12 +266,123 @@
   };
   window.raycraftingAdminSync = syncToServer;
 
+  var priceSaveTimers = {};
+  var priceDebounceTimers = {};
+  var syncDebounceTimer = null;
+
+  var debouncedSyncToServer = function(){
+    if (!adminToken) return;
+    clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = setTimeout(async function(){
+      try {
+        await syncToServer();
+      } catch(e) {
+        console.warn('Sync to server deferred/failed:', e);
+      }
+    }, 450);
+  };
+
+  var handleQuickPriceChange = function(input, isCommit) {
+    if (!input || !input.classList.contains('quick-price-input')) return;
+    var productId = input.dataset.id;
+    var field = input.dataset.field;
+    var product = products.find(function(p){ return p.id === productId; });
+    if (!product) return;
+
+    var rawVal = input.value.trim();
+    var numVal = Number(rawVal);
+
+    if (field === 'price') {
+      if (rawVal === '' || isNaN(numVal) || numVal < 0) {
+        if (isCommit) input.value = product.price;
+        return;
+      }
+    } else if (field === 'originalPrice') {
+      if (rawVal === '' || isNaN(numVal) || numVal < 0) {
+        numVal = 0;
+      }
+    }
+
+    var currentVal = Number(product[field] || 0);
+    if (currentVal === numVal) {
+      return;
+    }
+
+    product[field] = numVal;
+    recordUserPriceChange(productId, product.price, product.originalPrice);
+
+    if (editingId === productId) {
+      if (field === 'price' && el('productPrice')) el('productPrice').value = numVal;
+      if (field === 'originalPrice' && el('productOriginalPrice')) el('productOriginalPrice').value = numVal || '';
+    }
+
+    localStorage.setItem(key, JSON.stringify(products));
+
+    var statusEl = el('priceStatus-' + productId);
+    if (statusEl) {
+      statusEl.textContent = '✓ Saved (₹' + product.price + ')';
+      statusEl.classList.add('visible');
+      clearTimeout(priceSaveTimers[productId]);
+      priceSaveTimers[productId] = setTimeout(function(){
+        statusEl.classList.remove('visible');
+      }, 2200);
+    }
+
+    debouncedSyncToServer();
+  };
+
+  el('catalogList').addEventListener('click', function(e){
+    if (e.target && e.target.closest('.catalog-price-editor')) {
+      e.stopPropagation();
+    }
+  }, true);
+
+  el('catalogList').addEventListener('focusin', function(e){
+    if (e.target && e.target.classList.contains('quick-price-input')) {
+      e.target.select();
+    }
+  });
+
+  el('catalogList').addEventListener('keydown', function(e){
+    if (e.target && e.target.classList.contains('quick-price-input')) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleQuickPriceChange(e.target, true);
+        e.target.blur();
+      } else if (e.key === 'Escape') {
+        var product = products.find(function(p){ return p.id === e.target.dataset.id; });
+        if (product) {
+          e.target.value = (e.target.dataset.field === 'price' ? product.price : (product.originalPrice || ''));
+        }
+        e.target.blur();
+      }
+    }
+  });
+
+  el('catalogList').addEventListener('input', function(e){
+    if (e.target && e.target.classList.contains('quick-price-input')) {
+      var input = e.target;
+      var productId = input.dataset.id;
+      clearTimeout(priceDebounceTimers[productId]);
+      priceDebounceTimers[productId] = setTimeout(function(){
+        handleQuickPriceChange(input, false);
+      }, 700);
+    }
+  });
+
+  el('catalogList').addEventListener('change', function(e){
+    if (e.target && e.target.classList.contains('quick-price-input')) {
+      handleQuickPriceChange(e.target, true);
+    }
+  });
+
   var loadRemoteCatalog = async function(){
     try {
       var response = await fetch('/api/admin/products', { headers: { 'x-admin-token': adminToken }, cache: 'no-store' });
       var data = await response.json();
       if (!response.ok || !Array.isArray(data.products) || !data.products.length) return;
       products = data.products.map(function(product){ return Object.assign({}, product, { originalPrice: Number(product.originalPrice || product.original_price || 0), active: product.active !== false && product.active !== 0 }); });
+      products = applyUserCustomPrices(products);
       localStorage.setItem(key, JSON.stringify(products));
       renderList();
       resetForm();
@@ -261,6 +437,7 @@
     };
     var existing=products.findIndex(function(item){ return item.id===editingId; });
     if(existing >= 0) products[existing]=product; else products.push(product);
+    recordUserPriceChange(product.id, product.price, product.originalPrice);
     persist();
     el('saveStatus').textContent='Saving to live shop…';
     try {
@@ -350,6 +527,7 @@
             featured: Number(product.featured) || 999
           });
         });
+        products = applyUserCustomPrices(products);
         localStorage.setItem(key, JSON.stringify(products));
         renderList();
       }
@@ -360,7 +538,7 @@
   renderList(); resetForm(); loadInitialCatalog();
 }());
 </script>
-<script src="seller-commerce.js?v=20261030v9"></script>
+<script src="seller-commerce.js?v=20261107v2"></script>
 <script src="seller-requests.js?v=custom2"></script>
 </body>
 </html>
