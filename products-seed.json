@@ -526,7 +526,7 @@
     "category": "Keepsakes",
     "price": 499,
     "original_price": 699,
-    "detail": "3-layer chocolate chenille cake · Crimson velvet roses · Striped birthday candle",
+    "detail": "Keepsake memory cake box · Opens to store custom photos & notes inside · With candle",
     "description": "An irresistible everlasting celebration cake sculpted entirely from chocolate brown and cream pipe-cleaner spirals. Topped with miniature ruby velvet roses, cherry accents, and a festive birthday candle that never burns down.",
     "featured": 26,
     "art": "cake",
@@ -534,7 +534,8 @@
     "images": [
       "assets/products/chocolate-fudge-rose-birthday-cake-1.webp",
       "assets/products/chocolate-fudge-rose-birthday-cake-2.webp",
-      "assets/products/chocolate-fudge-rose-birthday-cake-3.webp"
+      "assets/products/chocolate-fudge-rose-birthday-cake-3.webp",
+      "assets/products/chocolate-fudge-rose-birthday-cake-4.webp"
     ],
     "badge": "Celebration",
     "dimensions": "~13 cm diameter · ~14 cm tall (with candle)",

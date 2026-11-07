@@ -536,7 +536,8 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "images": [
       "assets/products/chocolate-fudge-rose-birthday-cake-1.webp",
       "assets/products/chocolate-fudge-rose-birthday-cake-2.webp",
-      "assets/products/chocolate-fudge-rose-birthday-cake-3.webp"
+      "assets/products/chocolate-fudge-rose-birthday-cake-3.webp",
+      "assets/products/chocolate-fudge-rose-birthday-cake-4.webp"
     ],
     "badge": "Celebration",
     "dimensions": "~13 cm diameter \u00b7 ~14 cm tall (with candle)",
