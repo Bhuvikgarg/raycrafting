@@ -1730,7 +1730,7 @@ async function api(req, res, pathname, body, url) {
     if (req.method === "POST" && pathname === "/api/admin/products/sync") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const products = Array.isArray(body.products) ? body.products : [];
-      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=excluded.images_json,badge=COALESCE(excluded.badge, products.badge),dimensions=COALESCE(excluded.dimensions, products.dimensions),materials=COALESCE(excluded.materials, products.materials),care=COALESCE(excluded.care, products.care),active=excluded.active`);
+      const upsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,category=excluded.category,price=excluded.price,original_price=excluded.original_price,detail=excluded.detail,description=excluded.description,featured=excluded.featured,art=excluded.art,image=excluded.image,images_json=excluded.images_json,options_json=excluded.options_json,badge=COALESCE(excluded.badge, products.badge),dimensions=COALESCE(excluded.dimensions, products.dimensions),materials=COALESCE(excluded.materials, products.materials),care=COALESCE(excluded.care, products.care),active=excluded.active`);
       const customUpsert = db.prepare(`INSERT INTO custom_prices (product_id, price, original_price, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(product_id) DO UPDATE SET price=excluded.price, original_price=excluded.original_price, updated_at=excluded.updated_at`);
       db.exec("BEGIN");
       try {
@@ -1745,6 +1745,29 @@ async function api(req, res, pathname, body, url) {
           const primaryImg = savedImgs[0] || saveBase64Image(product.image, cleanName) || "";
           const finalPrice = Number(product.price) || 0;
           const finalOrigPrice = Number(product.originalPrice || product.original_price) || 0;
+
+          let optionsJson = null;
+          if (Array.isArray(product.options)) {
+            if (product.options.length > 0) {
+              const cleanedOpts = product.options.map((opt, oIdx) => {
+                let optImg = opt.image || "";
+                if (optImg.startsWith("data:image/")) {
+                  optImg = saveBase64Image(optImg, `${cleanName}-option-${oIdx+1}`);
+                }
+                return {
+                  name: String(opt.name || `Option ${oIdx+1}`).trim(),
+                  image: optImg
+                };
+              }).filter(opt => opt.name || opt.image);
+              optionsJson = cleanedOpts.length ? JSON.stringify(cleanedOpts) : null;
+            } else {
+              optionsJson = null;
+            }
+          } else {
+            const existingRow = db.prepare("SELECT options_json FROM products WHERE id=?").get(String(product.id));
+            optionsJson = existingRow ? existingRow.options_json : null;
+          }
+
           upsert.run(
             String(product.id),
             cleanName,
@@ -1757,6 +1780,7 @@ async function api(req, res, pathname, body, url) {
             String(product.art || "custom"),
             primaryImg,
             JSON.stringify(savedImgs),
+            optionsJson,
             product.badge || null,
             product.dimensions || null,
             product.materials || null,
@@ -1772,14 +1796,17 @@ async function api(req, res, pathname, body, url) {
         }
         db.exec("COMMIT");
         try {
-          const allRows = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
+          const allRows = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
           const cleanProds = allRows.map(p => {
             let imgs = [];
             try { imgs = JSON.parse(p.images_json || "[]"); } catch(e){}
             if (!imgs.length && p.image) imgs = [p.image];
+            let opts = [];
+            try { opts = JSON.parse(p.options_json || "[]"); } catch(e){}
             return {
               ...p,
               images: imgs,
+              options: opts,
               original_price: p.original_price || 0,
               originalPrice: p.original_price || 0
             };
