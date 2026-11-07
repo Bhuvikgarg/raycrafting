@@ -272,6 +272,20 @@
           waBtn.href = "https://wa.me/919041915832?text=" + encodeURIComponent("Hi Raycrafting! I have a question about my order. 🌸");
         }
 
+        fetch('/api/config').then(function(r){ return r.json(); }).then(function(cfg){
+          if(cfg && cfg.supportPhone && waBtn){
+            var clean = String(cfg.supportPhone).replace(/\D/g, '');
+            var num = clean.startsWith('91') ? clean : '91' + clean;
+            try {
+              var cur = new URL(waBtn.href);
+              var text = cur.searchParams.get('text') || '';
+              waBtn.href = 'https://wa.me/' + num + (text ? '?text=' + encodeURIComponent(text) : '');
+            } catch(e) {
+              waBtn.href = 'https://wa.me/' + num;
+            }
+          }
+        }).catch(function(){});
+
         // Try reading latest order cached locally
         try {
           var lastOrder = JSON.parse(localStorage.getItem('raycrafting_last_order_details') || 'null');

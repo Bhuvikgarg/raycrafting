@@ -565,33 +565,72 @@ if (giftCheck && giftBox && giftInput) {
 }
 
 fetch("/api/config").then((r) => r.json()).then((cfg) => {
-  const wa = document.querySelector("#whatsappFloat");
-  if (wa && cfg.supportPhone) {
-    const cleanPhone = String(cfg.supportPhone).replace(/\D/g, "");
-    wa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi Raycrafting! I'm browsing your online shop and had a question about custom flowers/orders.")}`;
-    wa.target = "_blank";
-    wa.rel = "noopener noreferrer";
+  if (cfg.supportPhone) {
+    const cleanDigits = String(cfg.supportPhone).replace(/\D/g, "");
+    const waNumber = cleanDigits.startsWith("91") ? cleanDigits : "91" + cleanDigits;
+    const displayPhone = cleanDigits.startsWith("91") ? "+91 " + cleanDigits.slice(2) : "+91 " + cleanDigits;
+
+    // 1. Floating WhatsApp Button
+    const wa = document.querySelector("#whatsappFloat");
+    if (wa) {
+      wa.href = `https://wa.me/${waNumber}?text=${encodeURIComponent("Hi Raycrafting! I'm browsing your online shop and had a question about custom flowers/orders.")}`;
+      wa.target = "_blank";
+      wa.rel = "noopener noreferrer";
+    }
+
+    // 2. Creator & Artisan Partnership / Become a Seller WhatsApp Button
+    const sellerWa = document.querySelector("#sellerWhatsAppBtn");
+    if (sellerWa) {
+      sellerWa.href = `https://wa.me/${waNumber}?text=${encodeURIComponent("Hi Raycrafting, I am a handmade creator and I would love to sell my crafts on Raycrafting!")}`;
+      sellerWa.target = "_blank";
+      sellerWa.rel = "noopener noreferrer";
+    }
+
+    // 3. Seller Application Success Card WhatsApp Button
+    const successWa = document.querySelector("#sellerSuccessWhatsAppBtn") || document.querySelector("#sellerSuccessCard a.button-whatsapp-seller");
+    if (successWa) {
+      successWa.href = `https://wa.me/${waNumber}?text=${encodeURIComponent("Hi Raycrafting, I just submitted my seller application on Raycrafting!")}`;
+      successWa.target = "_blank";
+      successWa.rel = "noopener noreferrer";
+    }
+
+    // 4. Footer WhatsApp Link
+    const footerWa = document.querySelector("#footerWhatsAppLink");
+    if (footerWa) {
+      footerWa.href = `https://wa.me/${waNumber}`;
+      footerWa.textContent = `WhatsApp: ${displayPhone} ↗`;
+      footerWa.target = "_blank";
+      footerWa.rel = "noopener noreferrer";
+    }
+
+    // 5. VIP WhatsApp Broadcast Link
+    const vipWa = document.querySelector("#vipWhatsAppBroadcast");
+    if (vipWa) {
+      vipWa.href = `https://wa.me/${waNumber}?text=${encodeURIComponent("Hi! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
+      vipWa.target = "_blank";
+      vipWa.rel = "noopener noreferrer";
+    }
+
+    // 6. About Modal WhatsApp Chat Link
+    const aboutWa = document.querySelector("#aboutWhatsAppChat");
+    if (aboutWa) {
+      aboutWa.href = `https://wa.me/${waNumber}?text=${encodeURIComponent("Hi Raycrafting! I love your creations!")}`;
+      aboutWa.target = "_blank";
+      aboutWa.rel = "noopener noreferrer";
+    }
   }
-  const insta = document.querySelector("#instagramFloat");
-  if (insta && cfg.instagramUrl) {
-    insta.href = cfg.instagramUrl;
-    insta.hidden = false;
+
+  // Instagram links
+  if (cfg.instagramUrl) {
+    const insta = document.querySelector("#instagramFloat");
+    if (insta) { insta.href = cfg.instagramUrl; insta.hidden = false; }
+    const footerInsta = document.querySelector("#footerInstagramLink");
+    if (footerInsta) { footerInsta.href = cfg.instagramUrl; footerInsta.hidden = false; }
+    const vipInsta = document.querySelector("#vipInstagramDm");
+    if (vipInsta) { vipInsta.href = cfg.instagramUrl; vipInsta.hidden = false; }
   }
-  const footerInsta = document.querySelector("#footerInstagramLink");
-  if (footerInsta && cfg.instagramUrl) {
-    footerInsta.href = cfg.instagramUrl;
-    footerInsta.hidden = false;
-  }
-  const vipInsta = document.querySelector("#vipInstagramDm");
-  if (vipInsta && cfg.instagramUrl) {
-    vipInsta.href = cfg.instagramUrl;
-    vipInsta.hidden = false;
-  }
-  const vipWa = document.querySelector("#vipWhatsAppBroadcast");
-  if (vipWa && cfg.supportPhone) {
-    const cleanPhone = String(cfg.supportPhone).replace(/\D/g, "");
-    vipWa.href = `https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent("Hi! I'd love to join the Raycrafting VIP list for early drop access & custom designs.")}`;
-  }
+
+  // Inspiring Quote
   if (cfg.bannerQuote) {
     const quoteEl = document.querySelector("#announcementQuoteText");
     if (quoteEl) quoteEl.textContent = cfg.bannerQuote;

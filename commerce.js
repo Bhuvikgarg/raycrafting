@@ -573,7 +573,7 @@
           <p style="margin: 12px 0; font-size: 13px; line-height: 1.6; color: var(--muted, #666);">"I believe the smallest handmade things carry the warmest feelings — blooms that never wither, and keepsakes that make your desk feel like home." ✨</p>
           <div class="about-links" style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Raycrafting">Email Raycrafting ↗</a>
-            <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/917988019623?text=Hi%20Raycrafting!%20I%20love%20your%20creations!" target="_blank" rel="noopener noreferrer">Chat with Raycrafting 💬</a>
+            <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/919041915832?text=Hi%20Raycrafting!%20I%20love%20your%20creations!" target="_blank" rel="noopener noreferrer">Chat with Raycrafting 💬</a>
             <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Custom idea? ↗</a>
           </div>
         </div>
@@ -1468,6 +1468,12 @@
     if (callLink && phone) {
       callLink.href = `tel:${phone.replace(/[^+\d]/g, "")}`;
       callLink.hidden = false;
+    }
+    const aboutWa = $("#aboutWhatsAppChat");
+    if (aboutWa && phone) {
+      const cleanDigits = phone.replace(/\D/g, "");
+      const clean = cleanDigits.startsWith("91") ? cleanDigits : "91" + cleanDigits;
+      aboutWa.href = `https://wa.me/${clean}?text=${encodeURIComponent("Hi Raycrafting! I love your creations!")}`;
     }
   }
 

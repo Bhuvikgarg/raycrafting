@@ -231,5 +231,20 @@
       <span>Everlasting pipe-cleaner blooms crafted with patience in India</span>
     </div>
   </footer>
+  <script>
+    fetch("/api/config").then(function(r){ return r.json(); }).then(function(cfg){
+      if(cfg && cfg.supportPhone){
+        var clean = String(cfg.supportPhone).replace(/\D/g, "");
+        var num = clean.startsWith("91") ? clean : "91" + clean;
+        var display = clean.startsWith("91") ? "+91 " + clean.slice(2) : "+91 " + clean;
+        document.querySelectorAll("a[href*='wa.me']").forEach(function(el){
+          el.href = "https://wa.me/" + num;
+          if(el.textContent.includes("WhatsApp:")) {
+            el.textContent = "WhatsApp: " + display + " ↗";
+          }
+        });
+      }
+    }).catch(function(){});
+  </script>
 </body>
 </html>
