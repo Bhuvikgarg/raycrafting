@@ -175,7 +175,71 @@ db.exec(`
     original_price REAL DEFAULT 0,
     updated_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS reviews (
+    id TEXT PRIMARY KEY,
+    product_id TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    product_image TEXT DEFAULT '',
+    reviewer_name TEXT NOT NULL,
+    city TEXT DEFAULT '',
+    rating INTEGER DEFAULT 5,
+    comment TEXT NOT NULL,
+    verified_buyer INTEGER DEFAULT 0,
+    order_id TEXT DEFAULT '',
+    created_at TEXT NOT NULL
+  );
 `);
+
+try {
+  const revCount = db.prepare("SELECT COUNT(*) AS count FROM reviews").get().count;
+  if (revCount === 0) {
+    const seedReview = db.prepare(`
+      INSERT INTO reviews (id, product_id, product_name, product_image, reviewer_name, city, rating, comment, verified_buyer, order_id, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    seedReview.run(
+      "rev_seed_1",
+      "sunshine-daisy-fluffy-keychain",
+      "Sunshine Daisy Fluffy Charm Keychain",
+      "assets/products/sunshine-daisy-fluffy-keychain-1.webp",
+      "Ananya S.",
+      "New Delhi",
+      5,
+      "The fuzzy daisy charm is sitting on my study desk right now and it instantly cheers up my workspace. The twisting is so neat and it looks even cuter in person!",
+      1,
+      "RC-SEED-101",
+      new Date(Date.now() - 86400000 * 3).toISOString()
+    );
+    seedReview.run(
+      "rev_seed_2",
+      "potted-red-tulips-planter",
+      "Potted Red & Velvet Tulips Planter",
+      "assets/products/potted-red-tulips-planter-1.webp",
+      "Rohan M.",
+      "Bengaluru",
+      5,
+      "Ordered as a surprise for my sister. The packaging was completely crush-proof and the handwritten note made it extra special.",
+      1,
+      "RC-SEED-102",
+      new Date(Date.now() - 86400000 * 6).toISOString()
+    );
+    seedReview.run(
+      "rev_seed_3",
+      "fluffy-kitten-paw-keychain",
+      "Fluffy Kitten Paw Charm Keychain",
+      "assets/products/fluffy-kitten-paw-keychain-1.webp",
+      "Priya K.",
+      "Mumbai",
+      5,
+      "Better than real flowers because these never wilt! I got the fluffy kitten paw keychain. The velvety chenille quality is amazing. 10/10 recommend Raycrafting.",
+      1,
+      "RC-SEED-103",
+      new Date(Date.now() - 86400000 * 10).toISOString()
+    );
+  }
+} catch (err) {
+  console.warn("Reviews table init warning:", err.message);
+}
 
 function ensureColumn(table, column, definition) {
   const columns = db.prepare(`PRAGMA table_info(${table})`).all();
@@ -1139,6 +1203,64 @@ async function api(req, res, pathname, body, url) {
         googleClientId: GOOGLE_CLIENT_ID || null,
         selfPickupEnabled: true,
         codEnabled: true
+      });
+    }
+    if (req.method === "GET" && pathname === "/api/reviews") {
+      const reviews = db.prepare("SELECT id, product_id, product_name, product_image, reviewer_name, city, rating, comment, verified_buyer, order_id, created_at FROM reviews ORDER BY created_at DESC").all();
+      return json(res, 200, { reviews });
+    }
+    if (req.method === "POST" && pathname === "/api/reviews") {
+      const { productId, productName, productImage, reviewerName, city, rating, comment, orderId } = body || {};
+      if (!productId || !reviewerName || !comment) {
+        return json(res, 400, { error: "Product, your name, and comment are required." });
+      }
+      let verified = 0;
+      if (orderId) {
+        try {
+          const ord = db.prepare("SELECT id FROM orders WHERE id=?").get(String(orderId).trim());
+          if (ord) verified = 1;
+        } catch {}
+      }
+      const customer = customerFromRequest(req);
+      if (customer) {
+        try {
+          const custOrder = db.prepare("SELECT o.id FROM orders o JOIN order_items oi ON o.id=oi.order_id WHERE o.customer_id=? AND oi.product_id=? LIMIT 1").get(customer.id, String(productId));
+          if (custOrder) verified = 1;
+        } catch {}
+      }
+      const reviewId = "rev_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const createdAt = new Date().toISOString();
+      db.prepare(`
+        INSERT INTO reviews (id, product_id, product_name, product_image, reviewer_name, city, rating, comment, verified_buyer, order_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        reviewId,
+        String(productId).trim(),
+        String(productName || productId).trim(),
+        String(productImage || "").trim(),
+        String(reviewerName).trim(),
+        String(city || "").trim(),
+        Math.max(1, Math.min(5, Number(rating) || 5)),
+        String(comment).trim(),
+        verified ? 1 : 0,
+        String(orderId || "").trim(),
+        createdAt
+      );
+      return json(res, 201, {
+        ok: true,
+        review: {
+          id: reviewId,
+          product_id: String(productId).trim(),
+          product_name: String(productName || productId).trim(),
+          product_image: String(productImage || "").trim(),
+          reviewer_name: String(reviewerName).trim(),
+          city: String(city || "").trim(),
+          rating: Math.max(1, Math.min(5, Number(rating) || 5)),
+          comment: String(comment).trim(),
+          verified_buyer: verified ? 1 : 0,
+          order_id: String(orderId || "").trim(),
+          created_at: createdAt
+        }
       });
     }
     if (req.method === "GET" && pathname === "/api/products") {

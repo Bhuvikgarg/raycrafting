@@ -550,7 +550,6 @@ function openProduct(product) {
   const specs = document.querySelector("#modalSpecs");
   if (specs) {
     specs.innerHTML = `
-      <div class="modal-spec-row"><span><strong>Size</strong></span><span>${escapeHtml(product.dimensions || "~14-16 cm tall")}</span></div>
       <div class="modal-spec-row"><span><strong>Craft Materials</strong></span><span>${escapeHtml(product.materials || "Velvety chenille stems & craft pot")}</span></div>
       <div class="modal-spec-row"><span><strong>Care &amp; Longevity</strong></span><span>${escapeHtml(product.care || "Everlasting bloom · Never withers · Zero watering")}</span></div>
       <div class="modal-spec-row"><span><strong>Gift Ready</strong></span><span>Dispatched in 24-48h in crush-proof box</span></div>
@@ -873,11 +872,319 @@ window.addEventListener("storage", (event) => {
     renderCart();
   }
 });
-document.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeModal(); setDrawer(false); } });
+document.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeModal(); setDrawer(false); closeReviewModal(); } });
+
+/* =========================================================
+   COMMUNITY REVIEWS & PRODUCT-LINKED COMMENT SYSTEM
+   ========================================================= */
+let communityReviews = [];
+
+function formatReviewTime(isoString) {
+  if (!isoString) return "Recently";
+  try {
+    const diff = Date.now() - new Date(isoString).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days <= 0) return "Today";
+    if (days === 1) return "Yesterday";
+    if (days < 30) return `${days} days ago`;
+    const months = Math.floor(days / 30);
+    return `${months} month${months > 1 ? "s" : ""} ago`;
+  } catch {
+    return "Recently";
+  }
+}
+
+async function loadCommunityReviews() {
+  try {
+    const res = await fetch("/api/reviews");
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.reviews) && data.reviews.length > 0) {
+        communityReviews = data.reviews;
+        try { localStorage.setItem("raycrafting_reviews", JSON.stringify(communityReviews)); } catch {}
+        renderCommunityReviews(communityReviews);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Reviews load fallback:", err.message);
+  }
+
+  // Local storage fallback
+  try {
+    const cached = JSON.parse(localStorage.getItem("raycrafting_reviews") || "null");
+    if (Array.isArray(cached) && cached.length > 0) {
+      communityReviews = cached;
+      renderCommunityReviews(communityReviews);
+      return;
+    }
+  } catch {}
+
+  renderCommunityReviews([]);
+}
+
+function renderCommunityReviews(reviews) {
+  const grid = document.querySelector("#reviewsGrid");
+  const scoreEl = document.querySelector("#reviewsAvgScore");
+  const starsEl = document.querySelector("#reviewsAvgStars");
+  const countEl = document.querySelector("#reviewsCountLabel");
+  if (!grid) return;
+
+  if (!reviews || reviews.length === 0) {
+    grid.innerHTML = `
+      <div class="reviews-empty-state">
+        <div class="empty-icon-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+        <h3>No craft notes yet</h3>
+        <p>Bought a handcrafted bloom or companion? Tell everyone how it looks on your desk!</p>
+        <button class="button button-dark" type="button" id="emptyWriteReviewBtn">WRITE THE FIRST REVIEW</button>
+      </div>
+    `;
+    const emptyBtn = grid.querySelector("#emptyWriteReviewBtn");
+    if (emptyBtn) emptyBtn.addEventListener("click", () => openReviewModal());
+    if (scoreEl) scoreEl.textContent = "5.0 / 5 Rating";
+    if (starsEl) starsEl.textContent = "★★★★★";
+    if (countEl) countEl.textContent = "from craft lovers";
+    return;
+  }
+
+  // Calculate actual rating score
+  const totalScore = reviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0);
+  const avg = (totalScore / reviews.length).toFixed(1);
+  const roundedStars = Math.round(Number(avg));
+  if (scoreEl) scoreEl.textContent = `${avg} / 5 Rating`;
+  if (starsEl) starsEl.textContent = "★".repeat(Math.max(1, Math.min(5, roundedStars)));
+  if (countEl) countEl.textContent = `from ${reviews.length} craft lover${reviews.length === 1 ? "" : "s"}`;
+
+  grid.innerHTML = reviews.map((r) => {
+    const starCount = Math.max(1, Math.min(5, Number(r.rating) || 5));
+    const stars = "★".repeat(starCount) + "☆".repeat(5 - starCount);
+    const prodImg = r.product_image || `assets/products/${r.product_id}-1.webp`;
+    const verifiedBadge = r.verified_buyer
+      ? `<span class="verified-buyer-badge" title="Verified Handcrafted Purchase"><svg class="verified-rosette" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.67-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg> Verified Buyer</span>`
+      : "";
+
+    return `
+      <article class="review-card" data-review-id="${escapeHtml(r.id || '')}">
+        <div class="review-card-top">
+          <button type="button" class="review-product-ref" data-product-id="${escapeHtml(r.product_id)}" title="View ${escapeHtml(r.product_name)} in catalogue">
+            <img class="review-product-thumb" src="${escapeHtml(prodImg)}" alt="${escapeHtml(r.product_name)}" onerror="this.style.opacity='0'" />
+            <span class="review-product-meta">
+              <span class="review-product-eyebrow">Review for</span>
+              <strong class="review-product-title">${escapeHtml(r.product_name)}</strong>
+            </span>
+            <span class="review-product-jump" aria-hidden="true">↗</span>
+          </button>
+          <div class="review-stars" aria-label="${starCount} stars">${stars}</div>
+        </div>
+        <p class="review-text">"${escapeHtml(r.comment)}"</p>
+        <div class="review-author">
+          <div class="reviewer-identity">
+            <strong class="reviewer-name">${escapeHtml(r.reviewer_name)}</strong>
+            ${verifiedBadge}
+          </div>
+          <span class="review-meta-date">${escapeHtml(r.city ? r.city + " · " : "")}${formatReviewTime(r.created_at)}</span>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  // Attach jump-to-product handlers
+  grid.querySelectorAll(".review-product-ref").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const pid = btn.dataset.productId;
+      if (!pid) return;
+      jumpToHeroProduct(pid);
+    });
+  });
+}
+
+function populateReviewProductSelect(selectedId = "") {
+  const select = document.querySelector("#reviewProductSelect");
+  if (!select) return;
+  const activeProducts = (products || []).filter(isProductActive);
+  select.innerHTML = activeProducts.map((p) => {
+    const isSelected = p.id === selectedId;
+    return `<option value="${escapeHtml(p.id)}" ${isSelected ? "selected" : ""}>${escapeHtml(p.name)}</option>`;
+  }).join("");
+}
+
+function openReviewModal(productId = "", productName = "", orderId = "", productImage = "") {
+  const modal = document.querySelector("#reviewModal");
+  if (!modal) return;
+
+  populateReviewProductSelect(productId);
+
+  const select = document.querySelector("#reviewProductSelect");
+  if (productId && select) {
+    select.value = productId;
+  }
+
+  const orderInput = document.querySelector("#reviewOrderId");
+  if (orderInput) orderInput.value = orderId || "";
+
+  // Set default rating to 5
+  setReviewStarRating(5);
+
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+
+  const commentInput = document.querySelector("#reviewCommentInput");
+  if (commentInput) {
+    setTimeout(() => commentInput.focus(), 150);
+  }
+}
+
+function closeReviewModal() {
+  const modal = document.querySelector("#reviewModal");
+  if (!modal) return;
+  modal.hidden = true;
+  if (!cartDrawer?.classList.contains("open") && document.querySelector("#productModal")?.hidden) {
+    document.body.style.overflow = "";
+  }
+  const form = document.querySelector("#reviewForm");
+  if (form) form.reset();
+  setReviewStarRating(5);
+}
+
+function setReviewStarRating(rating) {
+  const val = Math.max(1, Math.min(5, Number(rating) || 5));
+  const hiddenInput = document.querySelector("#reviewRatingInput");
+  if (hiddenInput) hiddenInput.value = String(val);
+
+  document.querySelectorAll("#starRatingSelect .star-btn").forEach((btn) => {
+    const r = Number(btn.dataset.rating);
+    btn.classList.toggle("active", r <= val);
+  });
+}
+
+function initReviewSystem() {
+  // Star button interactions
+  document.querySelectorAll("#starRatingSelect .star-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const r = Number(btn.dataset.rating) || 5;
+      setReviewStarRating(r);
+    });
+  });
+
+  // Open modal button
+  document.querySelector("#openReviewModalBtn")?.addEventListener("click", () => {
+    openReviewModal();
+  });
+
+  // Close modal button
+  document.querySelector("#reviewModalClose")?.addEventListener("click", closeReviewModal);
+
+  // Close on backdrop click
+  document.querySelector("#reviewModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "reviewModal") closeReviewModal();
+  });
+
+  // Review form submission
+  const form = document.querySelector("#reviewForm");
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = document.querySelector("#submitReviewBtn");
+      const pid = document.querySelector("#reviewProductSelect")?.value?.trim();
+      const name = document.querySelector("#reviewAuthorInput")?.value?.trim();
+      const city = document.querySelector("#reviewCityInput")?.value?.trim();
+      const rating = Number(document.querySelector("#reviewRatingInput")?.value) || 5;
+      const comment = document.querySelector("#reviewCommentInput")?.value?.trim();
+      const orderId = document.querySelector("#reviewOrderId")?.value?.trim();
+
+      if (!pid || !name || !comment) {
+        showToast("Please fill in your name and comment.");
+        return;
+      }
+
+      const matchedProduct = (products || []).find((p) => p.id === pid);
+      const prodName = matchedProduct ? matchedProduct.name : pid;
+      const prodImg = matchedProduct ? productImage(matchedProduct) : `assets/products/${pid}-1.webp`;
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "POSTING REVIEW...";
+      }
+
+      try {
+        const payload = {
+          productId: pid,
+          productName: prodName,
+          productImage: prodImg,
+          reviewerName: name,
+          city: city,
+          rating: rating,
+          comment: comment,
+          orderId: orderId
+        };
+
+        const res = await fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to submit review.");
+        }
+
+        const newReview = data.review || {
+          id: "rev_" + Date.now(),
+          product_id: pid,
+          product_name: prodName,
+          product_image: prodImg,
+          reviewer_name: name,
+          city: city,
+          rating: rating,
+          comment: comment,
+          verified_buyer: orderId ? 1 : 0,
+          created_at: new Date().toISOString()
+        };
+
+        communityReviews.unshift(newReview);
+        try { localStorage.setItem("raycrafting_reviews", JSON.stringify(communityReviews)); } catch {}
+        renderCommunityReviews(communityReviews);
+
+        closeReviewModal();
+        showToast("Thank you! Your craft note is now live.");
+        document.querySelector("#reviews")?.scrollIntoView({ behavior: "smooth" });
+      } catch (err) {
+        showToast(err.message || "Could not post review. Try again.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "POST REVIEW";
+        }
+      }
+    });
+  }
+
+  // Check URL query parameters for direct review links
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const reviewProd = params.get("reviewProduct");
+    const orderId = params.get("orderId");
+    if (reviewProd) {
+      setTimeout(() => {
+        openReviewModal(reviewProd, "", orderId || "");
+        document.querySelector("#reviews")?.scrollIntoView({ behavior: "smooth" });
+      }, 600);
+    }
+  } catch {}
+}
+
+window.raycraftingOpenReviewModal = openReviewModal;
 
 renderProducts();
 renderCart();
 loadPublicProducts();
+loadCommunityReviews();
+initReviewSystem();
 
 
 const heroFrame = document.querySelector("#heroSlideshow");
@@ -1361,6 +1668,7 @@ function initSmartBackNavigation() {
     const aboutModal = document.querySelector("#aboutModal");
     const checkoutModal = document.querySelector("#checkoutModal");
     const ordersModal = document.querySelector("#ordersModal");
+    const reviewModal = document.querySelector("#reviewModal");
     const cartDrawer = document.querySelector("#cartDrawer");
 
     let closedSomething = false;
@@ -1378,6 +1686,10 @@ function initSmartBackNavigation() {
     }
     if (ordersModal && !ordersModal.hidden) {
       ordersModal.hidden = true;
+      closedSomething = true;
+    }
+    if (reviewModal && !reviewModal.hidden) {
+      closeReviewModal();
       closedSomething = true;
     }
     if (cartDrawer && cartDrawer.classList.contains("open")) {

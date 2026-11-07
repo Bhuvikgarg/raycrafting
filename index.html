@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=prod25" />
+    <link rel="stylesheet" href="styles.css?v=prod26" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -193,40 +193,20 @@
       <section class="reviews-section section-shell" id="reviews" aria-labelledby="reviewsTitle">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Real craft buyer love</p>
-            <h2 id="reviewsTitle">Made to bring<br /><em>real smiles.</em></h2>
+            <p class="eyebrow">Community Craft Notes</p>
+            <h2 id="reviewsTitle">Real thoughts on<br /><em>our handmade creations.</em></h2>
           </div>
-          <div class="reviews-rating-badge">
-            <span class="stars">★★★★★</span>
-            <strong>4.9 / 5 Rating</strong>
-            <small>from craft lovers across India</small>
+          <div class="reviews-header-actions">
+            <div class="reviews-rating-badge">
+              <span class="stars" id="reviewsAvgStars">★★★★★</span>
+              <strong id="reviewsAvgScore">5.0 / 5 Rating</strong>
+              <small id="reviewsCountLabel">from verified buyers</small>
+            </div>
+            <button class="button button-dark leave-comment-cta" id="openReviewModalBtn" type="button">WRITE A REVIEW</button>
           </div>
         </div>
-        <div class="reviews-grid">
-          <div class="review-card">
-            <div class="review-stars">★★★★★</div>
-            <p>"The sunflower pot is sitting on my study table right now and it instantly cheers up my workspace. The fuzzy twisting is so neat and it looks even cuter in person!"</p>
-            <div class="review-author">
-              <strong class="reviewer-name">Ananya S. <svg class="verified-rosette" viewBox="0 0 24 24" width="16" height="16" aria-label="Verified Buyer" title="Verified Buyer"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.67-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg></strong>
-              <span>New Delhi</span>
-            </div>
-          </div>
-          <div class="review-card">
-            <div class="review-stars">★★★★★</div>
-            <p>"Ordered the pink rose pot as a birthday surprise for my best friend. The packaging was completely crush-proof and the handwritten note made it extra special."</p>
-            <div class="review-author">
-              <strong class="reviewer-name">Rohan M. <svg class="verified-rosette" viewBox="0 0 24 24" width="16" height="16" aria-label="Verified Buyer" title="Verified Buyer"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.67-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg></strong>
-              <span>Bengaluru</span>
-            </div>
-          </div>
-          <div class="review-card">
-            <div class="review-stars">★★★★★</div>
-            <p>"Better than real flowers because these never die! I got the bunny companion and strawberry keychain. The quality is amazing. 10/10 recommend Raycrafting."</p>
-            <div class="review-author">
-              <strong class="reviewer-name">Priya K. <svg class="verified-rosette" viewBox="0 0 24 24" width="16" height="16" aria-label="Verified Buyer" title="Verified Buyer"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.67-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg></strong>
-              <span>Mumbai</span>
-            </div>
-          </div>
+        <div class="reviews-grid" id="reviewsGrid">
+          <!-- Dynamic product-referred comments will render here -->
         </div>
       </section>
 
@@ -427,6 +407,51 @@
       </div>
     </div>
 
+    <!-- Dynamic Review / Comment Submission Modal -->
+    <div class="modal-wrap" id="reviewModal" hidden>
+      <div class="modal review-modal-panel" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+        <button class="close-button modal-close" id="reviewModalClose" type="button" aria-label="Close review dialog">×</button>
+        <div class="review-modal-content">
+          <p class="eyebrow">Community Craft Notes</p>
+          <h2 id="reviewModalTitle">Share Your Experience</h2>
+          <p class="review-modal-subtitle">Tell other craft lovers how your handmade piece looks and feels in your home!</p>
+          <form id="reviewForm" class="review-form">
+            <input type="hidden" id="reviewOrderId" value="" />
+            <div class="review-field">
+              <label for="reviewProductSelect">Which piece are you reviewing?</label>
+              <select id="reviewProductSelect" required></select>
+            </div>
+            <div class="review-field">
+              <label>Your Rating</label>
+              <div class="star-rating-select" id="starRatingSelect">
+                <button type="button" class="star-btn active" data-rating="1" aria-label="1 star">★</button>
+                <button type="button" class="star-btn active" data-rating="2" aria-label="2 stars">★</button>
+                <button type="button" class="star-btn active" data-rating="3" aria-label="3 stars">★</button>
+                <button type="button" class="star-btn active" data-rating="4" aria-label="4 stars">★</button>
+                <button type="button" class="star-btn active" data-rating="5" aria-label="5 stars">★</button>
+              </div>
+              <input type="hidden" id="reviewRatingInput" value="5" />
+            </div>
+            <div class="review-grid-2">
+              <div class="review-field">
+                <label for="reviewAuthorInput">Your Name</label>
+                <input id="reviewAuthorInput" type="text" placeholder="e.g. Aditi Sharma" required />
+              </div>
+              <div class="review-field">
+                <label for="reviewCityInput">City / Region (optional)</label>
+                <input id="reviewCityInput" type="text" placeholder="e.g. Pune" />
+              </div>
+            </div>
+            <div class="review-field">
+              <label for="reviewCommentInput">Your Review / Comment</label>
+              <textarea id="reviewCommentInput" rows="4" placeholder="How does it feel, look on your shelf, or how was the gifting reaction?" required></textarea>
+            </div>
+            <button class="button button-dark" type="submit" id="submitReviewBtn">POST REVIEW</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <div class="channel-floats" id="channelFloats">
       <a class="channel-float instagram-float" id="instagramFloat" target="_blank" rel="noopener noreferrer" href="#" aria-label="Chat with maker on Instagram Direct" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -467,8 +492,8 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="catalog.js?v=20261107v8"></script>
-    <script src="shared-script.js?v=20261107v11"></script>
+    <script src="shared-script.js?v=20261107v12"></script>
     <script src="custom-requests.js?v=20261107v8"></script>
-    <script src="commerce.js?v=20261107v9"></script>
+    <script src="commerce.js?v=20261107v10"></script>
 </body>
 </html>

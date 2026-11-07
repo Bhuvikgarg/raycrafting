@@ -71,4 +71,23 @@
 - **Die-Cut Craft Sticker (Keel Architecture):** Handcrafted badges on showcase photos follow authentic die-cut paper peel sticker styling (`vaidikcode/keel`): 2.5px solid white border, 12px rounded corners, realistic drop shadow, 6deg rotation tilt, and a folded corner gradient crease (`.sticker-peel`).
 - **Gradient Overflow Prevention on Filter Pills:** When styling active category pills (`.filter-button.active`), strictly eliminate colored box shadows that cast a pink gradient haze on WebKit browsers, and enforce `border: none !important; box-shadow: none !important; overflow: hidden !important; -webkit-mask-image: -webkit-radial-gradient(white, black);` for crisp, bleed-free pill contours.
 
+## 14. Product-Linked Community Reviews & Post-Purchase Review Flow
+- **Unified Cross-Catalogue Review Feed:** The reviews section (`#reviews`) operates as a dynamic, shared community feed displaying reviews for any piece across the store. Static hardcoded dummy reviews are prohibited.
+- **Explicit Product Referencing:** Every review card must prominently display a clickable product reference pill (`.review-product-ref`) containing:
+  - Product thumbnail image (rounded, cropped edge-to-edge).
+  - Product name and "Review for" label.
+  - Directional jump cue (`↗`) that smoothly scrolls to the catalogue, flashes an attention pulse, and opens the product detail modal.
+- **Seamless Post-Purchase Review Access:**
+  - **Order Confirmation Modal (`#orderConfirmModal`):** Immediately upon completing checkout, an interactive review prompt lists every purchased item with a direct "Review Piece ★" button.
+  - **"My Orders" Modal (`#ordersModal`):** In past order history cards, each ordered piece has a "Review [Product Name] ★" button.
+  - **Order Receipt Page (`thank-you.html`):** In the order details summary, each line item links directly to `index.html?reviewProduct=<id>&orderId=<orderId>#reviews`.
+  - Clicking any of these pre-selects the product, pre-fills the `orderId`, and automatically grants the Twitter-style verified rosette checkmark upon review submission.
+- **Review Submission Modal (`#reviewModal`):**
+  - Accessible via "WRITE A REVIEW" CTA in the reviews section or from post-purchase buttons.
+  - Includes a product dropdown selector (pre-populated with active catalogue items), an interactive 5-star rating selector (`.star-rating-select`), customer name, optional city, and review textarea.
+  - Validates and stores reviews in SQLite via `POST /api/reviews` with instant client-side rendering and `localStorage` caching for zero-latency offline resilience.
+- **Removal of Size Characteristics from Product Descriptions:**
+  - Product descriptions and modals must focus on craftsmanship, materials, longevity, and care. Size/dimension rows are excluded from customer-facing product specifications to keep descriptions clean and focus on emotional craft appeal.
+
+
 

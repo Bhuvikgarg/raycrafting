@@ -148,6 +148,17 @@
       .order-item-row span:first-child {
         color: var(--ink);
       }
+      .thank-you-review-link {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--coral-dark);
+        text-decoration: underline;
+        font-weight: 600;
+      }
+      .thank-you-review-link:hover {
+        color: var(--ink);
+      }
       .order-item-row span:last-child {
         font-family: var(--mono);
         font-weight: 600;
@@ -300,7 +311,15 @@
               }
               if (Array.isArray(lastOrder.items)) {
                 itemsList.innerHTML = lastOrder.items.map(function(item) {
-                  return '<div class="order-item-row"><span>' + (item.quantity || 1) + 'x ' + (item.name || 'Floral Piece') + '</span><span>₹' + ((item.unit_price || item.price || 0) * (item.quantity || 1)) + '</span></div>';
+                  var pId = item.product_id || item.id || '';
+                  var revUrl = 'index.html?reviewProduct=' + encodeURIComponent(pId) + '&orderId=' + encodeURIComponent(orderId || '') + '#reviews';
+                  return '<div class="order-item-row">' +
+                    '<div>' +
+                      '<span style="display:block;">' + (item.quantity || 1) + 'x ' + (item.name || 'Floral Piece') + '</span>' +
+                      (pId ? '<a class="thank-you-review-link" href="' + revUrl + '">Review this piece ★</a>' : '') +
+                    '</div>' +
+                    '<span>₹' + ((item.unit_price || item.price || 0) * (item.quantity || 1)) + '</span>' +
+                  '</div>';
                 }).join('');
               }
               if (lastOrder.address) {

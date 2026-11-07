@@ -477,6 +477,13 @@
               <strong id="confirmAddressText">—</strong>
             </div>
           </div>
+          <div class="confirm-review-prompt" id="confirmReviewSection" hidden>
+            <div class="confirm-review-head">
+              <span class="confirm-review-pill">Verified Craft Note</span>
+              <p>Share your experience with the pieces you ordered:</p>
+            </div>
+            <div class="confirm-review-items" id="confirmReviewItemsList"></div>
+          </div>
           <div class="confirm-actions">
             <button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders</button>
             <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">Chat with our studio on WhatsApp</a>
@@ -1243,8 +1250,16 @@
     }
   }
 
-  function showOrderConfirmation({ orderId, total, paymentMethod, addressText }) {
+  function showOrderConfirmation({ orderId, total, paymentMethod, addressText, items }) {
     closeCheckout();
+    const orderedItems = Array.isArray(items) && items.length > 0 ? items : (getLines().map((l) => ({
+      id: l.id,
+      product_id: l.id,
+      name: l.product ? l.product.name : l.id,
+      image: l.product ? l.product.image : `assets/products/${l.id}-1.webp`,
+      quantity: l.quantity,
+      price: l.product ? l.product.price : 0
+    })));
     try {
       localStorage.setItem("raycrafting_last_order_id", orderId || "");
       localStorage.setItem("raycrafting_last_order_details", JSON.stringify({
@@ -1252,7 +1267,7 @@
         total: total,
         paymentMethod: paymentMethod,
         address: { line1: addressText },
-        items: cartLines()
+        items: orderedItems
       }));
     } catch {}
     if ($("#confirmReceiptLink") && orderId) {
@@ -1289,6 +1304,40 @@
         waBtn.style.display = "none";
       }
     }
+
+    // Render interactive review prompts for the purchased pieces
+    const reviewSection = $("#confirmReviewSection");
+    const reviewList = $("#confirmReviewItemsList");
+    if (reviewSection && reviewList) {
+      if (orderedItems.length > 0) {
+        reviewList.innerHTML = orderedItems.map((item) => `
+          <div class="confirm-review-row">
+            <img class="confirm-review-thumb" src="${esc(item.image || 'assets/products/' + (item.product_id || item.id) + '-1.webp')}" alt="${esc(item.name)}" onerror="this.style.opacity='0'" />
+            <div class="confirm-review-meta">
+              <strong class="confirm-review-title">${esc(item.name)}</strong>
+              <span class="confirm-review-sub">Handcrafted Piece</span>
+            </div>
+            <button type="button" class="confirm-review-btn" data-review-item-id="${esc(item.product_id || item.id)}" data-review-item-name="${esc(item.name)}" data-review-item-img="${esc(item.image || '')}">Review Piece ★</button>
+          </div>
+        `).join("");
+        reviewSection.hidden = false;
+
+        reviewList.querySelectorAll(".confirm-review-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const pId = btn.dataset.reviewItemId;
+            const pName = btn.dataset.reviewItemName;
+            const pImg = btn.dataset.reviewItemImg;
+            closeOrderConfirmation();
+            if (typeof window.raycraftingOpenReviewModal === "function") {
+              window.raycraftingOpenReviewModal(pId, pName, orderId, pImg);
+            }
+          });
+        });
+      } else {
+        reviewSection.hidden = true;
+      }
+    }
+
     $("#orderConfirmModal").hidden = false;
     document.body.style.overflow = "hidden";
   }
@@ -1346,6 +1395,9 @@
     if (orders.length > 0) {
       html += orders.map((order) => {
         const items = order.items.map((item) => `${item.quantity} × ${esc(item.name)} (${money(item.line_total)})`).join(" · ");
+        const reviewButtons = Array.isArray(order.items) ? order.items.map((item) => `
+          <button type="button" class="order-item-review-btn" data-order-review-id="${esc(order.id)}" data-order-review-pid="${esc(item.product_id || item.id || '')}" data-order-review-name="${esc(item.name || '')}">Review "${esc(item.name)}" ★</button>
+        `).join("") : "";
         const reasons = order.failure_reason
           ? `<p class="order-history-reason"><strong>Payment issue:</strong> ${esc(order.failure_reason)}</p>`
           : order.decision_reason
@@ -1369,6 +1421,7 @@
             <span class="order-history-status ${esc(order.status)}">${esc(statusLabel(order.status))}</span>
           </div>
           <div class="order-history-items">${items}</div>
+          ${reviewButtons ? `<div class="order-history-reviews">${reviewButtons}</div>` : ""}
           ${reasons}
           ${(canCancel || canReturn || returnExpired) ? `<div class="order-history-actions">
             ${canCancel ? `<button type="button" data-order-action="cancel" data-order-id="${esc(order.id)}">Request cancellation</button>` : ""}
@@ -1662,6 +1715,15 @@
         loadCustomer();
       }
 
+      const purchasedLines = getLines().map((line) => ({
+        id: line.id,
+        product_id: line.id,
+        name: line.product ? line.product.name : line.id,
+        image: line.product ? line.product.image : `assets/products/${line.id}-1.webp`,
+        quantity: line.quantity,
+        price: line.product ? line.product.price : 0
+      }));
+
       if (paymentMethod === "cod") {
         clearCartView();
         toast("Order confirmed! We'll start crafting it.");
@@ -1669,7 +1731,8 @@
           orderId: created.orderId,
           total: created.total,
           paymentMethod: "cod",
-          addressText: addressSummary
+          addressText: addressSummary,
+          items: purchasedLines
         });
         return;
       }
@@ -1723,7 +1786,8 @@
               orderId: created.orderId,
               total: created.total,
               paymentMethod: "razorpay",
-              addressText: addressSummary
+              addressText: addressSummary,
+              items: purchasedLines
             });
           } catch (error) {
             showMessage(error.message);
@@ -1808,6 +1872,17 @@
     $("#ordersLoginButton")?.addEventListener("click", () => { closeOrders(); openCheckout(true); });
 
     $("#ordersList")?.addEventListener("click", (event) => {
+      const reviewBtn = event.target.closest("[data-order-review-pid]");
+      if (reviewBtn) {
+        const orderId = reviewBtn.dataset.orderReviewId;
+        const pid = reviewBtn.dataset.orderReviewPid;
+        const name = reviewBtn.dataset.orderReviewName;
+        closeOrders();
+        if (typeof window.raycraftingOpenReviewModal === "function") {
+          window.raycraftingOpenReviewModal(pid, name, orderId);
+        }
+        return;
+      }
       const orderActionBtn = event.target.closest("[data-order-action]");
       if (orderActionBtn) {
         orderAction(orderActionBtn.dataset.orderId, orderActionBtn.dataset.orderAction);
