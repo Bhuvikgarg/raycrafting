@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=prod23" />
+    <link rel="stylesheet" href="styles.css?v=prod24" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -99,10 +99,7 @@
           <div class="hero-note"><span class="scribble-star" aria-hidden="true">✳</span><span>Each piece is made by hand, so no two are exactly alike.</span></div>
         </div>
         <div class="hero-image-wrap">
-          <div class="hero-image-frame" id="heroSlideshow" role="region" aria-roledescription="carousel" aria-label="Raycrafting product showcase" tabindex="0" title="Tap to explore this piece in the catalog">
-            <button class="hero-nav-arrow hero-nav-prev" id="heroPrevBtn" type="button" aria-label="Previous handcrafted showcase item">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            </button>
+          <div class="hero-image-frame" id="heroSlideshow" role="region" aria-roledescription="carousel" aria-label="Raycrafting product showcase" tabindex="0" title="Swipe or tap to explore this piece in the catalog">
             <div class="hero-slides">
               <img class="hero-slide is-active" data-caption="Big size lotus Lamp" data-product-id="illuminated-lotus-blossom-lamp" src="assets/products/illuminated-lotus-blossom-lamp-1.webp" alt="Handcrafted glowing pink lotus flower night light" fetchpriority="high" loading="eager" />
               <img class="hero-slide" data-caption="Medium sized lotus lamp for diwali" data-product-id="medium-sized-lotus-lamp" src="assets/products/illuminated-lotus-blossom-lamp-2.webp" alt="Handcrafted medium lotus blossom lamp" aria-hidden="true" />
@@ -110,13 +107,37 @@
               <img class="hero-slide" data-caption="Potted Red &amp; Velvet Tulips Planter" data-product-id="potted-red-tulips-planter" src="assets/products/potted-red-tulips-planter-1.webp" alt="Handcrafted rich red velvet tulips in handmade planter" aria-hidden="true" />
               <img class="hero-slide" data-caption="Cozy Movie Night Cocoa &amp; Popcorn Duo" data-product-id="cozy-movie-night-cocoa-popcorn" src="assets/products/cozy-movie-night-cocoa-popcorn-1.webp" alt="Handcrafted smiling hot cocoa and popcorn duo" aria-hidden="true" />
             </div>
-            <button class="hero-nav-arrow hero-nav-next" id="heroNextBtn" type="button" aria-label="Next handcrafted showcase item">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </button>
-            <div class="image-sticker">handcrafted</div>
-            <div class="hero-tap-hint"><span>Tap to view in shop</span></div>
+
+            <!-- Die-cut craft sticker (Keel from Vaidikcode inspired) -->
+            <div class="image-sticker" aria-label="Handcrafted piece">
+              <span class="sticker-star">✳</span>
+              <span class="sticker-text">handcrafted</span>
+              <span class="sticker-peel" aria-hidden="true"></span>
+            </div>
+
+            <div class="hero-swipe-hint">
+              <span class="swipe-dot"></span>
+              <span>Swipe to explore pieces</span>
+            </div>
           </div>
-          <div class="hero-caption" id="heroCaptionWrap" tabindex="0" role="button" title="View product in shop"><span id="heroCounter">01 / 05</span><span id="heroCaption">Big size lotus Lamp</span></div>
+
+          <!-- Awwwards-style Elevated Showcase Panel -->
+          <div class="hero-showcase-panel" id="heroCaptionWrap" tabindex="0" role="button" title="View product in shop">
+            <div class="showcase-top-row">
+              <div class="showcase-counter-chip">
+                <span id="heroCounter">01 / 05</span>
+                <span class="showcase-badge">Featured Creation</span>
+              </div>
+              <div class="showcase-nav-pills">
+                <button class="showcase-arrow-btn" id="heroPrevBtn" type="button" aria-label="Previous showcase piece">‹</button>
+                <button class="showcase-arrow-btn" id="heroNextBtn" type="button" aria-label="Next showcase piece">›</button>
+              </div>
+            </div>
+            <div class="showcase-title-row">
+              <h2 class="showcase-title" id="heroCaption">Big size lotus Lamp</h2>
+              <span class="showcase-cta-pill">EXPLORE PIECE</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -446,7 +467,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="catalog.js?v=20261107v8"></script>
-    <script src="shared-script.js?v=20261107v9"></script>
+    <script src="shared-script.js?v=20261107v10"></script>
     <script src="custom-requests.js?v=20261107v8"></script>
     <script src="commerce.js?v=20261107v9"></script>
 </body>

@@ -943,9 +943,50 @@ if (heroFrame && heroSlides.length > 1) {
     });
   }
 
+  // Mobile Touch Swipe Gesture Handling
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let isSwiping = false;
+
+  heroFrame.addEventListener("touchstart", (e) => {
+    if (!e.touches || !e.touches[0]) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    isSwiping = true;
+    clearInterval(heroTimer);
+  }, { passive: true });
+
+  heroFrame.addEventListener("touchmove", (e) => {
+    if (!isSwiping || !e.touches || !e.touches[0]) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = currentX - touchStartX;
+    const diffY = currentY - touchStartY;
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+      if (e.cancelable) e.preventDefault();
+    }
+  }, { passive: false });
+
+  heroFrame.addEventListener("touchend", (e) => {
+    if (!isSwiping || !e.changedTouches || !e.changedTouches[0]) return;
+    isSwiping = false;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 35) {
+      if (diffX < 0) {
+        showHeroSlide(activeHeroSlide + 1);
+      } else {
+        showHeroSlide(activeHeroSlide - 1);
+      }
+    }
+    heroTimer = setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
+  }, { passive: true });
+
   // Tap or click hero card: trigger wrapper transition to next slide AND jump to that product in catalogue
   const handleShowcaseTap = (e) => {
-    if (e.target.closest(".hero-nav-arrow")) return;
+    if (e.target.closest("#heroPrevBtn, #heroNextBtn, .showcase-arrow-btn")) return;
     const activeSlide = heroSlides[activeHeroSlide];
     const targetProductId = activeSlide ? activeSlide.dataset.productId : null;
     showHeroSlide(activeHeroSlide + 1);
