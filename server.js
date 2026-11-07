@@ -340,7 +340,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badge: "Paid Online",
       badgeBg: "#dfeada",
       badgeColor: "#557351",
-      intro: "Thank you for your order! Your payment was received and Himanshi is carefully handcrafting your pieces."
+      intro: "Thank you for your order! Your payment was received and Raycrafting is carefully handcrafting your pieces."
     },
     processing: {
       headline: "🌸 Order Confirmed & Crafting",
@@ -348,8 +348,8 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badgeBg: "#dfeada",
       badgeColor: "#557351",
       intro: orderData.payment_method === "cod"
-        ? "Thank you for your order! Your Pay on Delivery order is confirmed and Himanshi has begun handcrafting your pieces."
-        : "The studio has accepted your order and Himanshi is handcrafting your pieces."
+        ? "Thank you for your order! Your Pay on Delivery order is confirmed and Raycrafting has begun handcrafting your pieces."
+        : "The studio has accepted your order and Raycrafting is handcrafting your pieces."
     },
     shipped: {
       headline: "📦 Your Order Has Shipped!",
@@ -377,7 +377,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badge: "Cancellation Requested",
       badgeBg: "#fff1cf",
       badgeColor: "#98721a",
-      intro: "We received your request to cancel this order. Himanshi is reviewing it."
+      intro: "We received your request to cancel this order. Raycrafting is reviewing it."
     },
     cancelled: {
       headline: "Order Cancelled",
@@ -391,7 +391,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
       badge: "Return Requested",
       badgeBg: "#fff1cf",
       badgeColor: "#98721a",
-      intro: "We received your return request under our 3-day handcrafted studio policy. Himanshi will review the details within 24 hours."
+      intro: "We received your return request under our 3-day handcrafted studio policy. Raycrafting will review the details within 24 hours."
     },
     returned: {
       headline: "Return Completed",
@@ -456,7 +456,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
 
   const cleanSupportPhone = String(supportPhone || "").replace(/\D/g, "");
   const whatsappUrl = cleanSupportPhone
-    ? `https://wa.me/${cleanSupportPhone.startsWith("91") ? cleanSupportPhone : "91" + cleanSupportPhone}?text=${encodeURIComponent(`Hi Himanshi, I have a question regarding order #${orderData.id}`)}`
+    ? `https://wa.me/${cleanSupportPhone.startsWith("91") ? cleanSupportPhone : "91" + cleanSupportPhone}?text=${encodeURIComponent(`Hi Raycrafting, I have a question regarding order #${orderData.id}`)}`
     : "";
 
   const html = `
@@ -508,7 +508,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
             <div style="margin-top:6px;color:#7e8087;font-size:11px;">Payment: <strong>${orderData.payment_method === "cod" ? "Pay on Delivery (Doorstep Cash / UPI)" : "Paid Online via Razorpay"}</strong></div>
           </div>
 
-          ${whatsappUrl ? `<div style="text-align:center;margin:22px 0 12px;"><a href="${whatsappUrl}" target="_blank" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:12px;font-weight:600;">💬 Chat with Himanshi on WhatsApp</a></div>` : ""}
+          ${whatsappUrl ? `<div style="text-align:center;margin:22px 0 12px;"><a href="${whatsappUrl}" target="_blank" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:12px;font-weight:600;">💬 Chat with Raycrafting on WhatsApp</a></div>` : ""}
           <div style="text-align:center;font-size:11px;color:#9aa0a6;margin-top:18px;">
             Questions or custom inquiries? Reply to this email or contact <a href="mailto:${htmlEscape(supportEmail)}" style="color:#e76e59;text-decoration:none;">${htmlEscape(supportEmail)}</a>.
           </div>
@@ -1058,7 +1058,7 @@ async function api(req, res, pathname, body, url) {
       const customer = customerFromRequest(req);
       const orderId = id("custom");
       db.prepare("INSERT INTO custom_orders (id,customer_id,name,email,phone,city,state,description,reference_image,status,buyer_price_request,budget_hint,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer ? customer.id : null, name, email, phone, city, state, description || "Reference image supplied.", referenceImage || null, "new", askPrice ? 1 : 0, budgetHint || null, now(), now());
-      return json(res, 201, { ok: true, customOrderId: orderId, message: askPrice ? "Your price quote request is with the studio! Himanshi will review and send you a custom price quote shortly." : "Your custom idea is with the studio. We’ll review it and contact you within 1 hour." });
+      return json(res, 201, { ok: true, customOrderId: orderId, message: askPrice ? "Your price quote request is with the studio! Raycrafting will review and send you a custom price quote shortly." : "Your custom idea is with the studio. We’ll review it and contact you within 1 hour." });
     }
     if (req.method === "POST" && pathname === "/api/note-requests") {
       if (!allowRequest(req, "note-request", 8, 15 * 60 * 1000)) return json(res, 429, { error: "Too many requests. Please try again later." });
@@ -1220,7 +1220,7 @@ async function api(req, res, pathname, body, url) {
       if (!order) return json(res, 404, { error: "Custom request not found." });
       if (action === "accept") {
         db.prepare("UPDATE custom_orders SET status='accepted',updated_at=? WHERE id=?").run(now(), orderId);
-        return json(res, 200, { ok: true, orderId, status: "accepted", message: "Price quote accepted! Himanshi will begin handcrafting your piece." });
+        return json(res, 200, { ok: true, orderId, status: "accepted", message: "Price quote accepted! Raycrafting will begin handcrafting your piece." });
       } else if (action === "decline" || action === "reject") {
         const note = reason ? `Buyer declined quote: ${reason}` : "Buyer declined quote.";
         db.prepare("UPDATE custom_orders SET status='declined',seller_note=COALESCE(seller_note || ' · ', '') || ?,updated_at=? WHERE id=?").run(note, now(), orderId);

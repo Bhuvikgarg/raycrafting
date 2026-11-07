@@ -734,7 +734,7 @@ if (heroFrame && heroSlides.length > 1) {
   }
 }
 
-// Brand logo click/touch opens Himanshi Sharma Artisan bio
+// Brand logo click/touch opens Raycrafting Artisan bio
 document.querySelectorAll(".brand").forEach((brandEl) => {
   brandEl.addEventListener("click", (e) => {
     e.preventDefault();

@@ -439,7 +439,7 @@
           <div class="support-box">
             <div>
               <strong>Need a hand with an order?</strong>
-              <p>Chat directly with Himanshi on WhatsApp or email the studio.</p>
+              <p>Chat directly with Raycrafting on WhatsApp or email the studio.</p>
             </div>
             <div class="support-links">
               <a id="chatSupport" href="mailto:raywithcharm@gmail.com">Email support</a>
@@ -517,7 +517,7 @@
             </label>
             <label>Describe the Defect or Damage <span style="color:var(--coral-dark)">*</span>
               <textarea id="returnDetail" required minlength="10" maxlength="500" rows="3" placeholder="Please describe the exact defect or damage in detail..."></textarea>
-              <small class="field-help">Please describe the issue. You can also share unboxing photos/videos with Himanshi on WhatsApp.</small>
+              <small class="field-help">Please describe the issue. You can also share unboxing photos/videos with Raycrafting on WhatsApp.</small>
             </label>
             <div style="display:flex;gap:10px;margin-top:6px;">
               <button class="commerce-action" type="submit" id="submitReturnBtn" style="flex:1;">Submit Return Request <span>→</span></button>
@@ -573,8 +573,8 @@
           </div>
           <p style="margin: 12px 0; font-size: 13px; line-height: 1.6; color: var(--muted, #666);">"I believe the smallest handmade things carry the warmest feelings — blooms that never wither, and keepsakes that make your desk feel like home." ✨</p>
           <div class="about-links" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Himanshi">Email Himanshi ↗</a>
-            <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/917988019623?text=Hi%20Himanshi!%20I%20love%20your%20creations%20on%20Raycrafting!" target="_blank" rel="noopener noreferrer">Chat on WhatsApp 💬</a>
+            <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Raycrafting">Email Raycrafting ↗</a>
+            <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/917988019623?text=Hi%20Raycrafting!%20I%20love%20your%20creations!" target="_blank" rel="noopener noreferrer">Chat with Raycrafting 💬</a>
             <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Custom idea? ↗</a>
           </div>
         </div>
@@ -1295,7 +1295,7 @@
       const phone = String(supportConfig.supportPhone || "").replace(/\D/g, "");
       if (phone) {
         const clean = phone.startsWith("91") ? phone : "91" + phone;
-        waBtn.href = `https://wa.me/${clean}?text=${encodeURIComponent(`Hi Himanshi! I just placed order ${orderId} on Raycrafting (${money(total)}). Excited for my handmade blooms!`)}`;
+        waBtn.href = `https://wa.me/${clean}?text=${encodeURIComponent(`Hi Raycrafting! I just placed order ${orderId} on Raycrafting (${money(total)}). Excited for my handmade blooms!`)}`;
         waBtn.style.display = "inline-flex";
       } else {
         waBtn.style.display = "none";
@@ -1409,21 +1409,21 @@
           quoteBox = `
             <div class="custom-quote-box">
               <div class="quote-header">
-                <span class="quote-badge">Himanshi's Price Quote</span>
+                <span class="quote-badge">Raycrafting Price Quote</span>
                 <strong class="quote-price">${money(req.quoted_price)}</strong>
               </div>
               ${req.seller_note ? `<p class="quote-seller-note"><strong>Maker note:</strong> ${esc(req.seller_note)}</p>` : ""}
               <div class="custom-quote-actions">
                 <button type="button" class="commerce-action quote-accept-btn" data-custom-action="accept" data-custom-id="${esc(req.id)}">✓ Accept Quote (${money(req.quoted_price)})</button>
                 <button type="button" class="orders-button quote-decline-btn" data-custom-action="decline" data-custom-id="${esc(req.id)}">✗ Decline</button>
-                ${phoneDigits ? `<a class="quote-whatsapp-link" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi Himanshi! Regarding custom request ${req.id} (quote ${money(req.quoted_price)}): `)}">💬 Chat on WhatsApp</a>` : ""}
+                ${phoneDigits ? `<a class="quote-whatsapp-link" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi Raycrafting! Regarding custom request ${req.id} (quote ${money(req.quoted_price)}): `)}">💬 Chat with Raycrafting</a>` : ""}
               </div>
             </div>
           `;
         } else if (isAccepted) {
           quoteBox = `
             <div class="custom-accepted-box">
-              🌸 <strong>Quote Accepted (${money(req.quoted_price || 0)})</strong> · Himanshi has received your confirmation and is handcrafting your custom piece! We will reach out when it is ready.
+              🌸 <strong>Quote Accepted (${money(req.quoted_price || 0)})</strong> · Raycrafting has received your confirmation and is handcrafting your custom piece! We will reach out when it is ready.
             </div>
           `;
         }
@@ -1454,7 +1454,7 @@
       <div class="orders-empty-auth">
         <div class="orders-auth-flower">🌸</div>
         <h3>Sign in to view your orders &amp; quotes</h3>
-        <p>Track your handcrafted blooms, review custom price quotes from Himanshi, or request returns.</p>
+        <p>Track your handcrafted blooms, review custom price quotes from Raycrafting, or request returns.</p>
         ${errorMsg && errorMsg !== "Sign in to view your orders." ? `<p class="commerce-message" style="margin-bottom:12px;">${esc(errorMsg)}</p>` : ""}
         <button class="commerce-action" id="ordersPromptSignInBtn" type="button">Sign in to your account <span>→</span></button>
       </div>
@@ -1574,7 +1574,7 @@
         })
       });
       closeReturnModal();
-      toast("Return request submitted for review. Himanshi will reach out shortly.");
+      toast("Return request submitted for review. Raycrafting will reach out shortly.");
       loadOrders();
     } catch (error) {
       if (msg) { msg.textContent = error.message; msg.className = "commerce-message"; }
@@ -1610,7 +1610,7 @@
         method: "POST",
         body: JSON.stringify({ orderId, action, reason })
       });
-      toast(res.message || (action === "accept" ? "Quote accepted! Himanshi will begin crafting your piece." : "Quote declined."));
+      toast(res.message || (action === "accept" ? "Quote accepted! Raycrafting will begin crafting your piece." : "Quote declined."));
       loadOrders();
     } catch (error) {
       window.alert(error.message);
