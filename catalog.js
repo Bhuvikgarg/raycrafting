@@ -1,5 +1,5 @@
-window.RAYCRAFTING_STORAGE_VERSION = "20261107_launch_v3";
-window.RAYCRAFTING_STORAGE_KEY = "raycrafting-products-v3";
+window.RAYCRAFTING_STORAGE_VERSION = "20261107_launch_v5";
+window.RAYCRAFTING_STORAGE_KEY = "raycrafting-products-v5";
 window.RAYCRAFTING_DEFAULT_IMAGE = "assets/products/illuminated-lotus-blossom-lamp-1.webp";
 window.RAYCRAFTING_DEFAULT_PRODUCTS = [
   {

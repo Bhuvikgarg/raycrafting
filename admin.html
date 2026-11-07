@@ -61,11 +61,31 @@
 </main>
 <div class="access-modal" id="accessModal"><form class="access-card" id="accessForm"><span class="access-mark">R</span><p class="eyebrow">Raycrafting seller access</p><h2>Unlock your studio.</h2><p>Enter your studio PIN to edit the catalog.</p><label>Studio PIN<input id="pinInput" type="password" autocomplete="current-password" required autofocus></label><button class="primary-button" type="submit">Enter studio <span>→</span></button><p class="access-error" id="accessError"></p><small>Your seller PIN is checked securely by the backend.</small></form></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="catalog.js?v=20261107v3"></script>
+<script src="catalog.js?v=20261107v5"></script>
 <script>
 (function(){
+  (function autoMigrateAdminCatalogCache() {
+    var CURRENT_VERSION = "20261107_launch_v5";
+    try {
+      var savedVer = localStorage.getItem("raycrafting_admin_catalog_ver");
+      if (savedVer !== CURRENT_VERSION) {
+        [
+          "raycrafting-products",
+          "raycrafting-products-v2",
+          "raycrafting-products-v3",
+          "raycrafting-products-v4",
+          "raycrafting-products-v5",
+          "raycrafting_user_prices"
+        ].forEach(function(k) {
+          try { localStorage.removeItem(k); } catch(e) {}
+        });
+        localStorage.setItem("raycrafting_admin_catalog_ver", CURRENT_VERSION);
+      }
+    } catch(e) {}
+  })();
+
   var key = window.RAYCRAFTING_STORAGE_KEY;
-  var defaults = window.RAYCRAFTING_DEFAULT_PRODUCTS;
+  var defaults = window.RAYCRAFTING_DEFAULT_PRODUCTS || [];
   var imageFallback = window.RAYCRAFTING_DEFAULT_IMAGE;
   var savedRaw = JSON.parse(localStorage.getItem(key) || 'null');
   var products;
@@ -378,11 +398,16 @@
 
   var loadRemoteCatalog = async function(){
     try {
-      var response = await fetch('/api/admin/products', { headers: { 'x-admin-token': adminToken }, cache: 'no-store' });
+      var response = await fetch('/api/admin/products?t=' + Date.now(), { headers: { 'x-admin-token': adminToken }, cache: 'no-store' });
       var data = await response.json();
       if (!response.ok || !Array.isArray(data.products) || !data.products.length) return;
-      products = data.products.map(function(product){ return Object.assign({}, product, { originalPrice: Number(product.originalPrice || product.original_price || 0), active: product.active !== false && product.active !== 0 }); });
-      products = applyUserCustomPrices(products);
+      products = data.products.map(function(product){
+        return Object.assign({}, product, {
+          price: Number(product.price) || 0,
+          originalPrice: Number(product.originalPrice || product.original_price || 0),
+          active: product.active !== false && product.active !== 0
+        });
+      });
       localStorage.setItem(key, JSON.stringify(products));
       renderList();
       resetForm();
@@ -515,19 +540,20 @@
   });
   var loadInitialCatalog = async function() {
     try {
-      var url = adminToken ? '/api/admin/products' : '/api/products';
+      var base = adminToken ? '/api/admin/products' : '/api/products';
+      var url = base + '?t=' + Date.now();
       var headers = adminToken ? { 'x-admin-token': adminToken } : {};
       var res = await fetch(url, { headers: headers, cache: 'no-store' });
       var data = await res.json();
       if (res.ok && Array.isArray(data.products) && data.products.length) {
         products = data.products.map(function(product){
           return Object.assign({}, product, {
+            price: Number(product.price) || 0,
             originalPrice: Number(product.originalPrice || product.original_price || 0),
             active: product.active !== false && product.active !== 0,
             featured: Number(product.featured) || 999
           });
         });
-        products = applyUserCustomPrices(products);
         localStorage.setItem(key, JSON.stringify(products));
         renderList();
       }
@@ -538,7 +564,7 @@
   renderList(); resetForm(); loadInitialCatalog();
 }());
 </script>
-<script src="seller-commerce.js?v=20261107v2"></script>
+<script src="seller-commerce.js?v=20261107v5"></script>
 <script src="seller-requests.js?v=custom2"></script>
 </body>
 </html>

@@ -39,8 +39,7 @@
   const esc = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
   const products = () => {
     if (Array.isArray(window.RAYCRAFTING_PRODUCTS) && window.RAYCRAFTING_PRODUCTS.length) return window.RAYCRAFTING_PRODUCTS;
-    const saved = localStorage.getItem(window.RAYCRAFTING_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : (window.RAYCRAFTING_DEFAULT_PRODUCTS || []).map((product) => ({ ...product }));
+    return (window.RAYCRAFTING_DEFAULT_PRODUCTS || []).map((product) => ({ ...product }));
   };
   const cart = () => JSON.parse(localStorage.getItem("raycrafting-cart") || "[]");
   const priceInfo = (product) => {

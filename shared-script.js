@@ -1,12 +1,19 @@
 (function autoMigrateCatalogCache() {
-  const CURRENT_VERSION = "20261107_launch_v3";
+  const CURRENT_VERSION = "20261107_launch_v5";
   try {
     const savedVer = localStorage.getItem("raycrafting_catalog_ver");
     if (savedVer !== CURRENT_VERSION) {
-      localStorage.removeItem("raycrafting-products");
-      localStorage.removeItem("raycrafting-products-v2");
-      localStorage.removeItem("raycrafting-products-v3");
-      localStorage.removeItem("raycrafting_user_prices");
+      const keys = [
+        "raycrafting-products",
+        "raycrafting-products-v2",
+        "raycrafting-products-v3",
+        "raycrafting-products-v4",
+        "raycrafting-products-v5",
+        "raycrafting_user_prices"
+      ];
+      keys.forEach((k) => {
+        try { localStorage.removeItem(k); } catch (e) {}
+      });
       localStorage.setItem("raycrafting_catalog_ver", CURRENT_VERSION);
     }
   } catch (e) {}
@@ -54,27 +61,8 @@ function applyUserCustomPrices(list) {
 }
 
 function loadProducts() {
-  const storageKey = window.RAYCRAFTING_STORAGE_KEY || "raycrafting-products-v3";
   const defaults = window.RAYCRAFTING_DEFAULT_PRODUCTS || [];
-  const saved = localStorage.getItem(storageKey);
-  if (!saved) {
-    try { localStorage.setItem(storageKey, JSON.stringify(defaults)); } catch {}
-    return defaults.map((product) => ({ ...product }));
-  }
-  try {
-    const parsed = JSON.parse(saved);
-    if (!Array.isArray(parsed) || !parsed.length) return defaults.map((product) => ({ ...product }));
-    const savedIds = new Set(parsed.map((p) => p && p.id));
-    const missing = defaults.filter((p) => p && !savedIds.has(p.id));
-    if (missing.length) {
-      const merged = applyUserCustomPrices(parsed.concat(missing.map((p) => ({ ...p }))));
-      try { localStorage.setItem(storageKey, JSON.stringify(merged)); } catch {}
-      return merged;
-    }
-    return applyUserCustomPrices(parsed);
-  } catch {
-    return defaults.map((product) => ({ ...product }));
-  }
+  return defaults.map((product) => ({ ...product }));
 }
 
 function productImage(product) {
@@ -324,15 +312,17 @@ window.addEventListener("raycrafting:cart-cleared", clearCart);
 
 async function loadPublicProducts() {
   try {
-    const response = await fetch("/api/products", { cache: "no-store" });
+    const response = await fetch("/api/products?t=" + Date.now(), { cache: "no-store" });
     if (!response.ok) return;
     const data = await response.json();
-    if (!Array.isArray(data.products)) return;
-    products = applyUserCustomPrices(data.products);
+    if (!Array.isArray(data.products) || !data.products.length) return;
+    products = data.products.map((p) => ({
+      ...p,
+      price: Number(p.price) || 0,
+      originalPrice: Number(p.originalPrice || p.original_price || 0),
+      original_price: Number(p.original_price || p.originalPrice || 0)
+    }));
     window.RAYCRAFTING_PRODUCTS = products;
-    try {
-      localStorage.setItem(window.RAYCRAFTING_STORAGE_KEY, JSON.stringify(products));
-    } catch {}
     renderProducts();
     renderCart();
   } catch {
