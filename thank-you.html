@@ -156,9 +156,7 @@
   </head>
   <body>
     <div class="announcement">
-      <span class="announcement-flower" aria-hidden="true">🌸</span>
       <span>“Where flowers bloom, so does hope.” — Handcrafted with love</span>
-      <span class="announcement-flower" aria-hidden="true">✨</span>
     </div>
 
     <header class="site-header">
@@ -182,7 +180,7 @@
 
     <main class="thank-you-shell">
       <section class="thank-you-card">
-        <span class="bloom-celebration" aria-hidden="true">💐</span>
+        <span class="bloom-celebration" aria-hidden="true">✓</span>
         <p class="eyebrow"><span class="eyebrow-dot"></span> Order Received &amp; Confirmed</p>
         <h1>Thank you for your order,<br /><em>handcrafted with love.</em></h1>
 
@@ -212,10 +210,10 @@
 
         <div class="thank-you-actions">
           <a class="whatsapp-chat-button" id="orderWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">
-            💬 Chat with Raycrafting on WhatsApp
+            Chat with Raycrafting on WhatsApp
           </a>
           <a class="button button-dark" href="index.html#shop">
-            Browse More Pieces 🌸
+            Browse More Pieces
           </a>
         </div>
 
@@ -265,11 +263,11 @@
         
         if (orderId) {
           displayEl.textContent = orderId;
-          var waText = encodeURIComponent("Hi Raycrafting! I just placed order " + orderId + " on Raycrafting. Looking forward to my handcrafted flowers! 🌸");
+          var waText = encodeURIComponent("Hi Raycrafting! I just placed order " + orderId + " on Raycrafting. Looking forward to my handcrafted flowers!");
           waBtn.href = "https://wa.me/919041915832?text=" + waText;
         } else {
           displayEl.textContent = "Confirmed";
-          waBtn.href = "https://wa.me/919041915832?text=" + encodeURIComponent("Hi Raycrafting! I have a question about my order. 🌸");
+          waBtn.href = "https://wa.me/919041915832?text=" + encodeURIComponent("Hi Raycrafting! I have a question about my order.");
         }
 
         fetch('/api/config').then(function(r){ return r.json(); }).then(function(cfg){

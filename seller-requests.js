@@ -26,8 +26,8 @@
     var cleanPhone = String(order.phone || "").replace(/\D/g, "");
     var waPhone = cleanPhone.startsWith("91") ? cleanPhone : (cleanPhone ? "91" + cleanPhone : "");
     var waText = encodeURIComponent("Hi " + (order.name || "") + "! I saw your custom request #" + (order.id || "") + " on Raycrafting.");
-    var waLink = waPhone ? "<a class=\"custom-wa-link\" target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://wa.me/" + esc(waPhone) + "?text=" + esc(waText) + "\">💬 WhatsApp</a>" : "";
-    var priceBadge = order.buyer_price_request ? "<span class=\"custom-tag-quote\">🏷️ Buyer Requested Price Quote</span>" : "";
+    var waLink = waPhone ? "<a class=\"custom-wa-link\" target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://wa.me/" + esc(waPhone) + "?text=" + esc(waText) + "\">WhatsApp</a>" : "";
+    var priceBadge = order.buyer_price_request ? "<span class=\"custom-tag-quote\">Buyer Requested Price Quote</span>" : "";
     var budgetInfo = order.budget_hint ? "<p class=\"custom-meta-pill\"><strong>Buyer expected budget:</strong> ₹" + esc(order.budget_hint) + "</p>" : "";
     var statusClass = "status-" + esc(order.status);
     return "<article class=\"request-card\" data-order-id=\"" + esc(order.id) + "\">" +

@@ -336,14 +336,14 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
 
   const statusConfig = {
     paid: {
-      headline: "🌸 Order Confirmed & Paid",
+      headline: "Order Confirmed & Paid",
       badge: "Paid Online",
       badgeBg: "#dfeada",
       badgeColor: "#557351",
       intro: "Thank you for your order! Your payment was received and Raycrafting is carefully handcrafting your pieces."
     },
     processing: {
-      headline: "🌸 Order Confirmed & Crafting",
+      headline: "Order Confirmed & Crafting",
       badge: orderData.payment_method === "cod" ? "Pay on Delivery" : "Confirmed",
       badgeBg: "#dfeada",
       badgeColor: "#557351",
@@ -352,21 +352,21 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
         : "The studio has accepted your order and Raycrafting is handcrafting your pieces."
     },
     shipped: {
-      headline: "📦 Your Order Has Shipped!",
+      headline: "Your Order Has Shipped!",
       badge: "Dispatched",
       badgeBg: "#e3effa",
       badgeColor: "#1d6fb8",
       intro: "Exciting news! Your handcrafted order is on its way to your doorstep."
     },
     out_for_delivery: {
-      headline: "🚚 Out for Delivery Today",
+      headline: "Out for Delivery Today",
       badge: "Out for Delivery",
       badgeBg: "#e3effa",
       badgeColor: "#1d6fb8",
       intro: "Your package is with the delivery partner and should reach you today!"
     },
     delivered: {
-      headline: "✨ Order Delivered",
+      headline: "Order Delivered",
       badge: "Delivered",
       badgeBg: "#dfeada",
       badgeColor: "#557351",
@@ -508,7 +508,7 @@ async function notifyCustomerOrderStatus(order, status, reason = "") {
             <div style="margin-top:6px;color:#7e8087;font-size:11px;">Payment: <strong>${orderData.payment_method === "cod" ? "Pay on Delivery (Doorstep Cash / UPI)" : "Paid Online via Razorpay"}</strong></div>
           </div>
 
-          ${whatsappUrl ? `<div style="text-align:center;margin:22px 0 12px;"><a href="${whatsappUrl}" target="_blank" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:12px;font-weight:600;">💬 Chat with Raycrafting on WhatsApp</a></div>` : ""}
+          ${whatsappUrl ? `<div style="text-align:center;margin:22px 0 12px;"><a href="${whatsappUrl}" target="_blank" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:12px;font-weight:600;">Chat with Raycrafting on WhatsApp</a></div>` : ""}
           <div style="text-align:center;font-size:11px;color:#9aa0a6;margin-top:18px;">
             Questions or custom inquiries? Reply to this email or contact <a href="mailto:${htmlEscape(supportEmail)}" style="color:#e76e59;text-decoration:none;">${htmlEscape(supportEmail)}</a>.
           </div>
@@ -1066,7 +1066,7 @@ async function api(req, res, pathname, body, url) {
         ok: true,
         couponCode: "WELCOME10",
         discountPercent: 10,
-        message: "🎉 Welcome! Use code WELCOME10 at checkout for 10% off your handcrafted blooms."
+        message: "Welcome! Use code WELCOME10 at checkout for 10% off your handcrafted blooms."
       });
     }
     if (req.method === "POST" && pathname === "/api/seller-inquiry") {

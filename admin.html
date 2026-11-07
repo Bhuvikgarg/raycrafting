@@ -55,7 +55,7 @@
 <div class="image-gallery-preview" id="imageGalleryPreview" style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px;"></div>
 <label>Position on shop (1 = first item shoppers see)<input id="productFeatured" type="number" min="1" step="1" value="1"><small class="field-help">Lower position numbers appear first in the catalogue. (e.g. 1-7 for Flowers, 8+ for Keepsakes &amp; Clay)</small></label><label class="visibility-toggle"><input id="productActive" type="checkbox" checked><span><strong>Show in current shop</strong><small class="field-help">Turn this off to keep the product saved but hidden from shoppers.</small></span></label>
 <div class="form-actions"><button class="primary-button" type="submit">Save product <span>→</span></button><span class="save-status" id="saveStatus" role="status"></span></div></form>
-<aside class="catalog-panel"><div class="panel-heading"><div><p class="eyebrow">Live catalog</p><h2><span id="productCount">0</span> pieces</h2></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><button class="icon-text-button" id="sortFlowersTopBtn" type="button" title="Arrange Flowers at the top, clay items down" style="border:1px solid var(--coral);padding:4px 9px;border-radius:999px;color:var(--coral-dark);">🌸 Flowers to top</button><button class="icon-text-button" id="exportButton" type="button">Export backup ↓</button></div></div><div id="catalogList" class="catalog-list"></div><div class="catalog-tools"><button class="danger-button" id="resetButton" type="button">Clear live catalog</button><p>This clears the shared public catalog. Add products here when you are ready.</p></div></aside>
+<aside class="catalog-panel"><div class="panel-heading"><div><p class="eyebrow">Live catalog</p><h2><span id="productCount">0</span> pieces</h2></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><button class="icon-text-button" id="sortFlowersTopBtn" type="button" title="Arrange Flowers at the top, clay items down" style="border:1px solid var(--coral);padding:4px 9px;border-radius:999px;color:var(--coral-dark);">Flowers to top</button><button class="icon-text-button" id="exportButton" type="button">Export backup ↓</button></div></div><div id="catalogList" class="catalog-list"></div><div class="catalog-tools"><button class="danger-button" id="resetButton" type="button">Clear live catalog</button><p>This clears the shared public catalog. Add products here when you are ready.</p></div></aside>
 </section>
 <section class="seller-note"><span>✳</span><div><strong>How the shop connection works</strong><p>This editor is connected to the shared live catalog. Save a piece here and it will appear in the public shop for every customer after the shop refreshes.</p></div></section>
 </main>
@@ -258,7 +258,7 @@
     });
     products.forEach(function(p, i){ p.featured = i + 1; });
     persist();
-    showToast('🌸 Flowers arranged at top of catalogue!');
+    showToast('Flowers arranged at top of catalogue!');
     if(adminToken) {
       try { await syncToServer(); } catch(e){}
     }

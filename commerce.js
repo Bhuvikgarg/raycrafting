@@ -351,7 +351,7 @@
                         <input type="radio" name="paymentMethod" value="razorpay" checked>
                         <div class="pm-text">
                           <div class="pm-title-row">
-                            <strong>⚡ Instant UPI, Cards &amp; NetBanking</strong>
+                            <strong>Instant UPI, Cards &amp; NetBanking</strong>
                             <span class="pm-badge-rec">Recommended</span>
                           </div>
                           <p class="pm-desc">Instant confirmation via Razorpay. Zero transaction fee. 100% encrypted &amp; secure.</p>
@@ -370,7 +370,7 @@
                         <input type="radio" name="paymentMethod" value="cod">
                         <div class="pm-text">
                           <div class="pm-title-row">
-                            <strong>📦 Pay on Delivery (Cash on Delivery)</strong>
+                            <strong>Pay on Delivery (Cash on Delivery)</strong>
                           </div>
                           <p class="pm-desc">Pay cash or scan QR upon doorstep delivery. No advance payment required.</p>
                         </div>
@@ -381,7 +381,7 @@
 
                 <section class="checkout-section">
                   <h3>Discounts &amp; Vouchers</h3>
-                  <button type="button" class="coupon-chip" id="welcomeCouponChip">🎁 Tap to apply WELCOME10 (10% OFF)</button>
+                  <button type="button" class="coupon-chip" id="welcomeCouponChip">Tap to apply WELCOME10 (10% OFF)</button>
                   <div class="coupon-row">
                     <input id="couponCode" placeholder="Enter coupon code" autocomplete="off">
                     <button class="commerce-action" id="couponButton" type="button">Apply</button>
@@ -396,14 +396,14 @@
                   <h3>Your order</h3>
                   <div class="checkout-lines" id="checkoutLines"></div>
                   <div class="checkout-maker-reassurance">
-                    🌸 <span>Handmade in small batches with love · 100% Gift-Ready</span>
+                    <span>Handmade in small batches with love · 100% Gift-Ready</span>
                   </div>
                   <div class="checkout-totals" id="checkoutTotals"></div>
                 </section>
                 <button class="commerce-action" id="payButton" type="button">Continue to payment <span>→</span></button>
                 <p class="commerce-message" id="paymentMessage"></p>
                 <div class="checkout-trust-badge">
-                  <span class="trust-shield">🔒</span>
+                  <span class="trust-shield">🛡</span>
                   <div>
                     <strong>100% Secure Checkout</strong>
                     <p>Encrypted payment &amp; handcrafted order guarantee · Free shipping on ₹499+</p>
@@ -454,7 +454,7 @@
       `<div class="commerce-modal" id="orderConfirmModal" hidden>
         <div class="commerce-panel confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
           <div class="confirm-celebration">
-            <div class="confirm-flower-icon">🌸</div>
+            <div class="confirm-flower-icon">✓</div>
             <p class="eyebrow">Raycrafting Handcrafted Order</p>
             <h2 id="confirmTitle">Your order is placed!</h2>
             <p id="confirmSubtitle">We’ve received your order and our studio is carefully preparing your handmade piece.</p>
@@ -479,8 +479,8 @@
           </div>
           <div class="confirm-actions">
             <button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders <span>→</span></button>
-            <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">💬 Chat with our studio on WhatsApp</a>
-            <a class="orders-button" id="confirmReceiptLink" href="thank-you.html" style="margin-top:6px;display:block;text-align:center;text-decoration:none;">View Full Order Receipt 📄</a>
+            <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">Chat with our studio on WhatsApp</a>
+            <a class="orders-button" id="confirmReceiptLink" href="thank-you.html" style="margin-top:6px;display:block;text-align:center;text-decoration:none;">View Full Order Receipt →</a>
             <button class="orders-button" id="confirmCloseBtn" type="button" style="margin-top:6px">Back to Shop</button>
           </div>
         </div>
@@ -500,7 +500,7 @@
             <button class="commerce-close" id="returnClose" type="button" aria-label="Close return modal">×</button>
           </div>
           <div class="return-policy-box">
-            🌸 <strong>Handmade Studio Quality Guarantee:</strong> Every piece is hand-twisted with care by our studio artists. If your order arrived broken, damaged during transit, or with a craftsmanship defect, we will arrange a replacement or refund within 3 days of delivery.
+            <strong>Handmade Studio Quality Guarantee:</strong> Every piece is hand-twisted with care by our studio artists. If your order arrived broken, damaged during transit, or with a craftsmanship defect, we will arrange a replacement or refund within 3 days of delivery.
           </div>
           <form class="commerce-form" id="returnForm">
             <input type="hidden" id="returnOrderId" value="">
@@ -566,14 +566,14 @@
           <div class="about-story">
             <img src="assets/sunflower.jpeg" alt="Handcrafted bloom from Himanshi's studio">
             <div>
-              <p><strong>Hi, I'm Himanshi Sharma! 🌸</strong> I'm the creator, designer, and hands behind everything at Raycrafting.</p>
+              <p><strong>Hi, I'm Himanshi Sharma!</strong> I'm the creator, designer, and hands behind everything at Raycrafting.</p>
               <p>Every single petal, stem, and cheerful desk buddy is individually shaped, twisted, and inspected by me in small batches with velvety chenille pipe cleaners and everlasting love.</p>
             </div>
           </div>
-          <p style="margin: 12px 0; font-size: 13px; line-height: 1.6; color: var(--muted, #666);">"I believe the smallest handmade things carry the warmest feelings — blooms that never wither, and keepsakes that make your desk feel like home." ✨</p>
+          <p style="margin: 12px 0; font-size: 13px; line-height: 1.6; color: var(--muted, #666);">"I believe the smallest handmade things carry the warmest feelings — blooms that never wither, and keepsakes that make your desk feel like home."</p>
           <div class="about-links" style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Raycrafting">Email Raycrafting ↗</a>
-            <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/919041915832?text=Hi%20Raycrafting!%20I%20love%20your%20creations!" target="_blank" rel="noopener noreferrer">Chat with Raycrafting 💬</a>
+            <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/919041915832?text=Hi%20Raycrafting!%20I%20love%20your%20creations!" target="_blank" rel="noopener noreferrer">Chat with Raycrafting</a>
             <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Custom idea? ↗</a>
           </div>
         </div>
@@ -646,9 +646,9 @@
       if (!lines.length) {
         payBtn.textContent = "Your bag is empty";
       } else if (method === "cod") {
-        payBtn.textContent = `Place Order · Pay ${money(total.total)} on Delivery 📦 →`;
+        payBtn.textContent = `Place Order · Pay ${money(total.total)} on Delivery →`;
       } else {
-        payBtn.textContent = `Pay ${money(total.total)} via UPI / Card 🔒 →`;
+        payBtn.textContent = `Pay ${money(total.total)} via UPI / Card →`;
       }
     }
 
@@ -924,7 +924,7 @@
       logoutButton.addEventListener("click", logout);
     } else {
       const guestNote = document.createElement("span");
-      guestNote.innerHTML = `⚡ <strong>Express Checkout</strong> · Quick &amp; secure (No password needed)`;
+      guestNote.innerHTML = `<strong>Express Checkout</strong> · Quick &amp; secure (No password needed)`;
       const signInLink = document.createElement("button");
       signInLink.id = "checkoutSignInLink";
       signInLink.type = "button";
@@ -1271,7 +1271,7 @@
     const isCod = paymentMethod === "cod";
     const badge = $("#confirmPaymentBadge");
     if (badge) {
-      badge.textContent = isCod ? "📦 Pay on Delivery" : "⚡ Paid Online (Razorpay)";
+      badge.textContent = isCod ? "Pay on Delivery" : "Paid Online (Razorpay)";
       badge.style.background = isCod ? "#fff1cf" : "#dfeada";
       badge.style.color = isCod ? "#98721a" : "#557351";
     }
@@ -1359,7 +1359,7 @@
         const isWithin3Days = (Date.now() - deliveryTimestamp) <= THREE_DAYS_MS;
         const canReturn = order.status === "delivered" && isWithin3Days;
         const returnExpired = order.status === "delivered" && !isWithin3Days;
-        const pm = order.payment_method === "cod" ? " · 📦 Pay on Delivery" : (order.status === "paid" || order.status === "processing" ? " · ⚡ Paid online" : "");
+        const pm = order.payment_method === "cod" ? " · Pay on Delivery" : (order.status === "paid" || order.status === "processing" ? " · Paid online" : "");
         return `<article class="order-history-card">
           <div class="order-history-head">
             <div>
@@ -1389,7 +1389,7 @@
         const isAccepted = req.status === "accepted";
         const budgetHintText = req.budget_hint ? ` · Budget hint: ₹${esc(req.budget_hint)}` : "";
         const statusBadgeText = isQuoted
-          ? `🏷️ Quoted: ${money(req.quoted_price)}`
+          ? `Quoted: ${money(req.quoted_price)}`
           : statusLabel(req.status);
 
         let quoteBox = "";
@@ -1404,14 +1404,14 @@
               <div class="custom-quote-actions">
                 <button type="button" class="commerce-action quote-accept-btn" data-custom-action="accept" data-custom-id="${esc(req.id)}">✓ Accept Quote (${money(req.quoted_price)})</button>
                 <button type="button" class="orders-button quote-decline-btn" data-custom-action="decline" data-custom-id="${esc(req.id)}">✗ Decline</button>
-                ${phoneDigits ? `<a class="quote-whatsapp-link" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi Raycrafting! Regarding custom request ${req.id} (quote ${money(req.quoted_price)}): `)}">💬 Chat with Raycrafting</a>` : ""}
+                ${phoneDigits ? `<a class="quote-whatsapp-link" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi Raycrafting! Regarding custom request ${req.id} (quote ${money(req.quoted_price)}): `)}">Chat with Raycrafting</a>` : ""}
               </div>
             </div>
           `;
         } else if (isAccepted) {
           quoteBox = `
             <div class="custom-accepted-box">
-              🌸 <strong>Quote Accepted (${money(req.quoted_price || 0)})</strong> · Raycrafting has received your confirmation and is handcrafting your custom piece! We will reach out when it is ready.
+              <strong>Quote Accepted (${money(req.quoted_price || 0)})</strong> · Raycrafting has received your confirmation and is handcrafting your custom piece! We will reach out when it is ready.
             </div>
           `;
         }
@@ -1440,7 +1440,7 @@
     if (!list) return;
     list.innerHTML = `
       <div class="orders-empty-auth">
-        <div class="orders-auth-flower">🌸</div>
+        <div class="orders-auth-flower">✳</div>
         <h3>Sign in to view your orders &amp; quotes</h3>
         <p>Track your handcrafted blooms, review custom price quotes from Raycrafting, or request returns.</p>
         ${errorMsg && errorMsg !== "Sign in to view your orders." ? `<p class="commerce-message" style="margin-bottom:12px;">${esc(errorMsg)}</p>` : ""}
@@ -1664,7 +1664,7 @@
 
       if (paymentMethod === "cod") {
         clearCartView();
-        toast("🌸 Order confirmed! We'll start crafting it.");
+        toast("Order confirmed! We'll start crafting it.");
         showOrderConfirmation({
           orderId: created.orderId,
           total: created.total,

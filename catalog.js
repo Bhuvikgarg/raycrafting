@@ -31,7 +31,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "price": 199,
     "original_price": 350,
     "detail": "Beautiful kotus lamp crafted with love using pipe cleaners",
-    "description": "Durability and it's beauty when it illuminates the home ✨",
+    "description": "Durability and beauty when it illuminates the home with a soft, warm amber glow.",
     "featured": 2,
     "art": "lotus",
     "image": "assets/products/illuminated-lotus-blossom-lamp-2.webp",

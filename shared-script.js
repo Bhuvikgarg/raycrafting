@@ -65,8 +65,22 @@ function loadProducts() {
   return defaults.map((product) => ({ ...product }));
 }
 
+function optimizeCloudinaryUrl(url, width = 800) {
+  if (!url) return url;
+  if (url.includes("res.cloudinary.com") && !url.includes("f_auto")) {
+    return url.replace("/upload/", `/upload/f_auto,q_auto,w_${width},c_limit/`);
+  }
+  const cloudName = window.RAYCRAFTING_CLOUDINARY_CLOUD || document.documentElement.dataset.cloudinaryCloud;
+  if (cloudName && url.startsWith("assets/products/")) {
+    const publicId = url.replace("assets/products/", "").replace(/\.[^.]+$/, "");
+    return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_${width},c_limit/raycrafting/${publicId}`;
+  }
+  return url;
+}
+
 function productImage(product) {
-  return product.image || window.RAYCRAFTING_DEFAULT_IMAGE;
+  const raw = product.image || window.RAYCRAFTING_DEFAULT_IMAGE;
+  return optimizeCloudinaryUrl(raw);
 }
 
 function isProductActive(product) {
@@ -86,9 +100,100 @@ const money = (value) => {
   }).format(num);
 };
 
+// ==========================================
+// Semantic Search & Intent Scoring Algorithm
+// ==========================================
+const SEMANTIC_SYNONYMS = {
+  flower: ["lotus", "rose", "sunflower", "tulip", "daisy", "lily", "bloom", "blossom", "bouquet", "stem", "planter", "pot"],
+  flowers: ["lotus", "rose", "sunflower", "tulip", "daisy", "lily", "bloom", "blossom", "bouquet", "stem", "planter", "pot"],
+  bloom: ["lotus", "rose", "sunflower", "tulip", "daisy", "lily", "flower", "bouquet"],
+  bouquet: ["blushing", "lavender", "stems", "sunflower", "bundle", "roses", "pearl", "trio", "wristlet"],
+  plant: ["planter", "pot", "tulips", "sunflower", "garden", "rose"],
+  pot: ["planter", "desk", "sunflower", "rose", "tulip", "garden", "stargazer"],
+  lamp: ["illuminated", "lotus", "candle", "light", "glow", "night"],
+  light: ["lamp", "illuminated", "lotus", "candle", "glow", "night"],
+  diwali: ["lotus", "lamp", "illuminated", "candle"],
+  nightlight: ["lamp", "illuminated", "lotus", "candle"],
+  pink: ["lotus", "rose", "blushing", "shortcake", "pastel", "tulip", "stargazer"],
+  red: ["velvet", "tulips", "crimson", "rose"],
+  yellow: ["sunflower", "golden", "toast", "cookie", "sunshine", "star"],
+  purple: ["lavender", "dreams"],
+  lavender: ["dreams", "purple", "bouquet", "planter"],
+  golden: ["sunflower", "toast", "cookie", "star", "lily"],
+  birthday: ["cake", "rose", "sunflower", "bouquet", "gift", "party", "fudge"],
+  gift: ["bouquet", "pot", "lamp", "bundle", "cake", "wristlet", "charm"],
+  anniversary: ["rose", "tulips", "bouquet", "lotus", "blushing"],
+  friend: ["sunflower", "bunny", "toast", "popcorn", "keychain", "wristlet", "charm"],
+  girlfriend: ["rose", "bouquet", "lotus", "tulips", "lavender", "pearl"],
+  desk: ["pot", "planter", "sunflower", "tulips", "coaster", "lamp"],
+  food: ["cake", "toast", "cookie", "shortcake", "cocoa", "popcorn", "cheesecake", "pastry"],
+  sweet: ["cake", "toast", "cookie", "shortcake", "cocoa", "cheesecake", "fudge"],
+  cake: ["party", "fudge", "shortcake", "cheesecake", "pastry", "birthday"],
+  cute: ["bunny", "kitten", "paw", "toast", "cocoa", "popcorn", "shortcake", "charm"],
+  keychain: ["wristlet", "charm", "paw", "daisy", "bunny"],
+  charm: ["keychain", "wristlet", "magnet", "toast", "cookie", "coaster"]
+};
+
+function scoreProductSemanticMatch(product, query) {
+  if (!query) return 1;
+  const cleanQuery = query.toLowerCase().trim();
+  const searchTokens = cleanQuery.split(/\s+/).filter(Boolean);
+
+  const title = (product.name || "").toLowerCase();
+  const cat = (product.category || "").toLowerCase();
+  const detail = (product.detail || "").toLowerCase();
+  const desc = (product.description || "").toLowerCase();
+  const badge = (product.badge || "").toLowerCase();
+  const tags = (product.tags || []).map((t) => t.toLowerCase()).join(" ");
+  const fullText = `${title} ${cat} ${detail} ${desc} ${badge} ${tags}`;
+
+  let totalScore = 0;
+
+  if (title.includes(cleanQuery)) totalScore += 50;
+  else if (cat.includes(cleanQuery)) totalScore += 30;
+  else if (fullText.includes(cleanQuery)) totalScore += 20;
+
+  const priceMatch = cleanQuery.match(/under\s*(\d+)/i) || cleanQuery.match(/<=\s*(\d+)/);
+  if (priceMatch) {
+    const maxP = Number(priceMatch[1]);
+    if (product.price <= maxP) totalScore += 45;
+  }
+
+  for (const token of searchTokens) {
+    if (token.length < 2) continue;
+
+    if (title.includes(token)) totalScore += 25;
+    else if (cat.includes(token)) totalScore += 15;
+    else if (tags.includes(token)) totalScore += 15;
+    else if (detail.includes(token)) totalScore += 10;
+    else if (desc.includes(token)) totalScore += 8;
+
+    const synonyms = SEMANTIC_SYNONYMS[token];
+    if (synonyms) {
+      for (const syn of synonyms) {
+        if (title.includes(syn)) {
+          totalScore += 20;
+          break;
+        } else if (fullText.includes(syn)) {
+          totalScore += 10;
+          break;
+        }
+      }
+    }
+  }
+
+  return totalScore;
+}
+
 function getVisibleProducts() {
-  const query = searchInput.value.trim().toLowerCase();
-  const visible = products.filter(isProductActive).filter((product) => {
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+  const clearBtn = document.querySelector("#clearSearch");
+  if (clearBtn) clearBtn.hidden = !query;
+
+  const activeProducts = products.filter(isProductActive);
+  const scored = [];
+
+  for (const product of activeProducts) {
     let matchesFilter = true;
     if (activeFilter === "All") matchesFilter = true;
     else if (activeFilter === "Flowers") matchesFilter = product.category === "Flowers";
@@ -97,15 +202,36 @@ function getVisibleProducts() {
     else if (activeFilter === "Under200") matchesFilter = product.price < 200;
     else if (activeFilter === "Bestsellers") matchesFilter = product.badge === "Bestseller" || product.badge === "Trending" || product.featured <= 4;
 
-    const matchesSearch = !query || `${product.name} ${product.category} ${product.detail} ${product.description || ""} ${product.badge || ""}`.toLowerCase().includes(query);
-    return matchesFilter && matchesSearch;
-  });
-  return visible.sort((a, b) => {
-    if (sortSelect.value === "low") return a.price - b.price;
-    if (sortSelect.value === "high") return b.price - a.price;
-    if (sortSelect.value === "name") return a.name.localeCompare(b.name);
-    return a.featured - b.featured;
-  });
+    if (!matchesFilter) continue;
+
+    const score = scoreProductSemanticMatch(product, query);
+    if (score > 0) {
+      scored.push({ product, score });
+    }
+  }
+
+  const searchFeedback = document.querySelector("#searchFeedback");
+  if (searchFeedback) {
+    if (query) {
+      searchFeedback.hidden = false;
+      searchFeedback.textContent = scored.length > 0
+        ? `Found ${scored.length} matching piece${scored.length === 1 ? "" : "s"} for "${query}"`
+        : `No direct matches for "${query}". Try searching flowers, lamps, bouquets, or keepsakes.`;
+    } else {
+      searchFeedback.hidden = true;
+      searchFeedback.textContent = "";
+    }
+  }
+
+  return scored
+    .sort((a, b) => {
+      if (query && b.score !== a.score) return b.score - a.score;
+      if (sortSelect.value === "low") return a.product.price - b.product.price;
+      if (sortSelect.value === "high") return b.product.price - a.product.price;
+      if (sortSelect.value === "name") return a.product.name.localeCompare(b.product.name);
+      return a.product.featured - b.product.featured;
+    })
+    .map((item) => item.product);
 }
 
 // ==========================================
@@ -184,34 +310,51 @@ function getProductContrastTheme(product) {
 function productMarkup(product) {
   const theme = getProductContrastTheme(product);
   const liked = localStorage.getItem(`raycrafting-like-${product.id}`) === "true";
-  const badge = product.badge ? `<span class="product-badge" style="background:${theme.badgeColor};color:#fff;">${escapeHtml(product.badge)}</span>` : "";
   const orig = Number(product.original_price || product.originalPrice || 0);
   const oldPriceHtml = orig > product.price ? `<span class="product-price-old">${money(orig)}</span>` : "";
 
-  let discountPill = "";
+  let flowerDiscountHtml = "";
   if (orig > product.price) {
     const pct = Math.round(((orig - product.price) / orig) * 100);
     if (pct >= 5) {
-      discountPill = `<span class="product-discount-pill">${pct}% OFF</span>`;
+      flowerDiscountHtml = `
+        <div class="product-discount-flower" aria-label="${pct}% off" title="${pct}% off">
+          <svg viewBox="0 0 100 100" class="flower-discount-svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="flowerDiscountGrad-${escapeHtml(product.id)}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ff6b8b" />
+                <stop offset="100%" stop-color="#d93b61" />
+              </linearGradient>
+            </defs>
+            <g fill="url(#flowerDiscountGrad-${escapeHtml(product.id)})">
+              <circle cx="50" cy="20" r="16" />
+              <circle cx="71" cy="29" r="16" />
+              <circle cx="80" cy="50" r="16" />
+              <circle cx="71" cy="71" r="16" />
+              <circle cx="50" cy="80" r="16" />
+              <circle cx="29" cy="71" r="16" />
+              <circle cx="20" cy="50" r="16" />
+              <circle cx="29" cy="29" r="16" />
+              <circle cx="50" cy="50" r="24" />
+            </g>
+          </svg>
+          <span class="flower-discount-val">-${pct}%</span>
+          <span class="flower-discount-sub">OFF</span>
+        </div>
+      `;
     }
   }
 
   const gallery = Array.isArray(product.images) && product.images.length > 1 ? product.images : [];
-  const galleryBadge = gallery.length > 1 ? `<span class="product-gallery-badge">📸 ${gallery.length} views</span>` : "";
   const altAttrs = gallery.length > 1 ? ` data-alt-img="${escapeHtml(gallery[1])}" data-main-img="${escapeHtml(productImage(product))}"` : "";
 
   return `<article class="product-card" data-product-id="${escapeHtml(product.id)}"${altAttrs} style="--card-bg: ${theme.bg}; --card-border: ${theme.border}; --product-glow: ${theme.glow}; --badge-accent: ${theme.badgeColor};">
-    <div class="product-image art-${escapeHtml(product.art || "default")}" data-action="details">
-      <img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)}, a handmade ${escapeHtml(product.category.toLowerCase())}" loading="lazy" decoding="async" width="400" height="400" />
-      <div class="product-badge-stack">
-        <span class="product-tag">${escapeHtml(product.category)}</span>
-        ${discountPill}
-      </div>
-      ${badge}
-      ${galleryBadge}
+    <div class="product-image shadcn-skeleton art-${escapeHtml(product.art || "default")}" data-action="details">
+      <img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)}, handcrafted ${escapeHtml(product.category.toLowerCase())}" loading="lazy" decoding="async" width="400" height="400" onload="this.classList.add('is-loaded'); this.parentElement.classList.add('is-loaded');" onerror="this.classList.add('is-loaded'); this.parentElement.classList.add('is-loaded');" />
+      ${flowerDiscountHtml}
       <button class="wish-button ${liked ? "active" : ""}" type="button" data-action="like" aria-label="${liked ? "Remove" : "Add"} ${escapeHtml(product.name)} ${liked ? "from" : "to"} wishlist">${liked ? "♥" : "♡"}</button>
       <div class="product-quick-view-overlay" data-action="details">
-        <span class="quick-view-btn">Quick View 👁</span>
+        <span class="quick-view-btn">Quick View</span>
       </div>
     </div>
     <div class="product-info">
@@ -290,14 +433,14 @@ function renderCart() {
   if (shippingBarWrap) {
     if (subtotal >= FREE_SHIPPING_THRESHOLD) {
       shippingBarWrap.innerHTML = `
-        <div class="shipping-bar-text shipping-unlocked">🎉 <strong>You've unlocked FREE Delivery!</strong></div>
+        <div class="shipping-bar-text shipping-unlocked"><strong>You've unlocked FREE Delivery!</strong></div>
         <div class="shipping-progress-track"><div class="shipping-progress-fill unlocked" style="width: 100%"></div></div>
       `;
     } else {
       const diff = FREE_SHIPPING_THRESHOLD - subtotal;
       const pct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
       shippingBarWrap.innerHTML = `
-        <div class="shipping-bar-text">Add <strong>${money(diff)}</strong> more for <strong>FREE delivery</strong>! 🚚</div>
+        <div class="shipping-bar-text">Add <strong>${money(diff)}</strong> more for <strong>FREE delivery</strong>!</div>
         <div class="shipping-progress-track"><div class="shipping-progress-fill" style="width: ${pct}%"></div></div>
       `;
     }
@@ -407,10 +550,10 @@ function openProduct(product) {
   const specs = document.querySelector("#modalSpecs");
   if (specs) {
     specs.innerHTML = `
-      <div class="modal-spec-row"><span>📏 <strong>Size</strong></span><span>${escapeHtml(product.dimensions || "~14-16 cm tall")}</span></div>
-      <div class="modal-spec-row"><span>🌿 <strong>Craft Materials</strong></span><span>${escapeHtml(product.materials || "Velvety chenille stems & craft pot")}</span></div>
-      <div class="modal-spec-row"><span>✨ <strong>Care &amp; Longevity</strong></span><span>${escapeHtml(product.care || "Everlasting bloom · Never withers · Zero watering")}</span></div>
-      <div class="modal-spec-row"><span>📦 <strong>Gift Ready</strong></span><span>Dispatched in 24-48h in crush-proof box</span></div>
+      <div class="modal-spec-row"><span><strong>Size</strong></span><span>${escapeHtml(product.dimensions || "~14-16 cm tall")}</span></div>
+      <div class="modal-spec-row"><span><strong>Craft Materials</strong></span><span>${escapeHtml(product.materials || "Velvety chenille stems & craft pot")}</span></div>
+      <div class="modal-spec-row"><span><strong>Care &amp; Longevity</strong></span><span>${escapeHtml(product.care || "Everlasting bloom · Never withers · Zero watering")}</span></div>
+      <div class="modal-spec-row"><span><strong>Gift Ready</strong></span><span>Dispatched in 24-48h in crush-proof box</span></div>
     `;
   }
   document.querySelector("#productModal").hidden = false;
@@ -433,12 +576,29 @@ document.querySelector("#filterGroup").addEventListener("click", (event) => {
 });
 
 sortSelect.addEventListener("change", renderProducts);
-searchInput.addEventListener("input", renderProducts);
-document.querySelector("#searchToggle").addEventListener("click", () => {
+if (searchInput) searchInput.addEventListener("input", renderProducts);
+document.querySelector("#searchToggle")?.addEventListener("click", () => {
   searchRow.hidden = !searchRow.hidden;
-  if (!searchRow.hidden) searchInput.focus();
+  if (!searchRow.hidden && searchInput) searchInput.focus();
 });
-document.querySelector("#clearSearch").addEventListener("click", () => { searchInput.value = ""; renderProducts(); searchInput.focus(); });
+document.querySelectorAll("#clearSearch").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    if (searchInput) searchInput.value = "";
+    renderProducts();
+    if (searchInput) searchInput.focus();
+  });
+});
+
+document.querySelectorAll(".search-quick-tag").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const term = btn.dataset.searchTerm || btn.textContent.trim();
+    if (searchInput) {
+      searchInput.value = term;
+      renderProducts();
+      searchInput.focus();
+    }
+  });
+});
 
 productGrid.addEventListener("click", (event) => {
   const card = event.target.closest("[data-product-id]");
@@ -467,7 +627,7 @@ productGrid.addEventListener("click", (event) => {
   if (addBtn) {
     addToCart(product.id);
     const originalHtml = addBtn.innerHTML;
-    addBtn.innerHTML = `<span>Added! 🌸</span>`;
+    addBtn.innerHTML = `<span>Added!</span>`;
     addBtn.classList.add("added-feedback");
     setTimeout(() => {
       addBtn.innerHTML = originalHtml;
@@ -662,7 +822,7 @@ if (sellerForm) {
       sellerForm.hidden = true;
       const successCard = document.querySelector("#sellerSuccessCard");
       if (successCard) successCard.hidden = false;
-      showToast("🎉 Seller application submitted! We will contact you soon.");
+      showToast("Seller application submitted! We will contact you soon.");
     } catch (err) {
       msg.textContent = err.message || "Failed to submit. Please chat on WhatsApp directly.";
     } finally {
@@ -688,7 +848,7 @@ document.querySelector("#newsletterForm")?.addEventListener("submit", async (eve
         document.querySelector("#vipCodeText").textContent = data.couponCode;
       }
     }
-    showToast("🎉 10% discount unlocked! Code: " + (data.couponCode || "WELCOME10"));
+    showToast("10% discount unlocked! Code: " + (data.couponCode || "WELCOME10"));
   } catch (error) {
     message.textContent = error.message;
   } finally {
@@ -701,7 +861,7 @@ document.querySelector("#vipCopyBtn")?.addEventListener("click", () => {
   navigator.clipboard?.writeText(code).then(() => {
     showToast("Copied " + code + " to clipboard!");
     const btn = document.querySelector("#vipCopyBtn");
-    if (btn) { btn.textContent = "Copied! ✓"; setTimeout(() => btn.textContent = "Copy Code 📋", 3000); }
+    if (btn) { btn.textContent = "Copied! ✓"; setTimeout(() => btn.textContent = "Copy Code", 3000); }
   });
 });
 
@@ -766,8 +926,26 @@ if (heroFrame && heroSlides.length > 1) {
     heroTimer = setInterval(() => showHeroSlide(activeHeroSlide + 1), 5200);
   });
 
+  const heroPrev = document.querySelector("#heroPrevBtn");
+  const heroNext = document.querySelector("#heroNextBtn");
+  if (heroPrev) {
+    heroPrev.addEventListener("click", (e) => {
+      e.stopPropagation();
+      clearInterval(heroTimer);
+      showHeroSlide(activeHeroSlide - 1);
+    });
+  }
+  if (heroNext) {
+    heroNext.addEventListener("click", (e) => {
+      e.stopPropagation();
+      clearInterval(heroTimer);
+      showHeroSlide(activeHeroSlide + 1);
+    });
+  }
+
   // Tap or click hero card: trigger wrapper transition to next slide AND jump to that product in catalogue
-  const handleShowcaseTap = () => {
+  const handleShowcaseTap = (e) => {
+    if (e.target.closest(".hero-nav-arrow")) return;
     const activeSlide = heroSlides[activeHeroSlide];
     const targetProductId = activeSlide ? activeSlide.dataset.productId : null;
     showHeroSlide(activeHeroSlide + 1);
@@ -996,14 +1174,14 @@ function initStickyMobileCta() {
       document.body.classList.add("has-sticky-bar");
       const count = cartQuantity();
       if (count > 0) {
-        ctaBtn.innerHTML = `View Bag (${count}) 🛍️`;
+        ctaBtn.innerHTML = `View Bag (${count})`;
         ctaBtn.setAttribute("href", "#bag");
         ctaBtn.onclick = function(e) {
           e.preventDefault();
           setDrawer(true);
         };
       } else {
-        ctaBtn.innerHTML = `Shop Blooms 🌸`;
+        ctaBtn.innerHTML = `Shop Blooms`;
         ctaBtn.setAttribute("href", "#shop");
         ctaBtn.onclick = null;
       }
@@ -1119,7 +1297,7 @@ function initTheme() {
       const isNowDark = !document.body.classList.contains("theme-dark");
       applyTheme(isNowDark);
       localStorage.setItem("raycrafting-theme", isNowDark ? "dark" : "light");
-      showToast(isNowDark ? "🌙 Night mode enabled" : "☀️ Light mode enabled");
+      showToast(isNowDark ? "Night mode enabled" : "Light mode enabled");
     });
   }
 }

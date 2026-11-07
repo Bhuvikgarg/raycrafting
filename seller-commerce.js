@@ -308,12 +308,12 @@
       const canReturn = order.status === "return_requested";
 
       let paymentPill = `<span class="payment-badge-online">✓ Paid Online</span>`;
-      if (isCod) paymentPill = `<span class="payment-badge-cod">📦 Pay on Delivery (COD)</span>`;
-      else if (order.status === "pending_payment") paymentPill = `<span class="payment-badge-unpaid">⏳ Awaiting Payment / Draft</span>`;
-      else if (order.status === "failed_payment") paymentPill = `<span class="payment-badge-failed">❌ Payment Failed</span>`;
+      if (isCod) paymentPill = `<span class="payment-badge-cod">Pay on Delivery (COD)</span>`;
+      else if (order.status === "pending_payment") paymentPill = `<span class="payment-badge-unpaid">Awaiting Payment / Draft</span>`;
+      else if (order.status === "failed_payment") paymentPill = `<span class="payment-badge-failed">Payment Failed</span>`;
 
       const failure = order.failure_reason ? '<p class="order-alert failed"><strong>Payment issue:</strong> ' + esc(order.failure_reason) + '</p>' : "";
-      const gift = order.gift_message ? '<p class="order-alert" style="background:#fff2f6;border-color:var(--coral);color:#8a3b53;"><strong>💌 Gift note:</strong> "' + esc(order.gift_message) + '"</p>' : "";
+      const gift = order.gift_message ? '<p class="order-alert" style="background:#fff2f6;border-color:var(--coral);color:#8a3b53;"><strong>Gift note:</strong> "' + esc(order.gift_message) + '"</p>' : "";
       const request = order.customer_request_reason ? '<p class="order-alert"><strong>Customer request:</strong> ' + esc(order.customer_request_reason) + '</p>' : "";
       const decision = order.decision_reason ? '<p class="order-alert declined"><strong>Seller reason:</strong> ' + esc(order.decision_reason) + '</p>' : "";
       const shippingAwb = order["shiprocket_awb"]; const shippingCourier = order["shiprocket_courier"]; const shipping = shippingAwb ? '<p class="shipping-meta"><strong>Tracking reference:</strong> ' + esc(shippingAwb) + (shippingCourier ? " · " + esc(shippingCourier) : "") + '</p>' : "";
@@ -321,7 +321,7 @@
 
       const cleanPhone = String(order.customer_phone || order.address?.phone || "").replace(/\D/g, "");
       const waText = encodeURIComponent(`Hi ${order.customer_name || ""}, this is Raycrafting regarding your order ${order.id}!`);
-      const waLink = cleanPhone ? `<a class="whatsapp-customer-btn" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${esc(waText)}">💬 Chat on WhatsApp</a>` : "";
+      const waLink = cleanPhone ? `<a class="whatsapp-customer-btn" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${esc(waText)}">Chat on WhatsApp</a>` : "";
 
       const actions = (order.status === "processing" ? '<button type="button" data-order-status="shipped" data-order-id="' + esc(order.id) + '">Mark shipped</button>' : "") +
         (canProcess && order.status === "paid" ? '<button type="button" data-order-status="processing" data-order-id="' + esc(order.id) + '">Accept &amp; Craft</button>' : "") +
@@ -448,28 +448,28 @@
         <!-- Credibility & Overview Metrics -->
         <div class="orders-credibility-bar" id="ordersMetricsBar">
           <div class="metric-card">
-            <span class="metric-icon">📦</span>
+            <span class="metric-icon">✓</span>
             <div>
               <strong id="metricTotalOrders">0</strong>
               <label>Total Orders</label>
             </div>
           </div>
           <div class="metric-card highlight-revenue">
-            <span class="metric-icon">💰</span>
+            <span class="metric-icon">₹</span>
             <div>
               <strong id="metricTotalRevenue">₹0</strong>
               <label>Confirmed Revenue</label>
             </div>
           </div>
           <div class="metric-card">
-            <span class="metric-icon">🎨</span>
+            <span class="metric-icon">✳</span>
             <div>
               <strong id="metricActiveCrafting">0</strong>
               <label>Active in Crafting</label>
             </div>
           </div>
           <div class="metric-card">
-            <span class="metric-icon">🚚</span>
+            <span class="metric-icon">→</span>
             <div>
               <strong id="metricDelivered">0</strong>
               <label>Delivered / Completed</label>
@@ -482,27 +482,27 @@
           <div class="export-actions-group">
             <button type="button" class="excel-download-button" id="downloadExcelOrdersBtn" title="Download all orders in Microsoft Excel / Google Sheets format (.csv)">
               <span class="excel-badge">XLS</span>
-              <span>📊 Download Excel Ledger (.csv)</span>
+              <span>Download Excel Ledger (.csv)</span>
             </button>
             <button type="button" class="excel-download-button secondary-ledger-btn" id="downloadActionLogBtn" title="Download chronological audit log of all order actions taken">
-              <span>📜 Download Audit Action Log</span>
+              <span>Download Audit Action Log</span>
             </button>
           </div>
           <div class="ledger-credibility-note">
-            <span>🛡️ Auto-updated on every customer order &amp; action</span>
+            <span>Auto-updated on every customer order &amp; action</span>
           </div>
         </div>
 
         <!-- Order View Tab Strip -->
         <div class="orders-tab-strip">
           <button type="button" class="order-filter-tab ${currentOrdersView === "all" ? "active" : ""}" data-orders-view="all">
-            🌟 All orders <span id="allCountPill"></span>
+            All orders <span id="allCountPill"></span>
           </button>
           <button type="button" class="order-filter-tab ${currentOrdersView === "confirmed" ? "active" : ""}" data-orders-view="confirmed">
             ✓ Confirmed &amp; In Progress <span id="confirmedCountPill"></span>
           </button>
           <button type="button" class="order-filter-tab ${currentOrdersView === "unpaid" ? "active" : ""}" data-orders-view="unpaid">
-            ⏳ Unpaid Drafts <span id="unpaidCountPill"></span>
+            Unpaid Drafts <span id="unpaidCountPill"></span>
           </button>
         </div>
 
@@ -512,7 +512,7 @@
         <!-- Studio Settings & Channels Box -->
         <div class="studio-settings-box">
           <div class="settings-title">
-            <span>🌸</span>
+            <span>✳</span>
             <div>
               <strong>Studio Settings &amp; Contact Channels</strong>
               <p>Customize your top inspiring quote banner, WhatsApp number, and Instagram Direct link.</p>
