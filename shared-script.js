@@ -415,10 +415,12 @@ function openProduct(product) {
   }
   document.querySelector("#productModal").hidden = false;
   document.body.style.overflow = "hidden";
+  document.body.classList.add("modal-open");
 }
 
 function closeModal() {
   document.querySelector("#productModal").hidden = true;
+  document.body.classList.remove("modal-open");
   if (!cartDrawer.classList.contains("open")) document.body.style.overflow = "";
 }
 

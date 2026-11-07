@@ -606,8 +606,14 @@ function saveBase64Image(dataUrl, prefix = "piece") {
     const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
     if (!match) return dataUrl;
     const rawExt = match[1].toLowerCase();
+    const allowed = ["jpeg", "jpg", "png", "webp"];
+    if (!allowed.includes(rawExt)) return dataUrl;
     const ext = rawExt === "jpeg" || rawExt === "jpg" ? "jpg" : (rawExt === "png" ? "png" : "webp");
     const buffer = Buffer.from(match[2], "base64");
+    if (buffer.length > 8 * 1024 * 1024) {
+      console.warn("Image upload skipped: exceeds 8MB limit");
+      return dataUrl;
+    }
     const hash = crypto.createHash("md5").update(buffer).digest("hex").slice(0, 12);
     const cleanPrefix = String(prefix).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30) || "piece";
     const fileName = `${cleanPrefix}-${hash}.${ext}`;
@@ -658,6 +664,35 @@ function issueAdminSession() {
   } catch {}
   ADMIN_SESSIONS.set(token, expiresAt);
   return token;
+}
+const FAILED_ADMIN_AUTH = new Map();
+function checkAdminAuthLock(req) {
+  const ip = requestIp(req);
+  const record = FAILED_ADMIN_AUTH.get(ip);
+  if (!record) return { locked: false };
+  if (record.lockUntil && Date.now() < record.lockUntil) {
+    const minutesLeft = Math.ceil((record.lockUntil - Date.now()) / 60000);
+    return { locked: true, minutesLeft };
+  }
+  if (record.lockUntil && Date.now() >= record.lockUntil) {
+    FAILED_ADMIN_AUTH.delete(ip);
+    return { locked: false };
+  }
+  return { locked: false };
+}
+function recordAdminAuthFailure(req) {
+  const ip = requestIp(req);
+  const record = FAILED_ADMIN_AUTH.get(ip) || { count: 0, lockUntil: 0 };
+  record.count += 1;
+  if (record.count >= 5) {
+    record.lockUntil = Date.now() + 15 * 60 * 1000;
+  }
+  FAILED_ADMIN_AUTH.set(ip, record);
+  return record.count;
+}
+function recordAdminAuthSuccess(req) {
+  const ip = requestIp(req);
+  FAILED_ADMIN_AUTH.delete(ip);
 }
 function adminTokenFromRequest(req) {
   let token = String(req.headers["x-admin-token"] || "").trim();
@@ -975,6 +1010,17 @@ function serveStatic(req, res, pathname) {
   }
 
   const relative = path.relative(ROOT, file);
+
+  // Defensive Security Hardening: Strictly deny access to dotfiles, databases, source files, and configs
+  const isHidden = pathname.startsWith("/.") || pathname.includes("/.") || relative.startsWith(".");
+  const isSensitiveExt = /\.(sqlite|db|log|sh|env|bak|backup|map)$/i.test(file);
+  const isSensitiveDir = relative.startsWith("data" + path.sep) || relative.startsWith("node_modules" + path.sep) || relative.startsWith(".git" + path.sep) || relative.startsWith(".vercel" + path.sep);
+  const isSensitiveFile = relative === "server.js" || relative === "package.json" || relative === "package-lock.json" || relative === "products-seed.json" || relative === "AGENTS.md" || relative === "README.md";
+
+  if (isHidden || isSensitiveExt || isSensitiveDir || isSensitiveFile) {
+    return json(res, 403, { error: "Access denied." });
+  }
+
   if (relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     const errorPage = path.join(ROOT, "404.html");
     const acceptsHtml = !req.headers.accept || req.headers.accept.includes("text/html") || req.headers.accept.includes("*/*");
@@ -1121,9 +1167,18 @@ async function api(req, res, pathname, body, url) {
       });
     }
     if (req.method === "POST" && pathname === "/api/admin/auth") {
-      if (!allowRequest(req, "admin-auth", 8)) return json(res, 429, { error: "Too many attempts. Try again later." });
+      const lockStatus = checkAdminAuthLock(req);
+      if (lockStatus.locked) {
+        return json(res, 429, { error: `Too many failed attempts. Studio locked for ${lockStatus.minutesLeft} more minute(s).` });
+      }
+      if (!allowRequest(req, "admin-auth", 10)) return json(res, 429, { error: "Too many attempts. Try again later." });
       if (!ADMIN_PIN) return json(res, 503, { error: "Seller access is not configured." });
-      if (!safeEqual(String(body.pin || ""), ADMIN_PIN)) return json(res, 401, { error: "That PIN is not correct." });
+      if (!safeEqual(String(body.pin || ""), ADMIN_PIN)) {
+        const fails = recordAdminAuthFailure(req);
+        const remaining = Math.max(0, 5 - fails);
+        return json(res, 401, { error: remaining > 0 ? `That PIN is not correct. ${remaining} attempt(s) remaining.` : "That PIN is not correct. Studio locked for 15 minutes." });
+      }
+      recordAdminAuthSuccess(req);
       return json(res, 200, { token: issueAdminSession(), expiresIn: 8 * 60 * 60 });
     }
     if (req.method === "POST" && pathname === "/api/admin/logout") {
@@ -1420,6 +1475,7 @@ async function api(req, res, pathname, body, url) {
       });
     }
     if (req.method === "GET" && pathname === "/api/window/debug-orders") {
+      if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const orders = await razorpayRequest("/orders?count=10");
       const payments = await razorpayRequest("/payments?count=10");
       return json(res, 200, { orders, payments });

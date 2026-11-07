@@ -43,7 +43,7 @@
 </style>
 </head>
 <body>
-<header class="admin-header"><a class="admin-brand" href="index.html"><span class="admin-mark">R</span><span>Raycrafting</span></a><div class="header-actions"><a href="docs.html" target="_blank" style="color:var(--coral-dark);font-weight:600;">Architecture Docs 📖</a><a href="index.html">View shop ↗</a><button id="logoutButton" type="button">Lock studio</button></div></header>
+<header class="admin-header"><a class="admin-brand" href="index.html"><span class="admin-mark">R</span><span>Raycrafting</span></a><div class="header-actions"><a href="docs.html" target="_blank" style="color:var(--coral-dark);font-weight:600;">Craft Guide 📖</a><a href="index.html">View shop ↗</a><button id="logoutButton" type="button">Lock studio</button></div></header>
 <main class="admin-shell">
 <section class="admin-hero"><div><p class="eyebrow">Private seller studio</p><h1>Your catalog,<br><em>your way.</em></h1></div><p class="admin-intro">Add a piece, upload its photo, set the price, and it will appear in the Raycrafting shop on this browser.</p></section>
 <section class="studio-grid">
@@ -61,7 +61,7 @@
 </main>
 <div class="access-modal" id="accessModal"><form class="access-card" id="accessForm"><span class="access-mark">R</span><p class="eyebrow">Raycrafting seller access</p><h2>Unlock your studio.</h2><p>Enter your studio PIN to edit the catalog.</p><label>Studio PIN<input id="pinInput" type="password" autocomplete="current-password" required autofocus></label><button class="primary-button" type="submit">Enter studio <span>→</span></button><p class="access-error" id="accessError"></p><small>Your seller PIN is checked securely by the backend.</small></form></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="catalog.js?v=20261107v6"></script>
+<script src="catalog.js?v=20261107v8"></script>
 <script>
 (function(){
   (function autoMigrateAdminCatalogCache() {
@@ -564,7 +564,7 @@
   renderList(); resetForm(); loadInitialCatalog();
 }());
 </script>
-<script src="seller-commerce.js?v=20261107v6"></script>
-<script src="seller-requests.js?v=custom2"></script>
+<script src="seller-commerce.js?v=20261107v8"></script>
+<script src="seller-requests.js?v=custom3"></script>
 </body>
 </html>

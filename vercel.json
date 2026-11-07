@@ -2,6 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/(\\.env.*|.*\\.sqlite|.*\\.db|server\\.js|products-seed\\.json|package\\.json|package-lock\\.json|AGENTS\\.md)",
+      "destination": "/404",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",

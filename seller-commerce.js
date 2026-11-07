@@ -320,7 +320,8 @@
       const fulfillment = '<div class="fulfillment-meta"><strong>' + esc(fulfillmentLabel(order)) + '</strong>' + (order.fulfillment_method !== "self_pickup" ? " · " + esc(order.shipping_status || "Standard dispatch") : "") + '</div>';
 
       const cleanPhone = String(order.customer_phone || order.address?.phone || "").replace(/\D/g, "");
-      const waLink = cleanPhone ? `<a class="whatsapp-customer-btn" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${encodeURIComponent(`Hi ${order.customer_name || ""}, this is Raycrafting regarding your order ${order.id}!`)}">💬 Chat on WhatsApp</a>` : "";
+      const waText = encodeURIComponent(`Hi ${order.customer_name || ""}, this is Raycrafting regarding your order ${order.id}!`);
+      const waLink = cleanPhone ? `<a class="whatsapp-customer-btn" target="_blank" rel="noopener noreferrer" href="https://wa.me/${cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone}?text=${esc(waText)}">💬 Chat on WhatsApp</a>` : "";
 
       const actions = (order.status === "processing" ? '<button type="button" data-order-status="shipped" data-order-id="' + esc(order.id) + '">Mark shipped</button>' : "") +
         (canProcess && order.status === "paid" ? '<button type="button" data-order-status="processing" data-order-id="' + esc(order.id) + '">Accept &amp; Craft</button>' : "") +
