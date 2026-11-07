@@ -344,6 +344,25 @@ function productMarkup(product) {
     }
   }
 
+  let colorSelectorHtml = "";
+  if (Array.isArray(product.options) && product.options.length > 1) {
+    colorSelectorHtml = `
+      <div class="card-color-selector" data-action="none">
+        <div class="card-color-header">
+          <span class="card-color-label">Color:</span>
+          <strong class="card-color-name">${escapeHtml(product.options[0].name)}</strong>
+        </div>
+        <div class="card-color-chips" role="radiogroup" aria-label="Select color for ${escapeHtml(product.name)}">
+          ${product.options.map((opt, i) => `
+            <button type="button" class="card-color-chip ${i === 0 ? "active" : ""}" data-action="pick-color" data-color-name="${escapeHtml(opt.name)}" data-color-img="${escapeHtml(opt.image)}" title="${escapeHtml(opt.name)}" aria-label="${escapeHtml(opt.name)}" aria-checked="${i === 0}" role="radio">
+              <img src="${escapeHtml(opt.image)}" alt="${escapeHtml(opt.name)}" loading="lazy" />
+            </button>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
   const gallery = Array.isArray(product.images) && product.images.length > 1 ? product.images : [];
   const altAttrs = gallery.length > 1 ? ` data-alt-img="${escapeHtml(gallery[1])}" data-main-img="${escapeHtml(productImage(product))}"` : "";
 
@@ -365,6 +384,7 @@ function productMarkup(product) {
         <span class="product-price">${money(product.price)}</span>
         ${oldPriceHtml}
       </div>
+      ${colorSelectorHtml}
       <div class="product-actions-grid">
         <button class="action-btn action-btn-bag" type="button" data-action="add" aria-label="Add ${escapeHtml(product.name)} to bag">
           <span>ADD TO BAG</span>
@@ -476,12 +496,18 @@ async function loadPublicProducts() {
     if (!response.ok) return;
     const data = await response.json();
     if (!Array.isArray(data.products) || !data.products.length) return;
-    const normalized = data.products.map((p) => ({
-      ...p,
-      price: Number(p.price) || 0,
-      originalPrice: Number(p.originalPrice || p.original_price || 0),
-      original_price: Number(p.original_price || p.originalPrice || 0)
-    }));
+    const defaultMap = new Map((window.RAYCRAFTING_DEFAULT_PRODUCTS || []).map((d) => [d.id, d]));
+    const normalized = data.products.map((p) => {
+      const def = defaultMap.get(p.id);
+      const opts = (Array.isArray(p.options) && p.options.length) ? p.options : (def && def.options ? def.options : []);
+      return {
+        ...p,
+        options: opts,
+        price: Number(p.price) || 0,
+        originalPrice: Number(p.originalPrice || p.original_price || 0),
+        original_price: Number(p.original_price || p.originalPrice || 0)
+      };
+    });
     products = applyUserCustomPrices(normalized);
     window.RAYCRAFTING_PRODUCTS = products;
     renderProducts();
@@ -692,6 +718,35 @@ productGrid.addEventListener("click", (event) => {
   const product = products.find((item) => item.id === card.dataset.productId && isProductActive(item));
   if (!product) return;
 
+  // Handle color chip clicks right on the product card
+  const colorChip = event.target.closest("[data-action='pick-color']");
+  if (colorChip) {
+    event.stopPropagation();
+    const cardEl = colorChip.closest(".product-card");
+    if (!cardEl) return;
+    const chips = cardEl.querySelectorAll(".card-color-chip");
+    chips.forEach((c) => {
+      c.classList.remove("active");
+      c.setAttribute("aria-checked", "false");
+    });
+    colorChip.classList.add("active");
+    colorChip.setAttribute("aria-checked", "true");
+
+    const colorName = colorChip.dataset.colorName;
+    const colorImg = colorChip.dataset.colorImg;
+    cardEl.dataset.selectedOption = colorName;
+    cardEl.dataset.selectedImage = colorImg;
+
+    const labelEl = cardEl.querySelector(".card-color-name");
+    if (labelEl) labelEl.textContent = colorName;
+
+    const mainImg = cardEl.querySelector(".product-image img");
+    if (mainImg && colorImg) {
+      mainImg.src = colorImg;
+    }
+    return;
+  }
+
   if (event.target.closest("[data-action='like']")) {
     const liked = localStorage.getItem(`raycrafting-like-${product.id}`) === "true";
     localStorage.setItem(`raycrafting-like-${product.id}`, String(!liked));
@@ -700,11 +755,9 @@ productGrid.addEventListener("click", (event) => {
   }
 
   if (event.target.closest("[data-action='buy-now']")) {
-    if (Array.isArray(product.options) && product.options.length > 1) {
-      openProduct(product, { promptColorChoice: true, pendingAction: "buy-now" });
-      return;
-    }
-    addToCart(product.id, false);
+    const selectedColor = card.dataset.selectedOption || (Array.isArray(product.options) && product.options.length ? product.options[0].name : null);
+    const selectedImage = card.dataset.selectedImage || (Array.isArray(product.options) && product.options.length ? product.options[0].image : null);
+    addToCart(product.id, false, selectedColor ? { name: selectedColor, image: selectedImage } : null);
     if (typeof window.raycraftingOpenCheckout === "function") {
       window.raycraftingOpenCheckout();
     } else {
@@ -715,11 +768,9 @@ productGrid.addEventListener("click", (event) => {
 
   const addBtn = event.target.closest("[data-action='add']");
   if (addBtn) {
-    if (Array.isArray(product.options) && product.options.length > 1) {
-      openProduct(product, { promptColorChoice: true, pendingAction: "add" });
-      return;
-    }
-    addToCart(product.id);
+    const selectedColor = card.dataset.selectedOption || (Array.isArray(product.options) && product.options.length ? product.options[0].name : null);
+    const selectedImage = card.dataset.selectedImage || (Array.isArray(product.options) && product.options.length ? product.options[0].image : null);
+    addToCart(product.id, true, selectedColor ? { name: selectedColor, image: selectedImage } : null);
     const originalHtml = addBtn.innerHTML;
     addBtn.innerHTML = `<span>Added!</span>`;
     addBtn.classList.add("added-feedback");

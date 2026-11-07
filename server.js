@@ -255,10 +255,20 @@ if (fs.existsSync(seedPath)) {
     // Never overwrite customized prices, names, positions, or active statuses on server restart.
     if (existingCount === 0) {
       const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
-      const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+      const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
       for (const p of seedProducts) {
         const imgs = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
-        productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
+        const opts = Array.isArray(p.options) && p.options.length ? JSON.stringify(p.options) : null;
+        productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), opts, p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
+      }
+    } else {
+      // Sync options_json from seedProducts so existing deployments receive the color options
+      const updateOpts = db.prepare("UPDATE products SET options_json=? WHERE id=?");
+      const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
+      for (const p of seedProducts) {
+        if (Array.isArray(p.options) && p.options.length) {
+          updateOpts.run(JSON.stringify(p.options), String(p.id));
+        }
       }
     }
     // Re-apply any user custom prices on startup so user-set prices are never lost
@@ -1456,7 +1466,7 @@ async function api(req, res, pathname, body, url) {
           discount: coupon.discount,
           shipping,
           coupon_code: coupon.code,
-          items: verified.map(v => ({ name: v.product.name, unit_price: v.product.price, quantity: v.quantity, line_total: v.lineTotal })),
+          items: verified.map(v => ({ name: v.product.name + (v.option ? ` (${v.option})` : ""), unit_price: v.product.price, quantity: v.quantity, line_total: v.lineTotal })),
           customer_name: customer.name || address.name,
           customer_email: isRealEmail ? suppliedEmail : (customer.email && !customer.email.endsWith("@accounts.raycrafting.local") ? customer.email : address.email),
           payment_method: "cod",

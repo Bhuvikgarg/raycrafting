@@ -1300,7 +1300,9 @@
       const phone = String(supportConfig.supportPhone || "").replace(/\D/g, "");
       if (phone) {
         const clean = phone.startsWith("91") ? phone : "91" + phone;
-        waBtn.href = `https://wa.me/${clean}?text=${encodeURIComponent(`Hi Raycrafting! I just placed order ${orderId} on Raycrafting (${money(total)}). Excited for my handmade blooms!`)}`;
+        const itemsSummary = orderedItems.map((item) => `${item.quantity || 1}x ${item.name || item.product?.name || 'Piece'}${item.option ? ' (' + item.option + ')' : ''}`).join(', ');
+        const waMsg = `Hi Raycrafting! I just placed order ${orderId} on Raycrafting (${money(total)}). Items: ${itemsSummary}. Excited for my handmade blooms!`;
+        waBtn.href = `https://wa.me/${clean}?text=${encodeURIComponent(waMsg)}`;
         waBtn.style.display = "inline-flex";
       } else {
         waBtn.style.display = "none";
