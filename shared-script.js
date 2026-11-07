@@ -1,5 +1,5 @@
 (function autoMigrateCatalogCache() {
-  const CURRENT_VERSION = "20261107_launch_v6";
+  const CURRENT_VERSION = "20261108_sync_v7";
   try {
     const savedVer = localStorage.getItem("raycrafting_catalog_ver");
     if (savedVer !== CURRENT_VERSION) {
@@ -8,7 +8,9 @@
         "raycrafting-products-v2",
         "raycrafting-products-v3",
         "raycrafting-products-v4",
-        "raycrafting-products-v5"
+        "raycrafting-products-v5",
+        "raycrafting-products-v6",
+        "raycrafting_user_prices"
       ];
       keys.forEach((k) => {
         try { localStorage.removeItem(k); } catch (e) {}
@@ -505,12 +507,9 @@ async function loadPublicProducts() {
     if (!Array.isArray(data.products) || !data.products.length) return;
     const defaultMap = new Map((window.RAYCRAFTING_DEFAULT_PRODUCTS || []).map((d) => [d.id, d]));
     const normalized = data.products.map((p) => {
-      const def = defaultMap.get(p.id);
       const colorsActive = p.showColors !== false && p.show_colors !== 0;
-      let opts = [];
-      if (colorsActive) {
-        opts = (Array.isArray(p.options) && p.options.length) ? p.options : (def && def.options ? def.options : []);
-      }
+      // Real database options - never resurrect deleted options from static defaults!
+      const opts = Array.isArray(p.options) ? p.options : [];
       return {
         ...p,
         options: opts,

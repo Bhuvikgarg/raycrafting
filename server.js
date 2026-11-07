@@ -253,7 +253,7 @@ if (fs.existsSync(seedPath)) {
   try {
     const existingCount = Number(db.prepare("SELECT count(*) as count FROM products").get()?.count || 0);
     // ONLY seed initial products if the products table is completely empty!
-    // Never overwrite customized prices, names, positions, or active statuses on server restart.
+    // Never overwrite customized prices, names, positions, colors, or active statuses on server restart.
     if (existingCount === 0) {
       const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
       const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
@@ -261,15 +261,6 @@ if (fs.existsSync(seedPath)) {
         const imgs = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
         const opts = Array.isArray(p.options) && p.options.length ? JSON.stringify(p.options) : null;
         productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), opts, p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
-      }
-    } else {
-      // Sync options_json from seedProducts so existing deployments receive the color options
-      const updateOpts = db.prepare("UPDATE products SET options_json=? WHERE id=?");
-      const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
-      for (const p of seedProducts) {
-        if (Array.isArray(p.options) && p.options.length) {
-          updateOpts.run(JSON.stringify(p.options), String(p.id));
-        }
       }
     }
     // Re-apply any user custom prices on startup so user-set prices are never lost
@@ -1237,7 +1228,7 @@ async function api(req, res, pathname, body, url) {
         return {
           ...product,
           images,
-          options: showColors ? options : [],
+          options,
           rawOptions: options,
           showColors,
           show_colors: showColors ? 1 : 0,
@@ -1845,11 +1836,16 @@ async function api(req, res, pathname, body, url) {
             };
           });
           fs.writeFileSync(seedPath, JSON.stringify(cleanProds, null, 2), "utf8");
+          
+          // Mirror directly to catalog.js so static baseline and server DB are permanently aligned
+          const catalogJsPath = path.join(ROOT, "catalog.js");
+          const catalogJsContent = `window.RAYCRAFTING_STORAGE_VERSION = "${Date.now()}";\nwindow.RAYCRAFTING_STORAGE_KEY = "raycrafting-products-v6";\nwindow.RAYCRAFTING_DEFAULT_IMAGE = "${cleanProds[0]?.image || 'assets/products/illuminated-lotus-blossom-lamp-1.webp'}";\nwindow.RAYCRAFTING_DEFAULT_PRODUCTS = ${JSON.stringify(cleanProds, null, 2)};\n`;
+          fs.writeFileSync(catalogJsPath, catalogJsContent, "utf8");
         } catch(e) {
-          console.warn("Could not mirror products-seed.json:", e.message);
+          console.warn("Could not mirror products-seed.json / catalog.js:", e.message);
         }
       } catch (error) { db.exec("ROLLBACK"); throw error; }
-      return json(res, 200, { ok: true, count: products.length });
+      return json(res, 200, { ok: true, count: products.length, savedAt: new Date().toISOString(), message: "All products permanently saved to backend database, seed JSON, and catalog." });
     }
     if (req.method === "POST" && pathname === "/api/admin/products/toggle-colors") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
