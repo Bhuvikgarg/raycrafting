@@ -388,28 +388,41 @@ function saveCart() {
   renderCart();
 }
 
+let selectedProductOption = null;
+
 function cartQuantity() {
   return cart.reduce((total, item) => total + item.quantity, 0);
 }
 
-function addToCart(productId, notify = true) {
+function addToCart(productId, notify = true, selectedOption = null) {
   const product = products.find((item) => item.id === productId && isProductActive(item));
   if (!product) return;
-  const existing = cart.find((item) => item.id === productId);
-  if (existing) existing.quantity += 1;
-  else cart.push({ id: productId, quantity: 1 });
+  
+  const optName = selectedOption ? (typeof selectedOption === "object" ? selectedOption.name : String(selectedOption)) : null;
+  const optImage = selectedOption && selectedOption.image ? selectedOption.image : null;
+
+  const existing = cart.find((item) => item.id === productId && (item.option || null) === (optName || null));
+  if (existing) {
+    existing.quantity += 1;
+    if (optImage && !existing.image) existing.image = optImage;
+  } else {
+    cart.push({ id: productId, quantity: 1, option: optName, image: optImage });
+  }
   saveCart();
-  if (notify) showToast(`${product.name} added to your bag.`);
+  const label = optName ? `${product.name} (${optName})` : product.name;
+  if (notify) showToast(`${label} added to your bag.`);
   if (window.raycraftingTrack) {
-    window.raycraftingTrack("add_to_cart", { item_id: product.id, item_name: product.name, price: product.price });
+    window.raycraftingTrack("add_to_cart", { item_id: product.id, item_name: product.name, item_variant: optName || "default", price: product.price });
   }
 }
 
-function updateQuantity(productId, change) {
-  const item = cart.find((entry) => entry.id === productId);
+function updateQuantity(productId, change, option = null) {
+  const item = cart.find((entry) => entry.id === productId && (entry.option || null) === (option || null));
   if (!item) return;
   item.quantity += change;
-  if (item.quantity <= 0) cart = cart.filter((entry) => entry.id !== productId);
+  if (item.quantity <= 0) {
+    cart = cart.filter((entry) => !(entry.id === productId && (entry.option || null) === (option || null)));
+  }
   saveCart();
 }
 
@@ -422,7 +435,10 @@ function renderCart() {
   drawerFooter.hidden = cart.length === 0;
   cartItems.innerHTML = cart.map((item) => {
     const product = products.find((entry) => entry.id === item.id);
-    return `<div class="cart-line"><div class="cart-line-art art-${escapeHtml(product.art || "default")} "><img src="${escapeHtml(productImage(product))}" alt="${escapeHtml(product.name)} thumbnail" /></div><div><h3>${escapeHtml(product.name)}</h3><p>${money(product.price)} · ${escapeHtml(product.detail)}</p><div class="qty-control"><button type="button" data-quantity="-1" data-id="${escapeHtml(product.id)}" aria-label="Decrease quantity">−</button><span>${item.quantity}</span><button type="button" data-quantity="1" data-id="${escapeHtml(product.id)}" aria-label="Increase quantity">+</button></div><button class="remove-line" type="button" data-remove="${escapeHtml(product.id)}">Remove</button></div><span class="cart-line-price">${money(product.price * item.quantity)}</span></div>`;
+    if (!product) return "";
+    const displayImg = item.image || productImage(product);
+    const optionBadge = item.option ? `<div class="cart-line-option"><span>Color:</span> <strong>${escapeHtml(item.option)}</strong></div>` : "";
+    return `<div class="cart-line"><div class="cart-line-art art-${escapeHtml(product.art || "default")} "><img src="${escapeHtml(displayImg)}" alt="${escapeHtml(product.name)} thumbnail" /></div><div><h3>${escapeHtml(product.name)}</h3>${optionBadge}<p>${money(product.price)} · ${escapeHtml(product.detail)}</p><div class="qty-control"><button type="button" data-quantity="-1" data-id="${escapeHtml(product.id)}" data-option="${escapeHtml(item.option || '')}" aria-label="Decrease quantity">−</button><span>${item.quantity}</span><button type="button" data-quantity="1" data-id="${escapeHtml(product.id)}" data-option="${escapeHtml(item.option || '')}" aria-label="Increase quantity">+</button></div><button class="remove-line" type="button" data-remove="${escapeHtml(product.id)}" data-option="${escapeHtml(item.option || '')}">Remove</button></div><span class="cart-line-price">${money(product.price * item.quantity)}</span></div>`;
   }).join("");
   const subtotal = cart.reduce((total, item) => total + products.find((product) => product.id === item.id).price * item.quantity, 0);
   document.querySelector("#cartSubtotal").textContent = money(subtotal);
@@ -489,8 +505,9 @@ function showToast(message) {
   showToast.timeout = setTimeout(() => toast.classList.remove("show"), 2600);
 }
 
-function openProduct(product) {
+function openProduct(product, modalOptions = {}) {
   selectedProduct = product;
+  selectedProductOption = (Array.isArray(product.options) && product.options.length > 0) ? product.options[0] : null;
   if (window.raycraftingTrack) {
     window.raycraftingTrack("view_item", { item_id: product.id, item_name: product.name, price: product.price, category: product.category });
   }
@@ -543,6 +560,76 @@ function openProduct(product) {
     ${discountHtml}
   `;
   document.querySelector("#modalDetail").textContent = product.detail;
+
+  // Render Color Choice Options if product has options
+  const colorSection = document.querySelector("#modalColorChoiceSection");
+  if (colorSection) {
+    if (Array.isArray(product.options) && product.options.length > 1) {
+      colorSection.hidden = false;
+      colorSection.innerHTML = `
+        <div class="product-color-choice-wrap ${modalOptions.promptColorChoice ? "highlight-pulse" : ""}" id="modalColorChoiceWrap">
+          <div class="color-choice-header">
+            <span class="color-choice-label">Choose Color / Option:</span>
+            <strong class="color-choice-selected-name" id="selectedColorName">${escapeHtml(selectedProductOption.name)}</strong>
+          </div>
+          <p class="color-choice-hint">${modalOptions.promptColorChoice ? "👉 Please select your favorite color option below to continue:" : "Tap a photo below to preview and choose that color option:"}</p>
+          <div class="color-choice-grid" id="modalColorGrid" role="radiogroup" aria-label="Color options">
+            ${product.options.map((opt, i) => `
+              <button type="button" class="color-choice-card ${i === 0 ? "active" : ""}" data-option-idx="${i}" data-option-name="${escapeHtml(opt.name)}" data-option-img="${escapeHtml(opt.image)}" role="radio" aria-checked="${i === 0}">
+                <div class="color-choice-img-wrap">
+                  <img src="${escapeHtml(opt.image)}" alt="${escapeHtml(opt.name)}" loading="lazy" />
+                  <span class="color-choice-check-badge">✓</span>
+                </div>
+                <span class="color-choice-title">${escapeHtml(opt.name)}</span>
+              </button>
+            `).join("")}
+          </div>
+        </div>
+      `;
+
+      colorSection.querySelectorAll(".color-choice-card").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.optionIdx);
+          selectedProductOption = product.options[idx] || { name: btn.dataset.optionName, image: btn.dataset.optionImg };
+          
+          colorSection.querySelectorAll(".color-choice-card").forEach((b) => {
+            b.classList.remove("active");
+            b.setAttribute("aria-checked", "false");
+          });
+          btn.classList.add("active");
+          btn.setAttribute("aria-checked", "true");
+          
+          const selNameEl = document.querySelector("#selectedColorName");
+          if (selNameEl) selNameEl.textContent = selectedProductOption.name;
+          
+          // Switch main image to selected color option photo
+          const mainImg = document.querySelector("#modalMainImg");
+          if (mainImg && selectedProductOption.image) {
+            mainImg.src = selectedProductOption.image;
+          }
+          
+          // Sync gallery thumbnails
+          document.querySelectorAll("#modalArt .modal-thumb-btn").forEach((tBtn) => {
+            if (tBtn.dataset.src === selectedProductOption.image) {
+              tBtn.classList.add("active");
+            } else {
+              tBtn.classList.remove("active");
+            }
+          });
+        });
+      });
+
+      if (modalOptions.promptColorChoice) {
+        setTimeout(() => {
+          colorSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 80);
+      }
+    } else {
+      colorSection.hidden = true;
+      colorSection.innerHTML = "";
+    }
+  }
+
   const buyNowModalBtn = document.querySelector("#modalBuyNow");
   if (buyNowModalBtn) {
     buyNowModalBtn.textContent = "BUY NOW";
@@ -613,6 +700,10 @@ productGrid.addEventListener("click", (event) => {
   }
 
   if (event.target.closest("[data-action='buy-now']")) {
+    if (Array.isArray(product.options) && product.options.length > 1) {
+      openProduct(product, { promptColorChoice: true, pendingAction: "buy-now" });
+      return;
+    }
     addToCart(product.id, false);
     if (typeof window.raycraftingOpenCheckout === "function") {
       window.raycraftingOpenCheckout();
@@ -624,6 +715,10 @@ productGrid.addEventListener("click", (event) => {
 
   const addBtn = event.target.closest("[data-action='add']");
   if (addBtn) {
+    if (Array.isArray(product.options) && product.options.length > 1) {
+      openProduct(product, { promptColorChoice: true, pendingAction: "add" });
+      return;
+    }
     addToCart(product.id);
     const originalHtml = addBtn.innerHTML;
     addBtn.innerHTML = `<span>Added!</span>`;
@@ -669,7 +764,7 @@ productGrid.addEventListener("mouseout", (event) => {
 
 document.querySelector("#modalAdd").addEventListener("click", () => {
   if (!selectedProduct) return;
-  addToCart(selectedProduct.id);
+  addToCart(selectedProduct.id, true, selectedProductOption);
   closeModal();
   setDrawer(true);
 });
@@ -678,7 +773,7 @@ const modalBuyNow = document.querySelector("#modalBuyNow");
 if (modalBuyNow) {
   modalBuyNow.addEventListener("click", () => {
     if (!selectedProduct) return;
-    addToCart(selectedProduct.id, false);
+    addToCart(selectedProduct.id, false, selectedProductOption);
     closeModal();
     if (typeof window.raycraftingOpenCheckout === "function") {
       window.raycraftingOpenCheckout();
@@ -696,8 +791,15 @@ document.querySelector("#emptyShop").addEventListener("click", () => setDrawer(f
 cartItems.addEventListener("click", (event) => {
   const quantityButton = event.target.closest("[data-quantity]");
   const removeButton = event.target.closest("[data-remove]");
-  if (quantityButton) updateQuantity(quantityButton.dataset.id, Number(quantityButton.dataset.quantity));
-  if (removeButton) { cart = cart.filter((item) => item.id !== removeButton.dataset.remove); saveCart(); }
+  if (quantityButton) {
+    updateQuantity(quantityButton.dataset.id, Number(quantityButton.dataset.quantity), quantityButton.dataset.option || null);
+  }
+  if (removeButton) {
+    const remId = removeButton.dataset.remove;
+    const remOpt = removeButton.dataset.option || null;
+    cart = cart.filter((item) => !(item.id === remId && (item.option || null) === (remOpt || null)));
+    saveCart();
+  }
 });
 const giftCheck = document.querySelector("#giftNoteCheck");
 const giftBox = document.querySelector("#giftNoteBox");

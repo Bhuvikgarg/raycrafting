@@ -3,8 +3,8 @@
     "id": "illuminated-lotus-blossom-lamp",
     "name": "Big size lotus Lamp",
     "category": "Flowers",
-    "price": 555,
-    "original_price": 650,
+    "price": 555.0,
+    "original_price": 650.0,
     "detail": "Handcrafted velvet petals \u00b7 Built-in warm LED glow",
     "description": "A breathtaking handcrafted lotus blossom sculpted from rich pink velvet chenille petals resting on an emerald moss base. Features warm fairy lights glowing gently from within the blossom center, creating a tranquil ambient night light or desk centerpiece.",
     "featured": 1,
@@ -19,14 +19,28 @@
     "dimensions": "Diameter: ~14 cm \u00b7 Height: ~9 cm",
     "materials": "Plush pink velvet chenille, preserved craft moss base, warm-tone LED micro fairy lights",
     "care": "Indoor ambient light \u00b7 Dust gently with soft dry cloth \u00b7 Replaceable mini cell battery",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Lotus Blossom Pink",
+        "image": "assets/products/illuminated-lotus-blossom-lamp-1.webp"
+      },
+      {
+        "name": "Rose Ambient Glow",
+        "image": "assets/products/illuminated-lotus-blossom-lamp-2.webp"
+      },
+      {
+        "name": "Golden Lotus Light",
+        "image": "assets/products/illuminated-lotus-blossom-lamp-3.webp"
+      }
+    ]
   },
   {
     "id": "medium-sized-lotus-lamp",
     "name": "Medium sized lotus lamp for diwali +(2 wax tea light candles free)",
     "category": "Flowers",
-    "price": 199,
-    "original_price": 350,
+    "price": 199.0,
+    "original_price": 350.0,
     "detail": "Beautiful kotus lamp crafted with love using pipe cleaners",
     "description": "Durability and beauty when it illuminates the home with a soft, warm amber glow.",
     "featured": 2,
@@ -40,14 +54,24 @@
     "dimensions": "~14-16 cm tall",
     "materials": "Velvety chenille stems & craft pot",
     "care": "Everlasting bloom \u00b7 Never withers \u00b7 Zero watering",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Warm Rose Petals",
+        "image": "assets/products/illuminated-lotus-blossom-lamp-2.webp"
+      },
+      {
+        "name": "Golden Candle Glow",
+        "image": "assets/products/illuminated-lotus-blossom-lamp-3.webp"
+      }
+    ]
   },
   {
     "id": "lavender-bouquet-pearl-lace",
     "name": "Lavender Dreams Pearl-Lace Bouquet",
     "category": "Flowers",
-    "price": 250,
-    "original_price": 399,
+    "price": 189.0,
+    "original_price": 399.0,
     "detail": "Handcrafted lavender stems \u00b7 Pearl beaded tulle wrap",
     "description": "Delicate sprigs of soft lavender pipe-cleaner blooms wrapped in pleated sheer organza tulle, finished with an elegant scalloped pearl-bead trim and a pearlescent ribbon bow. An everlasting bouquet that never wilts.",
     "featured": 3,
@@ -61,14 +85,24 @@
     "dimensions": "Length: ~22 cm \u00b7 Width: ~12 cm",
     "materials": "Fuzzy chenille stems, pleated blush organza, faux pearl bead trimming & satin bow",
     "care": "Everlasting floral keepsake \u00b7 Keeps its shape forever \u00b7 No water needed",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Pearl Lace Wrap",
+        "image": "assets/products/lavender-bouquet-pearl-lace-1.webp"
+      },
+      {
+        "name": "Silk Ribbon Wrap",
+        "image": "assets/products/lavender-bouquet-pearl-lace-2.webp"
+      }
+    ]
   },
   {
     "id": "potted-red-tulips-planter",
     "name": "Potted Red & Velvet Tulips Planter",
     "category": "Flowers",
-    "price": 300,
-    "original_price": 380,
+    "price": 249.0,
+    "original_price": 380.0,
     "detail": "Handcrafted tulip cluster \u00b7 Ribbed cup planter",
     "description": "A vibrant cluster of hand-twisted crimson and deep velvet burgundy tulips standing tall in emerald moss, housed inside a charming ribbed natural-tone cup planter.",
     "featured": 4,
@@ -82,14 +116,24 @@
     "dimensions": "Height: ~15 cm \u00b7 Planter diameter: ~7 cm",
     "materials": "Velvety red chenille wire, florist stems, moss bedding, textured ribbed pot",
     "care": "Evergreen home decor \u00b7 Zero watering required \u00b7 Dust with soft brush",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Crimson Velvet",
+        "image": "assets/products/potted-red-tulips-planter-1.webp"
+      },
+      {
+        "name": "Burgundy Bloom",
+        "image": "assets/products/potted-red-tulips-planter-2.webp"
+      }
+    ]
   },
   {
     "id": "potted-orange-tulips-planter",
     "name": "Potted Tangerine Orange Tulips Planter",
     "category": "Flowers",
-    "price": 300,
-    "original_price": 380,
+    "price": 249.0,
+    "original_price": 380.0,
     "detail": "Handcrafted sunset tulips \u00b7 Ribbed cup planter",
     "description": "Radiant tangerine and sunset orange fuzzy tulips nestled in lush moss inside a handcrafted ribbed pot tied with a pure white ribbon accent. Brings year-round warmth and cheer to any room.",
     "featured": 5,
@@ -103,14 +147,24 @@
     "dimensions": "Height: ~15 cm \u00b7 Planter diameter: ~7 cm",
     "materials": "Vibrant orange chenille stems, green leaves, faux moss, weighted planter",
     "care": "Indoor decor \u00b7 Keep in a dry spot \u00b7 Pet and allergy friendly",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Sunset Tangerine",
+        "image": "assets/products/potted-orange-tulips-planter-1.webp"
+      },
+      {
+        "name": "Golden Amber",
+        "image": "assets/products/potted-orange-tulips-planter-2.webp"
+      }
+    ]
   },
   {
     "id": "trio-pearl-lace-bouquets",
     "name": "Trio Pearl-Lace Mini Bouquets Bundle",
     "category": "Bundles",
-    "price": 300,
-    "original_price": 450,
+    "price": 449.0,
+    "original_price": 450.0,
     "detail": "Set of 3 bouquets \u00b7 Sky Blue, Lavender & Ruby",
     "description": "A delightful collection of three handcrafted miniature floral bouquets in Sky Blue, Royal Lavender, and Ruby Red. Each bouquet is lovingly wrapped in pleated organza and detailed with delicate pearl-beaded lace borders.",
     "featured": 6,
@@ -129,8 +183,8 @@
     "id": "sunshine-daisy-fluffy-keychain",
     "name": "Sunshine Daisy Fluffy Charm Keychain",
     "category": "Keepsakes",
-    "price": 300,
-    "original_price": 350,
+    "price": 89.0,
+    "original_price": 350.0,
     "detail": "Soft fuzzy blossom \u00b7 Brass keyring & clasp",
     "description": "An ultra-soft, cloud-fluffy yellow daisy with a sweet blush-pink center, mounted on an antique brass keyring. Clips effortlessly onto keys, purses, backpacks, or planners.",
     "featured": 7,
@@ -149,8 +203,8 @@
     "id": "fluffy-kitten-paw-keychain",
     "name": "Fluffy Kitten Paw Charm Keychain",
     "category": "Keepsakes",
-    "price": 300,
-    "original_price": 360,
+    "price": 89.0,
+    "original_price": 360.0,
     "detail": "Soft cloud kitty paw \u00b7 Embroidered pink toe beans",
     "description": "Irresistibly cute snow-white kitten paw keychain featuring plump, hand-stitched strawberry-pink toe beans and paw pad. Soft, fuzzy, and designed to bring smiles every time you reach for your keys.",
     "featured": 8,
@@ -169,8 +223,8 @@
     "id": "sunny-side-moods-egg-tray",
     "name": "Sunny-Side Moods Fried Egg Tray with Emotion Yolks",
     "category": "Keepsakes",
-    "price": 300,
-    "original_price": 420,
+    "price": 249.0,
+    "original_price": 420.0,
     "detail": "Ceramic egg white dish \u00b7 4 interchangeable mood yolks",
     "description": "Artisan clay sunny-side-up fried egg trinket tray with 4 removable yolk discs featuring hand-painted expressive emotions (happy, winking, pouty, and shy). Swap the yolk to match your daily mood, or use as a jewelry and ring dish.",
     "featured": 9,
@@ -184,14 +238,24 @@
     "dimensions": "Tray: ~11 cm \u00d7 9 cm \u00b7 Yolks: ~3.5 cm diameter",
     "materials": "Sculpted clay ceramic, non-toxic acrylic colors, protective gloss sealant",
     "care": "Wipe with a soft dry cloth \u00b7 Not microwave or dishwasher safe",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Happy Sunshine Yolk",
+        "image": "assets/products/sunny-side-moods-egg-tray-1.webp"
+      },
+      {
+        "name": "Playful Wink Yolk",
+        "image": "assets/products/sunny-side-moods-egg-tray-2.webp"
+      }
+    ]
   },
   {
     "id": "cozy-movie-night-cocoa-popcorn",
     "name": "Cozy Movie Night Cocoa & Popcorn Duo",
     "category": "Keepsakes",
-    "price": 300,
-    "original_price": 420,
+    "price": 439.0,
+    "original_price": 569.0,
     "detail": "Pair of 2 handmade buddies \u00b7 Hot cocoa & buttered popcorn",
     "description": "The coziest desk companions! Handcrafted from chenille pipe cleaners, this duo features a cheerful steaming hot chocolate mug with marshmallow swirls and a striped retro popcorn tub loaded with golden buttered kernels.",
     "featured": 10,
@@ -205,14 +269,24 @@
     "dimensions": "Mug: ~6 cm \u00d7 6 cm \u00b7 Popcorn tub: ~6.5 cm \u00d7 5.5 cm",
     "materials": "Chenille pipe cleaners, bead eyes, blush detailing, reinforced interior structure",
     "care": "Display piece \u00b7 Dust gently with soft brush",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Steaming Hot Cocoa",
+        "image": "assets/products/cozy-movie-night-cocoa-popcorn-1.webp"
+      },
+      {
+        "name": "Buttered Popcorn Buddy",
+        "image": "assets/products/cozy-movie-night-cocoa-popcorn-2.webp"
+      }
+    ]
   },
   {
     "id": "pastel-sweet-cake-magnets",
     "name": "Pastel Sweet Cake Fridge Magnets (Trio)",
     "category": "Keepsakes",
-    "price": 300,
-    "original_price": 399,
+    "price": 159.0,
+    "original_price": 399.0,
     "detail": "Set of 3 mini dessert cakes \u00b7 Strong magnetic backing",
     "description": "A delightful patisserie set of 3 tiered miniature cakes handcrafted from soft chenille pipe cleaners in Lavender Cream, Strawberry Shortcake, and Pistachio Mint with bright red cherries. Each piece has a strong magnet to hold notes and photos on your fridge.",
     "featured": 11,
@@ -227,14 +301,28 @@
     "dimensions": "Each cake: ~4 cm \u00d7 4 cm \u00d7 4.5 cm",
     "materials": "Chenille wire pastries, miniature cherries, neodymium ferrite back magnet",
     "care": "Sticks to fridges, magnetic memo boards, and steel cabinets",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Strawberry Blush",
+        "image": "assets/products/pastel-sweet-cake-magnets-1.webp"
+      },
+      {
+        "name": "Lavender Cream",
+        "image": "assets/products/pastel-sweet-cake-magnets-2.webp"
+      },
+      {
+        "name": "Mint Matcha",
+        "image": "assets/products/pastel-sweet-cake-magnets-3.webp"
+      }
+    ]
   },
   {
     "id": "artisan-cheesecake-slices-magnet-set",
     "name": "Artisan Sliced Cheesecake with Cherries Magnet Set",
     "category": "Keepsakes",
-    "price": 300,
-    "original_price": 420,
+    "price": 359.0,
+    "original_price": 420.0,
     "detail": "5-slice artisan cake \u00b7 Dual heavy-duty magnets per slice",
     "description": "Intricately detailed golden-baked cheesecake slices crafted from velvety pipe cleaners, piped with fluffy whipped-cream borders and crowned with ruby cherries. Each slice features dual magnetic discs to securely hold recipes or pictures on metal surfaces.",
     "featured": 12,
@@ -248,14 +336,24 @@
     "dimensions": "Full cake diameter: ~14 cm \u00b7 Each slice length: ~7 cm",
     "materials": "Chenille cord cake layers, faux whipped cream, twin rear magnets",
     "care": "Arrange as a whole cake or separate across your fridge",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Golden Sliced Cake",
+        "image": "assets/products/artisan-cheesecake-slices-magnet-set-1.webp"
+      },
+      {
+        "name": "Single Cherry Wedge",
+        "image": "assets/products/artisan-cheesecake-slices-magnet-set-2.webp"
+      }
+    ]
   },
   {
     "id": "red-velvet-cake-slice-magnet",
     "name": "Red Velvet Cherry Cake Slice Fridge Magnet",
     "category": "Keepsakes",
-    "price": 70,
-    "original_price": 360,
+    "price": 50.0,
+    "original_price": 360.0,
     "detail": "Layered red velvet slice \u00b7 Cherry flower topping",
     "description": "Luscious layered red velvet cake wedge handcrafted with rich crimson and golden chenille cake layers, decorated with a piped floral rosette and red cherry. Fitted with a heavy-duty back magnet.",
     "featured": 13,
@@ -269,14 +367,24 @@
     "dimensions": "Length: ~7.5 cm \u00b7 Height: ~5.5 cm",
     "materials": "Crimson & caramel chenille stems, cherry embellishment, ferrite back magnet",
     "care": "Wipe with dry microfiber cloth",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Crimson Layer Slice",
+        "image": "assets/products/red-velvet-cake-slice-magnet-1.webp"
+      },
+      {
+        "name": "Cherry Blossom Topping",
+        "image": "assets/products/red-velvet-cake-slice-magnet-2.webp"
+      }
+    ]
   },
   {
     "id": "buttered-toast-clay-magnet",
     "name": "Golden Buttered Toast Clay Magnet",
     "category": "Keepsakes",
-    "price": 100,
-    "original_price": 350,
+    "price": 100.0,
+    "original_price": 350.0,
     "detail": "Hand-sculpted toast \u00b7 Melting golden butter pat",
     "description": "Whimsical handcrafted clay slice of golden breakfast toast complete with toasted crust edges and a thick melting square of butter. Finished with a protective satin glaze and strong rear magnet.",
     "featured": 14,
@@ -295,8 +403,8 @@
     "id": "golden-star-cookie-magnet",
     "name": "Golden Star Cookie Keepsake Magnet",
     "category": "Keepsakes",
-    "price": 100,
-    "original_price": 350,
+    "price": 100.0,
+    "original_price": 350.0,
     "detail": "Embossed star biscuit \u00b7 Toasted sugar details",
     "description": "A delightful clay cookie keepsake embossed with a rustic star motif and toasted sugar accents. Brings a touch of celestial cozy warmth to your kitchen or workspace memo board.",
     "featured": 15,
@@ -315,8 +423,8 @@
     "id": "mini-strawberry-shortcake-clay",
     "name": "Mini Strawberry Shortcake Clay Dessert",
     "category": "Keepsakes",
-    "price": 350,
-    "original_price": 360,
+    "price": 250.0,
+    "original_price": 360.0,
     "detail": "Two-tier sponge cake \u00b7 4 seeded red strawberries",
     "description": "Miniature two-tier golden-yellow sponge cake layered with sweet vanilla cream and topped with four realistic seeded strawberries. An eye-catching decorative keepsake for dollhouse collectors or desk decor.",
     "featured": 16,
@@ -330,14 +438,24 @@
     "dimensions": "Diameter: ~5 cm \u00b7 Height: ~5.5 cm",
     "materials": "Air-dry sculpting clay, fine detail acrylics, glossy strawberry glaze",
     "care": "Decorative keepsake \u00b7 Protect from moisture and direct water",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Two-Tier Shortcake",
+        "image": "assets/products/mini-strawberry-shortcake-clay-1.webp"
+      },
+      {
+        "name": "Fresh Berry Detail",
+        "image": "assets/products/mini-strawberry-shortcake-clay-2.webp"
+      }
+    ]
   },
   {
     "id": "pink-swirl-blossom-clay-magnet",
     "name": "Pink Swirl Blossom Clay Magnet",
     "category": "Keepsakes",
-    "price": 300,
-    "original_price": 340,
+    "price": 100.0,
+    "original_price": 340.0,
     "detail": "Scalloped pastel flower \u00b7 Rosette swirl center",
     "description": "Handcrafted scalloped petal pastry charm with a glossy strawberry-pink spiral swirl. Fitted with a strong magnet for displaying your favorite notes, photos, and postcards.",
     "featured": 17,
@@ -356,8 +474,8 @@
     "id": "ocean-breeze-blue-lily-bouquet",
     "name": "Ocean Breeze Blue Lily & Tulip Bouquet",
     "category": "Flowers",
-    "price": 999,
-    "original_price": 1599,
+    "price": 999.0,
+    "original_price": 1599.0,
     "detail": "Handcrafted velvety blue lilies, hyacinths & white daisies \u00b7 Pearl tulle trim",
     "description": "A dreamlike floral arrangement featuring sculpted azure lilies, soft blue hyacinths, deep navy berry sprigs, and blooming white daisies. Hand-wrapped in baby blue paper with delicate scalloped pearl-beaded tulle and a silky white satin ribbon bow.",
     "featured": 18,
@@ -374,14 +492,36 @@
     "dimensions": "~28 cm tall \u00b7 ~20 cm wide",
     "materials": "Premium soft chenille stems, pearl-beaded organza tulle, florist wrapping paper, satin ribbon",
     "care": "Everlasting bloom \u00b7 Never withers \u00b7 Keep in dry indoor space",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Azure Blue Lily",
+        "image": "assets/products/ocean-breeze-blue-lily-bouquet-1.webp"
+      },
+      {
+        "name": "Royal Daisy Mix",
+        "image": "assets/products/ocean-breeze-blue-lily-bouquet-2.webp"
+      },
+      {
+        "name": "Sky Hyacinth",
+        "image": "assets/products/ocean-breeze-blue-lily-bouquet-3.webp"
+      },
+      {
+        "name": "Deep Velvet Navy",
+        "image": "assets/products/ocean-breeze-blue-lily-bouquet-4.webp"
+      },
+      {
+        "name": "Ocean Deluxe Wrap",
+        "image": "assets/products/ocean-breeze-blue-lily-bouquet-5.webp"
+      }
+    ]
   },
   {
     "id": "blushing-rose-pearl-lace-bouquet",
     "name": "Blushing Rose & Baby's Breath Pearl-Lace Bouquet",
     "category": "Flowers",
-    "price": 350,
-    "original_price": 499,
+    "price": 189.0,
+    "original_price": 499.0,
     "detail": "Handcrafted pink and white rosebuds \u00b7 Scalloped pearl tulle wrap",
     "description": "An enchanting bouquet of delicate pink and pure white mini blossoms, encased in layers of pleated soft pink organza with an elegant pearl-beaded border and a lustrous white satin bow. Complete with an adorable plush teddy companion.",
     "featured": 19,
@@ -395,14 +535,24 @@
     "dimensions": "~22 cm tall \u00b7 ~14 cm wide",
     "materials": "Fluffy chenille velvet stems, scalloped pearl lace, pleated organza tulle, satin ribbon",
     "care": "Everlasting bloom \u00b7 Dust gently with soft dry cloth",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Blushing Pink Rose",
+        "image": "assets/products/blushing-rose-pearl-lace-bouquet-1.webp"
+      },
+      {
+        "name": "Pure White Lace",
+        "image": "assets/products/blushing-rose-pearl-lace-bouquet-2.webp"
+      }
+    ]
   },
   {
     "id": "petite-fluffy-blossom-teddy-bouquet",
     "name": "Petite Fluffy Blossom Bouquet with Teddy Companion",
     "category": "Flowers",
-    "price": 299,
-    "original_price": 420,
+    "price": 259.0,
+    "original_price": 420.0,
     "detail": "Multi-color fluffy bloom posy \u00b7 Scalloped pearl lace trim \u00b7 Plush teddy",
     "description": "Cheerful clusters of fluffy pipe-cleaner blooms with bright contrasting centers, wrapped in sheer pearl-bordered tulle with a white ribbon. Cuddled by a sweet mini plush teddy bear companion.",
     "featured": 20,
@@ -417,14 +567,28 @@
     "dimensions": "~20 cm tall \u00b7 ~12 cm wide",
     "materials": "Fluffy chenille stems, scalloped pearl tulle, plush teddy bear, satin bow",
     "care": "Indoor keepsake \u00b7 Keep dry",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Sweet Pink Posy",
+        "image": "assets/products/petite-fluffy-blossom-teddy-bouquet-1.webp"
+      },
+      {
+        "name": "Sunny Yellow Meadow",
+        "image": "assets/products/petite-fluffy-blossom-teddy-bouquet-2.webp"
+      },
+      {
+        "name": "Lavender Twilight",
+        "image": "assets/products/petite-fluffy-blossom-teddy-bouquet-3.webp"
+      }
+    ]
   },
   {
     "id": "springtime-pink-tulip-daisy-bouquet",
     "name": "Springtime Pink Tulip & Daisy Bouquet",
     "category": "Flowers",
-    "price": 380,
-    "original_price": 520,
+    "price": 399.0,
+    "original_price": 520.0,
     "detail": "Handcrafted blushing pink tulips, white daisies & green sprigs",
     "description": "A fresh spring bouquet featuring sculpted pastel pink tulips with gently furled petals, miniature white daisies, and vibrant green stems, wrapped in crisp white presentation paper.",
     "featured": 21,
@@ -443,8 +607,8 @@
     "id": "radiant-golden-sunflower-bouquet",
     "name": "Radiant Golden Sunflower Bouquet",
     "category": "Flowers",
-    "price": 350,
-    "original_price": 499,
+    "price": 379.0,
+    "original_price": 499.0,
     "detail": "Two large golden sunflowers with chocolate centers \u00b7 Pleated white wrap",
     "description": "Bring permanent sunshine into any room with these cheerful golden yellow sunflowers, sculpted with velvety petals and rich brown spiraled centers. Beautifully wrapped in pleated white florist paper.",
     "featured": 22,
@@ -463,8 +627,8 @@
     "id": "rainbow-wildflower-daisy-stems-bundle",
     "name": "Rainbow Wildflower Daisy Stems Bundle (Set of 6)",
     "category": "Flowers",
-    "price": 280,
-    "original_price": 399,
+    "price": 300.0,
+    "original_price": 399.0,
     "detail": "Assorted vibrant handcrafted daisies \u00b7 Bendable stems",
     "description": "A joyful bunch of colorful pipe-cleaner daisies in royal blue, bright purple, sunny orange, lavender, and scarlet red with contrasting centers. Flexible bendable stems allow you to arrange them in any vase or cup.",
     "featured": 23,
@@ -483,8 +647,8 @@
     "id": "illuminated-golden-lily-night-lamp",
     "name": "Illuminated Golden Lily Night Lamp with Garden Companion",
     "category": "Flowers",
-    "price": 550,
-    "original_price": 750,
+    "price": 1299.0,
+    "original_price": 1599.0,
     "detail": "Glowing yellow & magenta stargazer lily \u00b7 Warm micro LEDs \u00b7 Little green frog base",
     "description": "A stunning ambient sculpture featuring a brilliant golden lily with delicate magenta stamens that glow with warm embedded fairy lights. Guarded by a sweet miniature handcrafted green frog nestled in a mossy base.",
     "featured": 24,
@@ -498,14 +662,24 @@
     "dimensions": "~24 cm tall \u00b7 ~15 cm wide",
     "materials": "Premium chenille velvet, micro LED fairy wire, coin battery pack, moss base",
     "care": "Indoor ambient light \u00b7 Replaceable mini cell battery \u00b7 Keep away from water",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Golden Ambient Glow",
+        "image": "assets/products/illuminated-golden-lily-night-lamp-1.webp"
+      },
+      {
+        "name": "Frog Base Garden Nightlight",
+        "image": "assets/products/illuminated-golden-lily-night-lamp-2.webp"
+      }
+    ]
   },
   {
     "id": "pink-lotus-tea-light-candle-lamp",
     "name": "Pink Lotus Flower Tea-Light Candle Lamp",
     "category": "Flowers",
-    "price": 220,
-    "original_price": 320,
+    "price": 199.0,
+    "original_price": 320.0,
     "detail": "Velvet pink lotus blossom \u00b7 Center candle holder with battery LED tea light",
     "description": "A serene handcrafted pink lotus blossom with layered velvet petals, designed to hold an electric tea light in the center. Creates a peaceful, warm flickering glow on your nightstand or altar.",
     "featured": 25,
@@ -524,8 +698,8 @@
     "id": "chocolate-fudge-rose-birthday-cake",
     "name": "Handcrafted Chocolate Fudge Birthday Cake with Roses & Candle",
     "category": "Keepsakes",
-    "price": 499,
-    "original_price": 699,
+    "price": 555.0,
+    "original_price": 699.0,
     "detail": "3-layer chocolate chenille cake \u00b7 Crimson velvet roses \u00b7 Striped birthday candle",
     "description": "An irresistible everlasting celebration cake sculpted entirely from chocolate brown and cream pipe-cleaner spirals. Topped with miniature ruby velvet roses, cherry accents, and a festive birthday candle that never burns down.",
     "featured": 26,
@@ -541,14 +715,32 @@
     "dimensions": "~13 cm diameter \u00b7 ~14 cm tall (with candle)",
     "materials": "Ultra-plush chenille velvet, sculpted decorative candle",
     "care": "Keep on desk or shelf \u00b7 Dust gently",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Crimson Rose Tier",
+        "image": "assets/products/chocolate-fudge-rose-birthday-cake-1.webp"
+      },
+      {
+        "name": "Chocolate Truffle Swirl",
+        "image": "assets/products/chocolate-fudge-rose-birthday-cake-2.webp"
+      },
+      {
+        "name": "Birthday Candle Edition",
+        "image": "assets/products/chocolate-fudge-rose-birthday-cake-3.webp"
+      },
+      {
+        "name": "Keepsake Gift Box",
+        "image": "assets/products/chocolate-fudge-rose-birthday-cake-4.webp"
+      }
+    ]
   },
   {
     "id": "nazar-evil-eye-floral-wall-hanging",
     "name": "Nazar Evil Eye Floral Protection Wall Hanging & Car Charm",
     "category": "Keepsakes",
-    "price": 320,
-    "original_price": 450,
+    "price": 359.0,
+    "original_price": 450.0,
     "detail": "Velvet evil eye amulet \u00b7 White flower bells \u00b7 Pearl beaded string & ribbon",
     "description": "Ward off negativity and invite good vibes with this unique handmade Evil Eye charm. Features a fuzzy concentric blue, white, and black eye motif framed by dainty white flower bells and pearl drop tassels with a satin bow.",
     "featured": 27,
@@ -567,8 +759,8 @@
     "id": "melting-pop-art-cola-can-sculpture",
     "name": "Melting Pop-Art Cola Can Sculpture",
     "category": "Keepsakes",
-    "price": 399,
-    "original_price": 550,
+    "price": 599.0,
+    "original_price": 550.0,
     "detail": "Upcycled crushed aluminum soda can \u00b7 Sculpted glossy red melt drip",
     "description": "A quirky, modern pop-art desk centerpiece. A crushed Coca-Cola can sculpted with a glossy red melting spill cascading over the rim. Guaranteed conversation starter for desks, shelves, or creative studios.",
     "featured": 28,
@@ -587,8 +779,8 @@
     "id": "potted-smiling-sunflower-planter",
     "name": "Potted Sunshine Sunflower Planter",
     "category": "Flowers",
-    "price": 260,
-    "original_price": 380,
+    "price": 250.0,
+    "original_price": 380.0,
     "detail": "Velvety golden sunflower \u00b7 Green leaves \u00b7 Cozy hand-ribbed craft pot",
     "description": "A single cheerful sunflower standing tall in a ribbed chocolate-brown craft pot. Sits perfectly next to your computer monitor, bookshelf, or windowsill to brighten your workday.",
     "featured": 29,
@@ -607,8 +799,8 @@
     "id": "potted-pink-stargazer-lily-planter",
     "name": "Potted Pink Stargazer Lily Planter",
     "category": "Flowers",
-    "price": 260,
-    "original_price": 380,
+    "price": 250.0,
+    "original_price": 380.0,
     "detail": "Lush pink lily with textured petals \u00b7 Ribbed chocolate pot",
     "description": "An everlasting pink lily blooming gracefully with broad fuzzy petals and emerald leaves, nestled inside a ribbed craft pot. Adds a soft touch of nature to your workspace.",
     "featured": 30,
@@ -627,8 +819,8 @@
     "id": "potted-crimson-velvet-rose-planter",
     "name": "Potted Crimson Velvet Rose Planter",
     "category": "Flowers",
-    "price": 260,
-    "original_price": 380,
+    "price": 189.0,
+    "original_price": 380.0,
     "detail": "Rich magenta rose bloom \u00b7 Green foliage \u00b7 Ribbed craft pot",
     "description": "A timeless red rose crafted from thick velvet chenille stems, planted in a chocolate-brown ribbed desktop pot. The perfect romantic or friendship keepsake that never wilts.",
     "featured": 31,
@@ -647,8 +839,8 @@
     "id": "potted-lavender-dreams-desk-planter",
     "name": "Potted Lavender Dreams Desk Planter",
     "category": "Flowers",
-    "price": 260,
-    "original_price": 380,
+    "price": 250.0,
+    "original_price": 380.0,
     "detail": "Cluster of purple lavender stalks \u00b7 Compact tan pot \u00b7 Gift packaging available",
     "description": "A soothing miniature cluster of fuzzy purple lavender buds planted in a corrugated paper craft pot. Known for bringing peaceful, calming energy to any workspace or study table.",
     "featured": 32,
@@ -662,14 +854,24 @@
     "dimensions": "~15 cm tall \u00b7 ~8 cm wide",
     "materials": "Plush chenille stems, craft pot, gift wrap ribbon",
     "care": "Everlasting bloom \u00b7 Zero maintenance",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Lavender Desk Cluster",
+        "image": "assets/products/potted-lavender-dreams-desk-planter-1.webp"
+      },
+      {
+        "name": "Gift Box Edition",
+        "image": "assets/products/potted-lavender-dreams-desk-planter-2.webp"
+      }
+    ]
   },
   {
     "id": "twin-pastel-garden-potted-duo",
     "name": "Twin Pastel Garden Potted Duo (Lotus & Tulip)",
     "category": "Bundles",
-    "price": 450,
-    "original_price": 620,
+    "price": 250.0,
+    "original_price": 620.0,
     "detail": "Two matching miniature potted blooms \u00b7 Pink lotus & tulip pair",
     "description": "Double the charm with this coordinated duo of potted handcrafted flowers. Features a blooming pink stargazer lotus alongside a budding tulip in matching ribbed desktop planters with white bow accents.",
     "featured": 33,
@@ -683,14 +885,24 @@
     "dimensions": "Each pot ~15 cm tall \u00b7 ~8 cm diameter",
     "materials": "Velvety chenille stems, craft planters, bow trim",
     "care": "Everlasting blooms \u00b7 Keep indoors",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Pastel Pink Lotus",
+        "image": "assets/products/twin-pastel-garden-potted-duo-1.webp"
+      },
+      {
+        "name": "Velvet Garden Tulip",
+        "image": "assets/products/twin-pastel-garden-potted-duo-2.webp"
+      }
+    ]
   },
   {
     "id": "sweet-bunny-strawberry-garden-pot",
     "name": "Sweet Bunny Strawberry Garden Planter",
     "category": "Keepsakes",
-    "price": 320,
-    "original_price": 450,
+    "price": 350.0,
+    "original_price": 450.0,
     "detail": "Smiling pink bunny figurine \u00b7 Strawberry ears & blossom wreath",
     "description": "An extraordinarily adorable handcrafted desktop bunny with long pink-and-white ears, cute blush cheeks, and tiny strawberry details, crowned with miniature blossoms and resting in a tan ribbed pot.",
     "featured": 34,
@@ -709,8 +921,8 @@
     "id": "fluffy-bunny-ear-floral-headband",
     "name": "Fluffy Bunny Ear Floral Headband",
     "category": "Keepsakes",
-    "price": 249,
-    "original_price": 350,
+    "price": 69.0,
+    "original_price": 99.0,
     "detail": "Soft pink velvet bunny ears \u00b7 Handcrafted rose garland headband",
     "description": "Turn heads with this darling wearable headband featuring plush pink chenille bunny ears accented with a delicate garland of handcrafted pink roses. Comfortable flexible band fits all head sizes.",
     "featured": 35,
@@ -729,8 +941,8 @@
     "id": "sweet-bunny-mini-pouch-pearl-wristlet",
     "name": "Sweet Bunny Pouch Charm with Pearl Wristlet",
     "category": "Keepsakes",
-    "price": 280,
-    "original_price": 399,
+    "price": 219.0,
+    "original_price": 399.0,
     "detail": "Strawberry-themed bunny face charm \u00b7 Lustrous pearl bead wristlet",
     "description": "A pocket-sized companion featuring an adorable pink-cheeked bunny with green leaf bows and strawberry accents, attached to a durable gold keychain ring with a shimmering pearl bead loop.",
     "featured": 36,
@@ -749,8 +961,8 @@
     "id": "handcrafted-floral-pearl-wristlet-collection",
     "name": "Handcrafted Floral & Berry Pearl Wristlet Keychains",
     "category": "Keepsakes",
-    "price": 220,
-    "original_price": 320,
+    "price": 99.0,
+    "original_price": 199.0,
     "detail": "Sculpted bloom or ripe strawberry charm \u00b7 Lustrous pearl bead loop",
     "description": "Add a touch of handmade elegance to your keys or handbag. Each charm is carefully twisted from velvety chenille into a vibrant botanical motif and paired with a smooth faux-pearl wristlet chain.",
     "featured": 37,
@@ -767,14 +979,36 @@
     "dimensions": "Charm ~5-7 cm \u00b7 Pearl wristlet ~10 cm",
     "materials": "Chenille velvet, faux pearl beads, gold-plated keyring",
     "care": "Wipe gently with dry cloth",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Ripe Strawberry",
+        "image": "assets/products/handcrafted-floral-pearl-wristlet-collection-1.webp"
+      },
+      {
+        "name": "Blushing Rose",
+        "image": "assets/products/handcrafted-floral-pearl-wristlet-collection-2.webp"
+      },
+      {
+        "name": "Lavender Bloom",
+        "image": "assets/products/handcrafted-floral-pearl-wristlet-collection-3.webp"
+      },
+      {
+        "name": "Sunshine Daisy",
+        "image": "assets/products/handcrafted-floral-pearl-wristlet-collection-4.webp"
+      },
+      {
+        "name": "Garden Blossom",
+        "image": "assets/products/handcrafted-floral-pearl-wristlet-collection-5.webp"
+      }
+    ]
   },
   {
     "id": "petite-bloom-handmade-ring-collection",
     "name": "Petite Bloom Handmade Ring & Mini Charm Set",
     "category": "Keepsakes",
-    "price": 180,
-    "original_price": 260,
+    "price": 129.0,
+    "original_price": 260.0,
     "detail": "Miniature hand-twisted flower ring \u00b7 Soft comfortable band",
     "description": "Wear a little flower on your hand wherever you go! Miniature floral rings shaped by hand with velvety chenille petals and comfortable flexible fit. Available in Lavender Lily, Daisy, Sunset Blossom, and Pearl White.",
     "featured": 38,
@@ -791,14 +1025,36 @@
     "dimensions": "Blossom ~3.5 cm \u00b7 Adjustable flexible ring band",
     "materials": "Soft chenille pipe cleaners, flexible ring base",
     "care": "Keep dry \u00b7 Reshape petals gently with fingers",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Lavender Lily",
+        "image": "assets/products/petite-bloom-handmade-ring-collection-1.webp"
+      },
+      {
+        "name": "Sunshine Daisy",
+        "image": "assets/products/petite-bloom-handmade-ring-collection-2.webp"
+      },
+      {
+        "name": "Sunset Blossom",
+        "image": "assets/products/petite-bloom-handmade-ring-collection-3.webp"
+      },
+      {
+        "name": "Pearl White",
+        "image": "assets/products/petite-bloom-handmade-ring-collection-4.webp"
+      },
+      {
+        "name": "Pastel Ring Set",
+        "image": "assets/products/petite-bloom-handmade-ring-collection-5.webp"
+      }
+    ]
   },
   {
     "id": "kawaii-bakery-pastry-keepsake-trio",
     "name": "Kawaii Bakery Pastry Keepsake Trio",
     "category": "Keepsakes",
-    "price": 159,
-    "original_price": 420,
+    "price": 159.0,
+    "original_price": 420.0,
     "detail": "Strawberry roll cake, chocolate swirl pastry & cute onigiri",
     "description": "A delicious trio of miniature dessert keepsakes! Includes a strawberry-topped Swiss roll, a golden chocolate swirl pastry with sweet smiling face, and an adorable nori-wrapped rice ball.",
     "featured": 39,
@@ -813,14 +1069,28 @@
     "dimensions": "Each pastry ~6-8 cm",
     "materials": "Textured craft clay, felt sponge, hand-painted details",
     "care": "Decorative desk keepsake \u00b7 Do not wash with water",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Strawberry Roll Cake",
+        "image": "assets/products/kawaii-bakery-pastry-keepsake-trio-1.webp"
+      },
+      {
+        "name": "Chocolate Swirl Pastry",
+        "image": "assets/products/kawaii-bakery-pastry-keepsake-trio-2.webp"
+      },
+      {
+        "name": "Cute Onigiri",
+        "image": "assets/products/kawaii-bakery-pastry-keepsake-trio-3.webp"
+      }
+    ]
   },
   {
     "id": "kawaii-smiling-ice-cream-cone-charms",
     "name": "Kawaii Smiling Ice Cream Cone Charms",
     "category": "Keepsakes",
-    "price": 79,
-    "original_price": 350,
+    "price": 79.0,
+    "original_price": 350.0,
     "detail": "Plush double & triple scoop ice cream cones with friendly smiling faces",
     "description": "Irresistibly cute sculpted ice cream cones made from textured waffle cones and fluffy colorful scoops (strawberry, vanilla, and matcha) complete with hand-embroidered happy smiles.",
     "featured": 40,
@@ -834,14 +1104,24 @@
     "dimensions": "~9-12 cm tall",
     "materials": "Textured plush chenille, craft waffle cone",
     "care": "Gentle dry dusting",
-    "active": 1
+    "active": 1,
+    "options": [
+      {
+        "name": "Strawberry & Vanilla",
+        "image": "assets/products/kawaii-smiling-ice-cream-cone-charms-1.webp"
+      },
+      {
+        "name": "Matcha & Sunshine",
+        "image": "assets/products/kawaii-smiling-ice-cream-cone-charms-2.webp"
+      }
+    ]
   },
   {
     "id": "fluffy-pastel-flower-coasters-charms",
     "name": "Fluffy Pastel Flower Coasters & Charms (Set of 4)",
     "category": "Keepsakes",
-    "price": 260,
-    "original_price": 380,
+    "price": 320.0,
+    "original_price": 499.0,
     "detail": "4 ultra-fluffy daisy flowers \u00b7 Pink, yellow, white & lavender",
     "description": "Incredibly soft and plush floral discs that serve as cute cup coasters or cheerful decorative accents for your vanity and nightstand. Can also be clipped to tote bags!",
     "featured": 41,
@@ -860,8 +1140,8 @@
     "id": "artisan-sliced-party-cake-platter",
     "name": "Artisan Handcrafted Party Cake Platter (Full 8-Slice Wheel)",
     "category": "Keepsakes",
-    "price": 799,
-    "original_price": 999,
+    "price": 599.0,
+    "original_price": 999.0,
     "detail": "8 individual pipe-cleaner cake slices with cherries and whipped cream",
     "description": "A full celebratory party cake composed of 8 individual slice charms arranged in a circle. Each slice is sculpted with fluffy sponge layers, piped white frosting, and a bright red cherry on top.",
     "featured": 42,
@@ -880,8 +1160,8 @@
     "id": "kawaii-shooting-star-and-kitty-charms",
     "name": "Kawaii Shooting Star & Kitty Keychain Charm Duo",
     "category": "Keepsakes",
-    "price": 240,
-    "original_price": 340,
+    "price": 300.0,
+    "original_price": 499.0,
     "detail": "Smiling yellow star & sweet white kitty with pink bow",
     "description": "Spread joy with this adorable duo! Includes a plush yellow shooting star with cute embroidered blush cheeks and a white kitten charm wearing a soft pink hair ribbon.",
     "featured": 43,
@@ -900,8 +1180,8 @@
     "id": "smiling-golden-toast-and-berry-charms",
     "name": "Smiling Golden Toast & Berry Keepsake Charm Pair",
     "category": "Keepsakes",
-    "price": 220,
-    "original_price": 300,
+    "price": 200.0,
+    "original_price": 300.0,
     "detail": "Pair of toast charms \u00b7 Melting butter & berry toppings",
     "description": "A heartwarming pair of handcrafted bread slices sculpted with golden-brown toasted crusts, smiling faces, and rich dollops of melting butter and blueberry toppings.",
     "featured": 44,

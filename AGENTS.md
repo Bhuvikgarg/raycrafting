@@ -91,3 +91,14 @@
 
 
 
+
+## 15. Color Choice Options Architecture & Visual Selection Flow
+- **Visual Photo Swatches for Multi-Option Products:** For products with multiple colors or styles (e.g. rings, bouquets, wristlets, magnets, lamps), buyers are shown interactive photo swatches displaying the actual photo of the colored option (`.color-choice-card`), with option title and active check badge (`✓`).
+- **Real-Time Photo Switching:** Tapping any color option updates the selected state, highlights the active choice with brand styling, and immediately switches the main modal photograph (`#modalMainImg`) to the photo of that specific colored option.
+- **Card Action Interception for Options:** If a buyer taps `ADD TO BAG` or `BUY NOW` directly from the catalogue grid for a piece that has multiple color choices, the system intercepts the click and opens the Quick View modal with the color choices highlighted (`.product-color-choice-wrap.highlight-pulse`) and prompts the buyer to choose their preferred color before proceeding.
+- **Cart & Checkout Color Preservation:**
+  - Selected options are captured as `{ id, quantity, option, image }` in `raycrafting-cart`.
+  - Bag drawer renders distinct cart lines for different chosen colors of the same product, displaying the color badge (`.cart-line-option`) and that exact color's thumbnail image.
+  - Checkout summary (`#checkoutLines`) preserves the chosen color subtitle (`.checkout-line-option`).
+  - Order items in SQLite (`order_items.selected_option` and `order_items.name`) and order notifications record the chosen color option cleanly.
+- **Pricing File Synchronization Rule:** Product pricing across `data/raycrafting.sqlite` (`products` and `custom_prices` tables), `catalog.js`, and `products-seed.json` is strictly derived from user-specified pricing files without deviations.

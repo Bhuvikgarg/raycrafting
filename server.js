@@ -212,6 +212,8 @@ ensureColumn("products", "dimensions", "TEXT");
 ensureColumn("products", "materials", "TEXT");
 ensureColumn("products", "care", "TEXT");
 ensureColumn("products", "images_json", "TEXT");
+ensureColumn("products", "options_json", "TEXT");
+ensureColumn("order_items", "selected_option", "TEXT");
 ensureColumn("orders", "gift_message", "TEXT");
 ensureColumn("custom_orders", "quoted_price", "REAL");
 ensureColumn("custom_orders", "buyer_price_request", "INTEGER DEFAULT 0");
@@ -1213,12 +1215,14 @@ async function api(req, res, pathname, body, url) {
       });
     }
     if (req.method === "GET" && pathname === "/api/products") {
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care FROM products WHERE active=1 ORDER BY featured ASC, name ASC").all();
       const mapped = products.map((product) => {
         let images = [];
         try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
         if (!images.length && product.image) images = [product.image];
-        return { ...product, images, originalPrice: product.original_price || 0 };
+        let options = [];
+        try { options = product.options_json ? JSON.parse(product.options_json) : []; } catch {}
+        return { ...product, images, options, originalPrice: product.original_price || 0 };
       });
       return json(res, 200, {
         products: applyCustomPriceOverrides(mapped)
@@ -1226,12 +1230,14 @@ async function api(req, res, pathname, body, url) {
     }
     if (req.method === "GET" && pathname === "/api/admin/products") {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
-      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
+      const products = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
       const mapped = products.map((product) => {
         let images = [];
         try { images = product.images_json ? JSON.parse(product.images_json) : []; } catch {}
         if (!images.length && product.image) images = [product.image];
-        return { ...product, images, originalPrice: product.original_price || 0, active: product.active !== 0 };
+        let options = [];
+        try { options = product.options_json ? JSON.parse(product.options_json) : []; } catch {}
+        return { ...product, images, options, originalPrice: product.original_price || 0, active: product.active !== 0 };
       });
       return json(res, 200, {
         products: applyCustomPriceOverrides(mapped)
@@ -1419,22 +1425,26 @@ async function api(req, res, pathname, body, url) {
 
       if (!items.length) return json(res, 400, { error: "Your bag is empty." });
       const getProduct = db.prepare("SELECT * FROM products WHERE id=? AND active=1"); const verified = []; let subtotal = 0;
-      for (const item of items) { const product = getProduct.get(String(item.id)); const quantity = Math.max(1, Math.min(99, Number(item.quantity) || 1)); if (!product) return json(res, 400, { error: "One of the products is no longer available." }); const lineTotal = Math.round(product.price * quantity * 100) / 100; subtotal += lineTotal; verified.push({ product, quantity, lineTotal }); }
+      for (const item of items) { const product = getProduct.get(String(item.id)); const quantity = Math.max(1, Math.min(99, Number(item.quantity) || 1)); if (!product) return json(res, 400, { error: "One of the products is no longer available." }); const lineTotal = Math.round(product.price * quantity * 100) / 100; subtotal += lineTotal; verified.push({ product, quantity, lineTotal, option: item.option || item.selected_option || null }); }
       const coupon = calculateCoupon(body.couponCode, subtotal); const shipping = fulfillmentMethod === "self_pickup" ? 0 : (subtotal - coupon.discount >= 499 ? 0 : 60); const total = Math.round((subtotal - coupon.discount + shipping) * 100) / 100; const orderId = id("ord"); const timestamp = now(); const giftMessage = String(body.giftMessage || "").trim().slice(0, 500);
 
       const initialStatus = paymentMethod === "cod" ? "processing" : "pending_payment";
 
       db.exec("BEGIN"); try {
         db.prepare("INSERT INTO orders (id,customer_id,status,subtotal,discount,shipping,total,currency,coupon_code,address_json,fulfillment_method,gift_message,payment_method,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(orderId, customer.id, initialStatus, subtotal, coupon.discount, shipping, total, "INR", coupon.code || null, JSON.stringify(address), fulfillmentMethod, giftMessage || null, paymentMethod, timestamp, timestamp);
-        const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total) VALUES (?,?,?,?,?,?)");
-        for (const item of verified) insert.run(orderId, item.product.id, item.product.name, item.product.price, item.quantity, item.lineTotal);
+        const insert = db.prepare("INSERT INTO order_items (order_id,product_id,name,unit_price,quantity,line_total,selected_option) VALUES (?,?,?,?,?,?,?)");
+        for (const item of verified) {
+          const optName = item.option ? String(item.option).trim().slice(0, 100) : null;
+          const displayName = item.product.name + (optName ? ` (${optName})` : "");
+          insert.run(orderId, item.product.id, displayName, item.product.price, item.quantity, item.lineTotal, optName);
+        }
         db.exec("COMMIT");
       } catch (error) { db.exec("ROLLBACK"); throw error; }
 
       recordOrderAction(
         orderId,
         paymentMethod === "cod" ? "ORDER_PLACED_COD" : "ORDER_INITIATED_ONLINE",
-        `Order placed by ${customer.name || address.name} (${customer.phone || address.phone || "No phone"}). Items: ${verified.map((v) => `${v.quantity}x ${v.product.name}`).join(", ")}. Subtotal: ₹${subtotal}, Discount: ₹${coupon.discount}, Shipping: ₹${shipping}, Total: ₹${total}. Fulfillment: ${fulfillmentMethod}`,
+        `Order placed by ${customer.name || address.name} (${customer.phone || address.phone || "No phone"}). Items: ${verified.map((v) => `${v.quantity}x ${v.product.name}${v.option ? ` [${v.option}]` : ""}`).join(", ")}. Subtotal: ₹${subtotal}, Discount: ₹${coupon.discount}, Shipping: ₹${shipping}, Total: ₹${total}. Fulfillment: ${fulfillmentMethod}`,
         initialStatus
       );
 

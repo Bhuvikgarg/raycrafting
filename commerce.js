@@ -633,7 +633,9 @@
     if (linesNode) {
       linesNode.innerHTML = lines.map((item) => {
         const detail = priceInfo(item.product);
-        return `<div class="checkout-line"><img src="${esc(item.product.image || window.RAYCRAFTING_DEFAULT_IMAGE)}" alt="${esc(item.product.name)}"><div><h4>${esc(item.product.name)}</h4><p>${item.quantity} × ${money(detail.sale)}</p></div><strong>${money(detail.sale * item.quantity)}</strong></div>`;
+        const img = item.image || item.product.image || window.RAYCRAFTING_DEFAULT_IMAGE;
+        const optHtml = item.option ? `<span class="checkout-line-option">Color: ${esc(item.option)}</span>` : "";
+        return `<div class="checkout-line"><img src="${esc(img)}" alt="${esc(item.product.name)}"><div><h4>${esc(item.product.name)}</h4>${optHtml}<p>${item.quantity} × ${money(detail.sale)}</p></div><strong>${money(detail.sale * item.quantity)}</strong></div>`;
       }).join("");
     }
 
@@ -1697,7 +1699,7 @@
       const created = await request("/orders", {
         method: "POST",
         body: JSON.stringify({
-          items: getLines().map((item) => ({ id: item.id, quantity: item.quantity })),
+          items: getLines().map((item) => ({ id: item.id, quantity: item.quantity, option: item.option || null, image: item.image || null })),
           couponCode: coupon.code,
           address: delivery.value,
           email: delivery.value.email,
