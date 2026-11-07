@@ -1624,6 +1624,23 @@ async function api(req, res, pathname, body, url) {
           );
         }
         db.exec("COMMIT");
+        try {
+          const allRows = db.prepare("SELECT id,name,category,price,original_price,detail,description,featured,art,image,images_json,badge,dimensions,materials,care,active FROM products ORDER BY featured ASC, name ASC").all();
+          const cleanProds = allRows.map(p => {
+            let imgs = [];
+            try { imgs = JSON.parse(p.images_json || "[]"); } catch(e){}
+            if (!imgs.length && p.image) imgs = [p.image];
+            return {
+              ...p,
+              images: imgs,
+              original_price: p.original_price || 0,
+              originalPrice: p.original_price || 0
+            };
+          });
+          fs.writeFileSync(seedPath, JSON.stringify(cleanProds, null, 2), "utf8");
+        } catch(e) {
+          console.warn("Could not mirror products-seed.json:", e.message);
+        }
       } catch (error) { db.exec("ROLLBACK"); throw error; }
       return json(res, 200, { ok: true, count: products.length });
     }
