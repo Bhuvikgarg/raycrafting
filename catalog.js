@@ -1,4 +1,5 @@
-window.RAYCRAFTING_STORAGE_KEY = "raycrafting-products";
+window.RAYCRAFTING_STORAGE_VERSION = "20261107_launch_v3";
+window.RAYCRAFTING_STORAGE_KEY = "raycrafting-products-v3";
 window.RAYCRAFTING_DEFAULT_IMAGE = "assets/products/illuminated-lotus-blossom-lamp-1.webp";
 window.RAYCRAFTING_DEFAULT_PRODUCTS = [
   {
@@ -7,7 +8,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 555,
     "original_price": 650,
-    "detail": "Handcrafted velvet petals \u00b7 Built-in warm LED glow",
+    "detail": "Handcrafted velvet petals · Built-in warm LED glow",
     "description": "A breathtaking handcrafted lotus blossom sculpted from rich pink velvet chenille petals resting on an emerald moss base. Features warm fairy lights glowing gently from within the blossom center, creating a tranquil ambient night light or desk centerpiece.",
     "featured": 1,
     "art": "lotus",
@@ -18,9 +19,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/illuminated-lotus-blossom-lamp-3.webp"
     ],
     "badge": "Bestseller",
-    "dimensions": "Diameter: ~14 cm \u00b7 Height: ~9 cm",
+    "dimensions": "Diameter: ~14 cm · Height: ~9 cm",
     "materials": "Plush pink velvet chenille, preserved craft moss base, warm-tone LED micro fairy lights",
-    "care": "Indoor ambient light \u00b7 Dust gently with soft dry cloth \u00b7 Replaceable mini cell battery",
+    "care": "Indoor ambient light · Dust gently with soft dry cloth · Replaceable mini cell battery",
     "active": 1
   },
   {
@@ -30,7 +31,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "price": 199,
     "original_price": 350,
     "detail": "Beautiful kotus lamp crafted with love using pipe cleaners",
-    "description": "Durability and it's beauty when it illuminates the home \u2728",
+    "description": "Durability and it's beauty when it illuminates the home ✨",
     "featured": 2,
     "art": "lotus",
     "image": "assets/products/illuminated-lotus-blossom-lamp-2.webp",
@@ -41,7 +42,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "badge": "Diwali Special",
     "dimensions": "~14-16 cm tall",
     "materials": "Velvety chenille stems & craft pot",
-    "care": "Everlasting bloom \u00b7 Never withers \u00b7 Zero watering",
+    "care": "Everlasting bloom · Never withers · Zero watering",
     "active": 1
   },
   {
@@ -50,7 +51,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 250,
     "original_price": 399,
-    "detail": "Handcrafted lavender stems \u00b7 Pearl beaded tulle wrap",
+    "detail": "Handcrafted lavender stems · Pearl beaded tulle wrap",
     "description": "Delicate sprigs of soft lavender pipe-cleaner blooms wrapped in pleated sheer organza tulle, finished with an elegant scalloped pearl-bead trim and a pearlescent ribbon bow. An everlasting bouquet that never wilts.",
     "featured": 3,
     "art": "lavender",
@@ -60,9 +61,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/lavender-bouquet-pearl-lace-2.webp"
     ],
     "badge": "Gift Pick",
-    "dimensions": "Length: ~22 cm \u00b7 Width: ~12 cm",
+    "dimensions": "Length: ~22 cm · Width: ~12 cm",
     "materials": "Fuzzy chenille stems, pleated blush organza, faux pearl bead trimming & satin bow",
-    "care": "Everlasting floral keepsake \u00b7 Keeps its shape forever \u00b7 No water needed",
+    "care": "Everlasting floral keepsake · Keeps its shape forever · No water needed",
     "active": 1
   },
   {
@@ -71,7 +72,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 300,
     "original_price": 380,
-    "detail": "Handcrafted tulip cluster \u00b7 Ribbed cup planter",
+    "detail": "Handcrafted tulip cluster · Ribbed cup planter",
     "description": "A vibrant cluster of hand-twisted crimson and deep velvet burgundy tulips standing tall in emerald moss, housed inside a charming ribbed natural-tone cup planter.",
     "featured": 4,
     "art": "tulip",
@@ -81,9 +82,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-red-tulips-planter-2.webp"
     ],
     "badge": "Trending",
-    "dimensions": "Height: ~15 cm \u00b7 Planter diameter: ~7 cm",
+    "dimensions": "Height: ~15 cm · Planter diameter: ~7 cm",
     "materials": "Velvety red chenille wire, florist stems, moss bedding, textured ribbed pot",
-    "care": "Evergreen home decor \u00b7 Zero watering required \u00b7 Dust with soft brush",
+    "care": "Evergreen home decor · Zero watering required · Dust with soft brush",
     "active": 1
   },
   {
@@ -92,7 +93,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 300,
     "original_price": 380,
-    "detail": "Handcrafted sunset tulips \u00b7 Ribbed cup planter",
+    "detail": "Handcrafted sunset tulips · Ribbed cup planter",
     "description": "Radiant tangerine and sunset orange fuzzy tulips nestled in lush moss inside a handcrafted ribbed pot tied with a pure white ribbon accent. Brings year-round warmth and cheer to any room.",
     "featured": 5,
     "art": "tulip-orange",
@@ -102,9 +103,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-orange-tulips-planter-2.webp"
     ],
     "badge": "New Bloom",
-    "dimensions": "Height: ~15 cm \u00b7 Planter diameter: ~7 cm",
+    "dimensions": "Height: ~15 cm · Planter diameter: ~7 cm",
     "materials": "Vibrant orange chenille stems, green leaves, faux moss, weighted planter",
-    "care": "Indoor decor \u00b7 Keep in a dry spot \u00b7 Pet and allergy friendly",
+    "care": "Indoor decor · Keep in a dry spot · Pet and allergy friendly",
     "active": 1
   },
   {
@@ -113,7 +114,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Bundles",
     "price": 300,
     "original_price": 450,
-    "detail": "Set of 3 bouquets \u00b7 Sky Blue, Lavender & Ruby",
+    "detail": "Set of 3 bouquets · Sky Blue, Lavender & Ruby",
     "description": "A delightful collection of three handcrafted miniature floral bouquets in Sky Blue, Royal Lavender, and Ruby Red. Each bouquet is lovingly wrapped in pleated organza and detailed with delicate pearl-beaded lace borders.",
     "featured": 6,
     "art": "bundle",
@@ -122,9 +123,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/trio-pearl-lace-bouquets-1.webp"
     ],
     "badge": "Bundle & Save",
-    "dimensions": "3 mini bouquets \u00b7 ~16 cm length each",
+    "dimensions": "3 mini bouquets · ~16 cm length each",
     "materials": "Multi-colored chenille florist stems, sheer organza, pearl ribbon borders",
-    "care": "Display in a vase or gift separately \u00b7 Never fades or wilts",
+    "care": "Display in a vase or gift separately · Never fades or wilts",
     "active": 1
   },
   {
@@ -133,7 +134,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 350,
-    "detail": "Soft fuzzy blossom \u00b7 Brass keyring & clasp",
+    "detail": "Soft fuzzy blossom · Brass keyring & clasp",
     "description": "An ultra-soft, cloud-fluffy yellow daisy with a sweet blush-pink center, mounted on an antique brass keyring. Clips effortlessly onto keys, purses, backpacks, or planners.",
     "featured": 7,
     "art": "daisy",
@@ -142,9 +143,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/sunshine-daisy-fluffy-keychain-1.webp"
     ],
     "badge": "Customer Favorite",
-    "dimensions": "Charm diameter: ~7.5 cm \u00b7 Total length with ring: ~12 cm",
+    "dimensions": "Charm diameter: ~7.5 cm · Total length with ring: ~12 cm",
     "materials": "Ultra-plush fuzzy yarn pom blossom, antique brass alloy keyring & chain",
-    "care": "Spot clean gently with damp cloth \u00b7 Air dry",
+    "care": "Spot clean gently with damp cloth · Air dry",
     "active": 1
   },
   {
@@ -153,7 +154,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 360,
-    "detail": "Soft cloud kitty paw \u00b7 Embroidered pink toe beans",
+    "detail": "Soft cloud kitty paw · Embroidered pink toe beans",
     "description": "Irresistibly cute snow-white kitten paw keychain featuring plump, hand-stitched strawberry-pink toe beans and paw pad. Soft, fuzzy, and designed to bring smiles every time you reach for your keys.",
     "featured": 8,
     "art": "paw",
@@ -162,9 +163,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/fluffy-kitten-paw-keychain-1.webp"
     ],
     "badge": "Cute Pick",
-    "dimensions": "Paw size: ~7 cm \u00d7 7 cm \u00b7 Ring length: ~5 cm",
+    "dimensions": "Paw size: ~7 cm × 7 cm · Ring length: ~5 cm",
     "materials": "Fluffy faux-fur chenille, pink yarn embroidery, brass alloy keyring",
-    "care": "Keep dry \u00b7 Spot clean only",
+    "care": "Keep dry · Spot clean only",
     "active": 1
   },
   {
@@ -173,7 +174,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 420,
-    "detail": "Ceramic egg white dish \u00b7 4 interchangeable mood yolks",
+    "detail": "Ceramic egg white dish · 4 interchangeable mood yolks",
     "description": "Artisan clay sunny-side-up fried egg trinket tray with 4 removable yolk discs featuring hand-painted expressive emotions (happy, winking, pouty, and shy). Swap the yolk to match your daily mood, or use as a jewelry and ring dish.",
     "featured": 9,
     "art": "egg-tray",
@@ -183,9 +184,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/sunny-side-moods-egg-tray-2.webp"
     ],
     "badge": "Handmade Original",
-    "dimensions": "Tray: ~11 cm \u00d7 9 cm \u00b7 Yolks: ~3.5 cm diameter",
+    "dimensions": "Tray: ~11 cm × 9 cm · Yolks: ~3.5 cm diameter",
     "materials": "Sculpted clay ceramic, non-toxic acrylic colors, protective gloss sealant",
-    "care": "Wipe with a soft dry cloth \u00b7 Not microwave or dishwasher safe",
+    "care": "Wipe with a soft dry cloth · Not microwave or dishwasher safe",
     "active": 1
   },
   {
@@ -194,7 +195,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 420,
-    "detail": "Pair of 2 handmade buddies \u00b7 Hot cocoa & buttered popcorn",
+    "detail": "Pair of 2 handmade buddies · Hot cocoa & buttered popcorn",
     "description": "The coziest desk companions! Handcrafted from chenille pipe cleaners, this duo features a cheerful steaming hot chocolate mug with marshmallow swirls and a striped retro popcorn tub loaded with golden buttered kernels.",
     "featured": 10,
     "art": "cocoa-popcorn",
@@ -204,9 +205,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/cozy-movie-night-cocoa-popcorn-2.webp"
     ],
     "badge": "Desk Buddy Duo",
-    "dimensions": "Mug: ~6 cm \u00d7 6 cm \u00b7 Popcorn tub: ~6.5 cm \u00d7 5.5 cm",
+    "dimensions": "Mug: ~6 cm × 6 cm · Popcorn tub: ~6.5 cm × 5.5 cm",
     "materials": "Chenille pipe cleaners, bead eyes, blush detailing, reinforced interior structure",
-    "care": "Display piece \u00b7 Dust gently with soft brush",
+    "care": "Display piece · Dust gently with soft brush",
     "active": 1
   },
   {
@@ -215,7 +216,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 399,
-    "detail": "Set of 3 mini dessert cakes \u00b7 Strong magnetic backing",
+    "detail": "Set of 3 mini dessert cakes · Strong magnetic backing",
     "description": "A delightful patisserie set of 3 tiered miniature cakes handcrafted from soft chenille pipe cleaners in Lavender Cream, Strawberry Shortcake, and Pistachio Mint with bright red cherries. Each piece has a strong magnet to hold notes and photos on your fridge.",
     "featured": 11,
     "art": "cake-trio",
@@ -226,7 +227,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/pastel-sweet-cake-magnets-3.webp"
     ],
     "badge": "Trio Set",
-    "dimensions": "Each cake: ~4 cm \u00d7 4 cm \u00d7 4.5 cm",
+    "dimensions": "Each cake: ~4 cm × 4 cm × 4.5 cm",
     "materials": "Chenille wire pastries, miniature cherries, neodymium ferrite back magnet",
     "care": "Sticks to fridges, magnetic memo boards, and steel cabinets",
     "active": 1
@@ -237,7 +238,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 420,
-    "detail": "5-slice artisan cake \u00b7 Dual heavy-duty magnets per slice",
+    "detail": "5-slice artisan cake · Dual heavy-duty magnets per slice",
     "description": "Intricately detailed golden-baked cheesecake slices crafted from velvety pipe cleaners, piped with fluffy whipped-cream borders and crowned with ruby cherries. Each slice features dual magnetic discs to securely hold recipes or pictures on metal surfaces.",
     "featured": 12,
     "art": "cheesecake",
@@ -247,7 +248,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/artisan-cheesecake-slices-magnet-set-2.webp"
     ],
     "badge": "Artisan Craft",
-    "dimensions": "Full cake diameter: ~14 cm \u00b7 Each slice length: ~7 cm",
+    "dimensions": "Full cake diameter: ~14 cm · Each slice length: ~7 cm",
     "materials": "Chenille cord cake layers, faux whipped cream, twin rear magnets",
     "care": "Arrange as a whole cake or separate across your fridge",
     "active": 1
@@ -258,7 +259,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 360,
-    "detail": "Layered red velvet slice \u00b7 Cherry flower topping",
+    "detail": "Layered red velvet slice · Cherry flower topping",
     "description": "Luscious layered red velvet cake wedge handcrafted with rich crimson and golden chenille cake layers, decorated with a piped floral rosette and red cherry. Fitted with a heavy-duty back magnet.",
     "featured": 13,
     "art": "red-velvet",
@@ -268,7 +269,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/red-velvet-cake-slice-magnet-2.webp"
     ],
     "badge": "Sweet Treat",
-    "dimensions": "Length: ~7.5 cm \u00b7 Height: ~5.5 cm",
+    "dimensions": "Length: ~7.5 cm · Height: ~5.5 cm",
     "materials": "Crimson & caramel chenille stems, cherry embellishment, ferrite back magnet",
     "care": "Wipe with dry microfiber cloth",
     "active": 1
@@ -279,7 +280,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 350,
-    "detail": "Hand-sculpted toast \u00b7 Melting golden butter pat",
+    "detail": "Hand-sculpted toast · Melting golden butter pat",
     "description": "Whimsical handcrafted clay slice of golden breakfast toast complete with toasted crust edges and a thick melting square of butter. Finished with a protective satin glaze and strong rear magnet.",
     "featured": 14,
     "art": "toast",
@@ -288,9 +289,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/buttered-toast-clay-magnet-1.webp"
     ],
     "badge": "Hand Sculpted",
-    "dimensions": "~6 cm \u00d7 5 cm \u00d7 1.2 cm",
+    "dimensions": "~6 cm × 5 cm × 1.2 cm",
     "materials": "Polymer clay, acrylic gouache paint, satin protective glaze, strong magnet",
-    "care": "Water resistant glaze \u00b7 Clean with damp cloth",
+    "care": "Water resistant glaze · Clean with damp cloth",
     "active": 1
   },
   {
@@ -299,7 +300,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 350,
-    "detail": "Embossed star biscuit \u00b7 Toasted sugar details",
+    "detail": "Embossed star biscuit · Toasted sugar details",
     "description": "A delightful clay cookie keepsake embossed with a rustic star motif and toasted sugar accents. Brings a touch of celestial cozy warmth to your kitchen or workspace memo board.",
     "featured": 15,
     "art": "star-cookie",
@@ -308,7 +309,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/golden-star-cookie-magnet-1.webp"
     ],
     "badge": "Cozy Kitchen",
-    "dimensions": "~5.5 cm diameter \u00b7 ~1 cm thickness",
+    "dimensions": "~5.5 cm diameter · ~1 cm thickness",
     "materials": "Oven-baked clay, artist acrylics, protective varnish, magnet backing",
     "care": "Wipe clean with a soft dry cloth",
     "active": 1
@@ -319,7 +320,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 360,
-    "detail": "Two-tier sponge cake \u00b7 4 seeded red strawberries",
+    "detail": "Two-tier sponge cake · 4 seeded red strawberries",
     "description": "Miniature two-tier golden-yellow sponge cake layered with sweet vanilla cream and topped with four realistic seeded strawberries. An eye-catching decorative keepsake for dollhouse collectors or desk decor.",
     "featured": 16,
     "art": "strawberry-cake",
@@ -329,9 +330,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/mini-strawberry-shortcake-clay-2.webp"
     ],
     "badge": "Miniature Art",
-    "dimensions": "Diameter: ~5 cm \u00b7 Height: ~5.5 cm",
+    "dimensions": "Diameter: ~5 cm · Height: ~5.5 cm",
     "materials": "Air-dry sculpting clay, fine detail acrylics, glossy strawberry glaze",
-    "care": "Decorative keepsake \u00b7 Protect from moisture and direct water",
+    "care": "Decorative keepsake · Protect from moisture and direct water",
     "active": 1
   },
   {
@@ -340,7 +341,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 300,
     "original_price": 340,
-    "detail": "Scalloped pastel flower \u00b7 Rosette swirl center",
+    "detail": "Scalloped pastel flower · Rosette swirl center",
     "description": "Handcrafted scalloped petal pastry charm with a glossy strawberry-pink spiral swirl. Fitted with a strong magnet for displaying your favorite notes, photos, and postcards.",
     "featured": 17,
     "art": "swirl-blossom",
@@ -349,7 +350,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/pink-swirl-blossom-clay-magnet-1.webp"
     ],
     "badge": "Sweet Accent",
-    "dimensions": "Diameter: ~5 cm \u00b7 Thickness: ~1.5 cm",
+    "dimensions": "Diameter: ~5 cm · Thickness: ~1.5 cm",
     "materials": "Molded clay, pink enamel spiral, high-gloss protective finish, magnet",
     "care": "Clean with a dry lint-free cloth",
     "active": 1
@@ -360,7 +361,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 999,
     "original_price": 1599,
-    "detail": "Handcrafted velvety blue lilies, hyacinths & white daisies \u00b7 Pearl tulle trim",
+    "detail": "Handcrafted velvety blue lilies, hyacinths & white daisies · Pearl tulle trim",
     "description": "A dreamlike floral arrangement featuring sculpted azure lilies, soft blue hyacinths, deep navy berry sprigs, and blooming white daisies. Hand-wrapped in baby blue paper with delicate scalloped pearl-beaded tulle and a silky white satin ribbon bow.",
     "featured": 18,
     "art": "lily",
@@ -373,9 +374,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/ocean-breeze-blue-lily-bouquet-5.webp"
     ],
     "badge": "Handcrafted",
-    "dimensions": "~28 cm tall \u00b7 ~20 cm wide",
+    "dimensions": "~28 cm tall · ~20 cm wide",
     "materials": "Premium soft chenille stems, pearl-beaded organza tulle, florist wrapping paper, satin ribbon",
-    "care": "Everlasting bloom \u00b7 Never withers \u00b7 Keep in dry indoor space",
+    "care": "Everlasting bloom · Never withers · Keep in dry indoor space",
     "active": 1
   },
   {
@@ -384,7 +385,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 350,
     "original_price": 499,
-    "detail": "Handcrafted pink and white rosebuds \u00b7 Scalloped pearl tulle wrap",
+    "detail": "Handcrafted pink and white rosebuds · Scalloped pearl tulle wrap",
     "description": "An enchanting bouquet of delicate pink and pure white mini blossoms, encased in layers of pleated soft pink organza with an elegant pearl-beaded border and a lustrous white satin bow. Complete with an adorable plush teddy companion.",
     "featured": 19,
     "art": "rose",
@@ -394,9 +395,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/blushing-rose-pearl-lace-bouquet-2.webp"
     ],
     "badge": "Gift-Ready",
-    "dimensions": "~22 cm tall \u00b7 ~14 cm wide",
+    "dimensions": "~22 cm tall · ~14 cm wide",
     "materials": "Fluffy chenille velvet stems, scalloped pearl lace, pleated organza tulle, satin ribbon",
-    "care": "Everlasting bloom \u00b7 Dust gently with soft dry cloth",
+    "care": "Everlasting bloom · Dust gently with soft dry cloth",
     "active": 1
   },
   {
@@ -405,7 +406,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 299,
     "original_price": 420,
-    "detail": "Multi-color fluffy bloom posy \u00b7 Scalloped pearl lace trim \u00b7 Plush teddy",
+    "detail": "Multi-color fluffy bloom posy · Scalloped pearl lace trim · Plush teddy",
     "description": "Cheerful clusters of fluffy pipe-cleaner blooms with bright contrasting centers, wrapped in sheer pearl-bordered tulle with a white ribbon. Cuddled by a sweet mini plush teddy bear companion.",
     "featured": 20,
     "art": "daisy",
@@ -416,9 +417,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/petite-fluffy-blossom-teddy-bouquet-3.webp"
     ],
     "badge": "Adorable",
-    "dimensions": "~20 cm tall \u00b7 ~12 cm wide",
+    "dimensions": "~20 cm tall · ~12 cm wide",
     "materials": "Fluffy chenille stems, scalloped pearl tulle, plush teddy bear, satin bow",
-    "care": "Indoor keepsake \u00b7 Keep dry",
+    "care": "Indoor keepsake · Keep dry",
     "active": 1
   },
   {
@@ -436,9 +437,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/springtime-pink-tulip-daisy-bouquet-1.webp"
     ],
     "badge": "New Arrival",
-    "dimensions": "~26 cm tall \u00b7 ~18 cm wide",
+    "dimensions": "~26 cm tall · ~18 cm wide",
     "materials": "Soft velvet pipe cleaners, florist wrap paper, satin ribbon",
-    "care": "Everlasting bloom \u00b7 Zero watering needed",
+    "care": "Everlasting bloom · Zero watering needed",
     "active": 1
   },
   {
@@ -447,7 +448,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 350,
     "original_price": 499,
-    "detail": "Two large golden sunflowers with chocolate centers \u00b7 Pleated white wrap",
+    "detail": "Two large golden sunflowers with chocolate centers · Pleated white wrap",
     "description": "Bring permanent sunshine into any room with these cheerful golden yellow sunflowers, sculpted with velvety petals and rich brown spiraled centers. Beautifully wrapped in pleated white florist paper.",
     "featured": 22,
     "art": "sunflower",
@@ -456,9 +457,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/radiant-golden-sunflower-bouquet-1.webp"
     ],
     "badge": "Sunshine",
-    "dimensions": "~27 cm tall \u00b7 ~17 cm wide",
+    "dimensions": "~27 cm tall · ~17 cm wide",
     "materials": "Velvety chenille stems, florist wrap paper, ribbon",
-    "care": "Everlasting bloom \u00b7 Never withers",
+    "care": "Everlasting bloom · Never withers",
     "active": 1
   },
   {
@@ -467,7 +468,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 280,
     "original_price": 399,
-    "detail": "Assorted vibrant handcrafted daisies \u00b7 Bendable stems",
+    "detail": "Assorted vibrant handcrafted daisies · Bendable stems",
     "description": "A joyful bunch of colorful pipe-cleaner daisies in royal blue, bright purple, sunny orange, lavender, and scarlet red with contrasting centers. Flexible bendable stems allow you to arrange them in any vase or cup.",
     "featured": 23,
     "art": "daisy",
@@ -476,9 +477,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/rainbow-wildflower-daisy-stems-bundle-1.webp"
     ],
     "badge": "Multi-Pack",
-    "dimensions": "Stems ~20 cm long \u00b7 Blossom diameter ~4.5 cm",
+    "dimensions": "Stems ~20 cm long · Blossom diameter ~4.5 cm",
     "materials": "Multi-color plush pipe cleaners, flexible florist wire core",
-    "care": "Wipe with dry cloth \u00b7 Bend stems into desired shape",
+    "care": "Wipe with dry cloth · Bend stems into desired shape",
     "active": 1
   },
   {
@@ -487,7 +488,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 550,
     "original_price": 750,
-    "detail": "Glowing yellow & magenta stargazer lily \u00b7 Warm micro LEDs \u00b7 Little green frog base",
+    "detail": "Glowing yellow & magenta stargazer lily · Warm micro LEDs · Little green frog base",
     "description": "A stunning ambient sculpture featuring a brilliant golden lily with delicate magenta stamens that glow with warm embedded fairy lights. Guarded by a sweet miniature handcrafted green frog nestled in a mossy base.",
     "featured": 24,
     "art": "lily",
@@ -497,9 +498,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/illuminated-golden-lily-night-lamp-2.webp"
     ],
     "badge": "Ambient Glow",
-    "dimensions": "~24 cm tall \u00b7 ~15 cm wide",
+    "dimensions": "~24 cm tall · ~15 cm wide",
     "materials": "Premium chenille velvet, micro LED fairy wire, coin battery pack, moss base",
-    "care": "Indoor ambient light \u00b7 Replaceable mini cell battery \u00b7 Keep away from water",
+    "care": "Indoor ambient light · Replaceable mini cell battery · Keep away from water",
     "active": 1
   },
   {
@@ -508,7 +509,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 220,
     "original_price": 320,
-    "detail": "Velvet pink lotus blossom \u00b7 Center candle holder with battery LED tea light",
+    "detail": "Velvet pink lotus blossom · Center candle holder with battery LED tea light",
     "description": "A serene handcrafted pink lotus blossom with layered velvet petals, designed to hold an electric tea light in the center. Creates a peaceful, warm flickering glow on your nightstand or altar.",
     "featured": 25,
     "art": "lotus",
@@ -517,9 +518,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/pink-lotus-tea-light-candle-lamp-1.webp"
     ],
     "badge": "Festival Glow",
-    "dimensions": "~14 cm diameter \u00b7 ~6 cm height",
+    "dimensions": "~14 cm diameter · ~6 cm height",
     "materials": "Velvet chenille pipe cleaners, battery-operated LED tea light candle",
-    "care": "Clean with soft brush \u00b7 Battery included and easily replaceable",
+    "care": "Clean with soft brush · Battery included and easily replaceable",
     "active": 1
   },
   {
@@ -528,7 +529,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 499,
     "original_price": 699,
-    "detail": "3-layer chocolate chenille cake \u00b7 Crimson velvet roses \u00b7 Striped birthday candle",
+    "detail": "3-layer chocolate chenille cake · Crimson velvet roses · Striped birthday candle",
     "description": "An irresistible everlasting celebration cake sculpted entirely from chocolate brown and cream pipe-cleaner spirals. Topped with miniature ruby velvet roses, cherry accents, and a festive birthday candle that never burns down.",
     "featured": 26,
     "art": "cake",
@@ -540,9 +541,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/chocolate-fudge-rose-birthday-cake-4.webp"
     ],
     "badge": "Celebration",
-    "dimensions": "~13 cm diameter \u00b7 ~14 cm tall (with candle)",
+    "dimensions": "~13 cm diameter · ~14 cm tall (with candle)",
     "materials": "Ultra-plush chenille velvet, sculpted decorative candle",
-    "care": "Keep on desk or shelf \u00b7 Dust gently",
+    "care": "Keep on desk or shelf · Dust gently",
     "active": 1
   },
   {
@@ -551,7 +552,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 320,
     "original_price": 450,
-    "detail": "Velvet evil eye amulet \u00b7 White flower bells \u00b7 Pearl beaded string & ribbon",
+    "detail": "Velvet evil eye amulet · White flower bells · Pearl beaded string & ribbon",
     "description": "Ward off negativity and invite good vibes with this unique handmade Evil Eye charm. Features a fuzzy concentric blue, white, and black eye motif framed by dainty white flower bells and pearl drop tassels with a satin bow.",
     "featured": 27,
     "art": "charm",
@@ -560,9 +561,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/nazar-evil-eye-floral-wall-hanging-1.webp"
     ],
     "badge": "Good Luck",
-    "dimensions": "~25 cm total hanging length \u00b7 ~10 cm wide",
+    "dimensions": "~25 cm total hanging length · ~10 cm wide",
     "materials": "Chenille velvet, faux pearl beads, satin ribbon, hanging loop",
-    "care": "Hang in car, doorway, or bedroom \u00b7 Dust gently",
+    "care": "Hang in car, doorway, or bedroom · Dust gently",
     "active": 1
   },
   {
@@ -571,7 +572,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 399,
     "original_price": 550,
-    "detail": "Upcycled crushed aluminum soda can \u00b7 Sculpted glossy red melt drip",
+    "detail": "Upcycled crushed aluminum soda can · Sculpted glossy red melt drip",
     "description": "A quirky, modern pop-art desk centerpiece. A crushed Coca-Cola can sculpted with a glossy red melting spill cascading over the rim. Guaranteed conversation starter for desks, shelves, or creative studios.",
     "featured": 28,
     "art": "sculpture",
@@ -580,9 +581,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/melting-pop-art-cola-can-sculpture-1.webp"
     ],
     "badge": "Unique Art",
-    "dimensions": "~12 cm tall \u00b7 ~8 cm wide",
+    "dimensions": "~12 cm tall · ~8 cm wide",
     "materials": "Aluminum beverage can, sculpted polymer drip with high-gloss lacquer finish",
-    "care": "Wipe with microfiber cloth \u00b7 For decorative display",
+    "care": "Wipe with microfiber cloth · For decorative display",
     "active": 1
   },
   {
@@ -591,7 +592,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 260,
     "original_price": 380,
-    "detail": "Velvety golden sunflower \u00b7 Green leaves \u00b7 Cozy hand-ribbed craft pot",
+    "detail": "Velvety golden sunflower · Green leaves · Cozy hand-ribbed craft pot",
     "description": "A single cheerful sunflower standing tall in a ribbed chocolate-brown craft pot. Sits perfectly next to your computer monitor, bookshelf, or windowsill to brighten your workday.",
     "featured": 29,
     "art": "sunflower",
@@ -600,9 +601,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-smiling-sunflower-planter-1.webp"
     ],
     "badge": "Desk Bloom",
-    "dimensions": "~16 cm tall \u00b7 ~9 cm pot diameter",
+    "dimensions": "~16 cm tall · ~9 cm pot diameter",
     "materials": "Soft chenille stems, craft pot base",
-    "care": "Everlasting bloom \u00b7 Zero watering needed",
+    "care": "Everlasting bloom · Zero watering needed",
     "active": 1
   },
   {
@@ -611,7 +612,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 260,
     "original_price": 380,
-    "detail": "Lush pink lily with textured petals \u00b7 Ribbed chocolate pot",
+    "detail": "Lush pink lily with textured petals · Ribbed chocolate pot",
     "description": "An everlasting pink lily blooming gracefully with broad fuzzy petals and emerald leaves, nestled inside a ribbed craft pot. Adds a soft touch of nature to your workspace.",
     "featured": 30,
     "art": "lily",
@@ -620,9 +621,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-pink-stargazer-lily-planter-1.webp"
     ],
     "badge": "Desk Bloom",
-    "dimensions": "~17 cm tall \u00b7 ~9 cm pot diameter",
+    "dimensions": "~17 cm tall · ~9 cm pot diameter",
     "materials": "Chenille stems, ribbed desktop pot",
-    "care": "Everlasting bloom \u00b7 Keep dry",
+    "care": "Everlasting bloom · Keep dry",
     "active": 1
   },
   {
@@ -631,7 +632,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 260,
     "original_price": 380,
-    "detail": "Rich magenta rose bloom \u00b7 Green foliage \u00b7 Ribbed craft pot",
+    "detail": "Rich magenta rose bloom · Green foliage · Ribbed craft pot",
     "description": "A timeless red rose crafted from thick velvet chenille stems, planted in a chocolate-brown ribbed desktop pot. The perfect romantic or friendship keepsake that never wilts.",
     "featured": 31,
     "art": "rose",
@@ -640,9 +641,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-crimson-velvet-rose-planter-1.webp"
     ],
     "badge": "Classic Rose",
-    "dimensions": "~16 cm tall \u00b7 ~9 cm pot diameter",
+    "dimensions": "~16 cm tall · ~9 cm pot diameter",
     "materials": "Plush chenille pipe cleaners, ribbed pot base",
-    "care": "Everlasting bloom \u00b7 Dust gently",
+    "care": "Everlasting bloom · Dust gently",
     "active": 1
   },
   {
@@ -651,7 +652,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Flowers",
     "price": 260,
     "original_price": 380,
-    "detail": "Cluster of purple lavender stalks \u00b7 Compact tan pot \u00b7 Gift packaging available",
+    "detail": "Cluster of purple lavender stalks · Compact tan pot · Gift packaging available",
     "description": "A soothing miniature cluster of fuzzy purple lavender buds planted in a corrugated paper craft pot. Known for bringing peaceful, calming energy to any workspace or study table.",
     "featured": 32,
     "art": "lavender",
@@ -661,9 +662,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/potted-lavender-dreams-desk-planter-2.webp"
     ],
     "badge": "Calming Bloom",
-    "dimensions": "~15 cm tall \u00b7 ~8 cm wide",
+    "dimensions": "~15 cm tall · ~8 cm wide",
     "materials": "Plush chenille stems, craft pot, gift wrap ribbon",
-    "care": "Everlasting bloom \u00b7 Zero maintenance",
+    "care": "Everlasting bloom · Zero maintenance",
     "active": 1
   },
   {
@@ -672,7 +673,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Bundles",
     "price": 450,
     "original_price": 620,
-    "detail": "Two matching miniature potted blooms \u00b7 Pink lotus & tulip pair",
+    "detail": "Two matching miniature potted blooms · Pink lotus & tulip pair",
     "description": "Double the charm with this coordinated duo of potted handcrafted flowers. Features a blooming pink stargazer lotus alongside a budding tulip in matching ribbed desktop planters with white bow accents.",
     "featured": 33,
     "art": "bundle",
@@ -682,9 +683,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/twin-pastel-garden-potted-duo-2.webp"
     ],
     "badge": "Pair Bundle",
-    "dimensions": "Each pot ~15 cm tall \u00b7 ~8 cm diameter",
+    "dimensions": "Each pot ~15 cm tall · ~8 cm diameter",
     "materials": "Velvety chenille stems, craft planters, bow trim",
-    "care": "Everlasting blooms \u00b7 Keep indoors",
+    "care": "Everlasting blooms · Keep indoors",
     "active": 1
   },
   {
@@ -693,7 +694,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 320,
     "original_price": 450,
-    "detail": "Smiling pink bunny figurine \u00b7 Strawberry ears & blossom wreath",
+    "detail": "Smiling pink bunny figurine · Strawberry ears & blossom wreath",
     "description": "An extraordinarily adorable handcrafted desktop bunny with long pink-and-white ears, cute blush cheeks, and tiny strawberry details, crowned with miniature blossoms and resting in a tan ribbed pot.",
     "featured": 34,
     "art": "bunny",
@@ -702,9 +703,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/sweet-bunny-strawberry-garden-pot-1.webp"
     ],
     "badge": "Cute Art",
-    "dimensions": "~17 cm tall \u00b7 ~9 cm wide",
+    "dimensions": "~17 cm tall · ~9 cm wide",
     "materials": "Ultra-soft chenille stems, miniature craft pot, hand-sculpted details",
-    "care": "Gentle dry dusting \u00b7 Decorative desk piece",
+    "care": "Gentle dry dusting · Decorative desk piece",
     "active": 1
   },
   {
@@ -713,7 +714,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 249,
     "original_price": 350,
-    "detail": "Soft pink velvet bunny ears \u00b7 Handcrafted rose garland headband",
+    "detail": "Soft pink velvet bunny ears · Handcrafted rose garland headband",
     "description": "Turn heads with this darling wearable headband featuring plush pink chenille bunny ears accented with a delicate garland of handcrafted pink roses. Comfortable flexible band fits all head sizes.",
     "featured": 35,
     "art": "headband",
@@ -722,9 +723,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/fluffy-bunny-ear-floral-headband-1.webp"
     ],
     "badge": "Wearable Joy",
-    "dimensions": "Standard flexible headband \u00b7 Ear height ~14 cm",
+    "dimensions": "Standard flexible headband · Ear height ~14 cm",
     "materials": "Chenille velvet, flexible wrapped headband base, craft roses",
-    "care": "Store flat \u00b7 Spot clean only",
+    "care": "Store flat · Spot clean only",
     "active": 1
   },
   {
@@ -733,7 +734,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 280,
     "original_price": 399,
-    "detail": "Strawberry-themed bunny face charm \u00b7 Lustrous pearl bead wristlet",
+    "detail": "Strawberry-themed bunny face charm · Lustrous pearl bead wristlet",
     "description": "A pocket-sized companion featuring an adorable pink-cheeked bunny with green leaf bows and strawberry accents, attached to a durable gold keychain ring with a shimmering pearl bead loop.",
     "featured": 36,
     "art": "bunny",
@@ -742,7 +743,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/sweet-bunny-mini-pouch-pearl-wristlet-1.webp"
     ],
     "badge": "Bag Charm",
-    "dimensions": "Charm ~7 cm \u00b7 Wristlet loop ~12 cm",
+    "dimensions": "Charm ~7 cm · Wristlet loop ~12 cm",
     "materials": "Plush pipe cleaners, high-luster faux pearl beads, gold-tone keyring",
     "care": "Wipe with dry cloth",
     "active": 1
@@ -753,7 +754,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 220,
     "original_price": 320,
-    "detail": "Sculpted bloom or ripe strawberry charm \u00b7 Lustrous pearl bead loop",
+    "detail": "Sculpted bloom or ripe strawberry charm · Lustrous pearl bead loop",
     "description": "Add a touch of handmade elegance to your keys or handbag. Each charm is carefully twisted from velvety chenille into a vibrant botanical motif and paired with a smooth faux-pearl wristlet chain.",
     "featured": 37,
     "art": "keychain",
@@ -766,7 +767,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/handcrafted-floral-pearl-wristlet-collection-5.webp"
     ],
     "badge": "Handcrafted",
-    "dimensions": "Charm ~5-7 cm \u00b7 Pearl wristlet ~10 cm",
+    "dimensions": "Charm ~5-7 cm · Pearl wristlet ~10 cm",
     "materials": "Chenille velvet, faux pearl beads, gold-plated keyring",
     "care": "Wipe gently with dry cloth",
     "active": 1
@@ -777,7 +778,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 180,
     "original_price": 260,
-    "detail": "Miniature hand-twisted flower ring \u00b7 Soft comfortable band",
+    "detail": "Miniature hand-twisted flower ring · Soft comfortable band",
     "description": "Wear a little flower on your hand wherever you go! Miniature floral rings shaped by hand with velvety chenille petals and comfortable flexible fit. Available in Lavender Lily, Daisy, Sunset Blossom, and Pearl White.",
     "featured": 38,
     "art": "ring",
@@ -790,9 +791,9 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/petite-bloom-handmade-ring-collection-5.webp"
     ],
     "badge": "Mini Wearable",
-    "dimensions": "Blossom ~3.5 cm \u00b7 Adjustable flexible ring band",
+    "dimensions": "Blossom ~3.5 cm · Adjustable flexible ring band",
     "materials": "Soft chenille pipe cleaners, flexible ring base",
-    "care": "Keep dry \u00b7 Reshape petals gently with fingers",
+    "care": "Keep dry · Reshape petals gently with fingers",
     "active": 1
   },
   {
@@ -814,7 +815,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "badge": "Sweet Dessert",
     "dimensions": "Each pastry ~6-8 cm",
     "materials": "Textured craft clay, felt sponge, hand-painted details",
-    "care": "Decorative desk keepsake \u00b7 Do not wash with water",
+    "care": "Decorative desk keepsake · Do not wash with water",
     "active": 1
   },
   {
@@ -844,7 +845,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 260,
     "original_price": 380,
-    "detail": "4 ultra-fluffy daisy flowers \u00b7 Pink, yellow, white & lavender",
+    "detail": "4 ultra-fluffy daisy flowers · Pink, yellow, white & lavender",
     "description": "Incredibly soft and plush floral discs that serve as cute cup coasters or cheerful decorative accents for your vanity and nightstand. Can also be clipped to tote bags!",
     "featured": 41,
     "art": "coaster",
@@ -855,7 +856,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "badge": "Cozy Craft",
     "dimensions": "~9 cm diameter each",
     "materials": "High-density plush chenille fibers",
-    "care": "Hand fluff gently \u00b7 Keep dry",
+    "care": "Hand fluff gently · Keep dry",
     "active": 1
   },
   {
@@ -873,7 +874,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/artisan-sliced-party-cake-platter-1.webp"
     ],
     "badge": "Collector Set",
-    "dimensions": "Full wheel ~18 cm diameter \u00b7 Slice ~7 cm long",
+    "dimensions": "Full wheel ~18 cm diameter · Slice ~7 cm long",
     "materials": "Velvet chenille pipe cleaners, metal keyring attachment loops",
     "care": "Decorative keepsake / charm collection",
     "active": 1
@@ -893,7 +894,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
       "assets/products/kawaii-shooting-star-and-kitty-charms-1.webp"
     ],
     "badge": "Duo Charms",
-    "dimensions": "Each charm ~6 cm \u00b7 Gold keyring included",
+    "dimensions": "Each charm ~6 cm · Gold keyring included",
     "materials": "Plush chenille, gold keyring loops",
     "care": "Clip to backpacks, keys, or pouches",
     "active": 1
@@ -904,7 +905,7 @@ window.RAYCRAFTING_DEFAULT_PRODUCTS = [
     "category": "Keepsakes",
     "price": 220,
     "original_price": 300,
-    "detail": "Pair of toast charms \u00b7 Melting butter & berry toppings",
+    "detail": "Pair of toast charms · Melting butter & berry toppings",
     "description": "A heartwarming pair of handcrafted bread slices sculpted with golden-brown toasted crusts, smiling faces, and rich dollops of melting butter and blueberry toppings.",
     "featured": 44,
     "art": "toast",
