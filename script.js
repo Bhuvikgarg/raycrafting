@@ -52,7 +52,7 @@ function productMarkup(product) {
       <span class="product-tag">${product.category}</span>
       <button class="wish-button ${liked ? "active" : ""}" type="button" data-action="like" aria-label="${liked ? "Remove" : "Add"} ${product.name} ${liked ? "from" : "to"} wishlist">${liked ? "♥" : "♡"}</button>
     </div>
-    <div class="product-info"><div><h3>${product.name}</h3><p>${product.detail}</p></div><span class="product-price">${money(product.price)}</span><button class="quick-add" type="button" data-action="details">View details <span aria-hidden="true">↗</span></button></div>
+    <div class="product-info"><div><h3>${product.name}</h3><p>${product.detail}</p></div><span class="product-price">${money(product.price)}</span><button class="quick-add" type="button" data-action="details">View details</button></div>
   </article>`;
 }
 

@@ -56,3 +56,9 @@
 - Support Cloudinary CDN delivery via `optimizeCloudinaryUrl(url)` with `f_auto,q_auto,w_800,c_limit`.
 - Use `scripts/upload-cloudinary.js` to batch upload assets when `CLOUDINARY_URL` credentials are provided.
 
+## 12. Button Typography & Arrow-Free Clickable Styling (LitsocWebsite Standard)
+- **No Arrows in Buttons:** Never include arrows (`↗`, `→`, `›`, `&rarr;`, `&nearr;`, or `+`) inside buttons or call-to-action links. All button text must be clean and direct (e.g. `SHOP THE COLLECTION`, `CUSTOM ORDERS`, `ADD TO BAG`, `BUY NOW`, `CONTINUE TO CHECKOUT`).
+- **Big, Bold, Impactful Typography:** Use the `Antonio` condensed display font (`--font-btn: "Antonio", "DM Sans", sans-serif`) inspired by `https://github.com/p1yush-exe/LitsocWebsite` with bold 700 weight, uppercase transformation, `letter-spacing: 0.04em - 0.05em`, and prominent size (1.12rem - 1.25rem).
+- **Superior Clickability & Touch Targets:** Enforce comfortable touch heights (`min-height: 48px`), generous horizontal padding, rounded pill shapes (`border-radius: 999px`), and tactile hover/active states for maximum engagement on both mobile and desktop.
+- **Permanent Pricing Preservation Lock:** Never purge `raycrafting_user_prices` from `localStorage` during cache migrations, and ensure both frontend client (`shared-script.js`) and backend SQLite (`server.js`) strictly maintain the user-set prices without autonomous overwrites.
+

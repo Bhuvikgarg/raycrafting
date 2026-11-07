@@ -49,7 +49,7 @@
         "<button class=\"custom-btn-accept\" type=\"button\" data-custom-quick=\"accepted\" data-id=\"" + esc(order.id) + "\">✓ Accept Request</button>" +
         "<button class=\"custom-btn-decline\" type=\"button\" data-custom-quick=\"declined\" data-id=\"" + esc(order.id) + "\">✗ Reject Request</button>" +
         "<button class=\"custom-btn-quote\" type=\"button\" data-custom-quick=\"price_quoted\" data-id=\"" + esc(order.id) + "\">🏷️ Send Price Quote</button>" +
-        "<button class=\"primary-button request-save\" type=\"button\" data-custom-save=\"" + esc(order.id) + "\">Save changes <span>→</span></button>" +
+        "<button class=\"primary-button request-save\" type=\"button\" data-custom-save=\"" + esc(order.id) + "\">Save changes</button>" +
       "</div>" +
     "</article>";
   }
@@ -82,7 +82,7 @@
     }
   }
   async function loadNotes() { var target = $("noteRequestsList"); if (!target) return; if (!token()) { target.innerHTML = "<p class=\"field-help\">Unlock Seller Studio to view notes.</p>"; return; } try { var response = await fetch("/api/admin/note-requests", { headers: { "x-admin-token": token() }, cache: "no-store" }); var data = await response.json().catch(function () { return {}; }); if (!response.ok) throw new Error(data.error || "Could not load notes."); target.innerHTML = data.noteRequests && data.noteRequests.length ? data.noteRequests.map(noteMarkup).join("") : "<p class=\"field-help\">No notes yet.</p>"; } catch (error) { target.innerHTML = "<p class=\"field-help\">" + esc(error.message) + "</p>"; } }
-  function noteMarkup(note) { return "<article class=\"request-card note-card\"><div class=\"request-head\"><div><strong>" + esc(note.name || "Anonymous note") + "</strong><p>" + esc(date(note.created_at)) + "</p></div>" + selectMarkup(noteStatuses, note.status, "data-note-status", note.id) + "</div><p><a href=\"mailto:" + esc(note.email) + "\">" + esc(note.email) + "</a> · " + esc(note.language) + " · " + esc(note.city) + ", " + esc(note.state) + "</p><p class=\"request-message\">" + esc(note.message) + "</p><button class=\"primary-button request-save\" type=\"button\" data-note-save=\"" + esc(note.id) + "\">Save note status <span>→</span></button></article>"; }
+  function noteMarkup(note) { return "<article class=\"request-card note-card\"><div class=\"request-head\"><div><strong>" + esc(note.name || "Anonymous note") + "</strong><p>" + esc(date(note.created_at)) + "</p></div>" + selectMarkup(noteStatuses, note.status, "data-note-status", note.id) + "</div><p><a href=\"mailto:" + esc(note.email) + "\">" + esc(note.email) + "</a> · " + esc(note.language) + " · " + esc(note.city) + ", " + esc(note.state) + "</p><p class=\"request-message\">" + esc(note.message) + "</p><button class=\"primary-button request-save\" type=\"button\" data-note-save=\"" + esc(note.id) + "\">Save note status</button></article>"; }
   async function saveNote(noteId, button) { var card = button.closest(".request-card"); var response = await fetch("/api/admin/note-requests/status", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-token": token() }, body: JSON.stringify({ noteId: noteId, status: card.querySelector("[data-note-status]").value }) }); var data = await response.json().catch(function () { return {}; }); if (!response.ok) throw new Error(data.error || "Could not save note status."); button.textContent = "Saved ✓"; setTimeout(loadNotes, 500); }
   function init() {
     var style = document.createElement("style");

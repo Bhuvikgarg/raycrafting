@@ -469,7 +469,7 @@
             </div>
           </div>
           <div class="metric-card">
-            <span class="metric-icon">→</span>
+            <span class="metric-icon">✓</span>
             <div>
               <strong id="metricDelivered">0</strong>
               <label>Delivered / Completed</label>
@@ -535,7 +535,7 @@
             <input id="bannerQuoteInput" placeholder="e.g. “Where flowers bloom, so does hope.” — Handcrafted with love" style="width:100%;margin:0;padding:9px 12px;">
             <small class="field-help">Appears across the top ribbon of the store for every buyer to see.</small>
           </div>
-          <button type="button" class="primary-button" id="saveSettingsBtn">Save Studio Settings &amp; Channels <span>→</span></button>
+          <button type="button" class="primary-button" id="saveSettingsBtn">Save Studio Settings &amp; Channels</button>
           <small id="settingsStatus" class="field-help" style="margin-top:8px;display:block;"></small>
         </div>
       </section>

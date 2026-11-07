@@ -79,7 +79,7 @@
   function injectStyles() {
     const style = document.createElement("style");
     style.textContent = `
-      .commerce-modal{position:fixed;inset:0;z-index:1400;display:grid;place-items:center;padding:20px;background:rgba(37,38,41,.56);overflow:auto}.commerce-modal[hidden]{display:none}.commerce-panel{width:min(780px,100%);max-height:calc(100vh - 40px);overflow:auto;background:var(--white,#fffdf9);padding:30px;box-shadow:0 25px 80px rgba(37,38,41,.22);border-radius:4px}.commerce-head{display:flex;justify-content:space-between;gap:20px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:20px}.commerce-head h2{margin:0;font:600 32px/1.1 var(--display,"Playfair Display",serif);letter-spacing:-.03em}.commerce-head p{margin:6px 0 0;color:var(--muted);font-size:12px}.commerce-close{border:0;background:none;font-size:28px;color:var(--muted);cursor:pointer;padding:0;line-height:1}.commerce-close:hover{color:var(--ink)}.commerce-tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-bottom:22px}.commerce-tab{border:0;border-bottom:2px solid transparent;background:none;padding:0 0 10px;color:var(--muted);font:11px var(--mono);text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.commerce-tab.active{border-color:var(--coral);color:var(--ink)}.commerce-form{display:grid;gap:14px}.commerce-form label{display:block;margin:0;font-size:11px;font-weight:600}.commerce-form input,.commerce-form select,.commerce-form textarea{width:100%;border:1px solid var(--line);background:#fbf8f3;color:var(--ink);padding:11px 12px;margin-top:6px;font:13px var(--sans);outline:0;border-radius:3px;box-sizing:border-box}.commerce-form input:focus,.commerce-form textarea:focus{border-color:var(--coral);background:#fff}.commerce-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.commerce-action{border:0;background:var(--ink);color:var(--white);padding:13px 18px;font-size:12px;font-weight:600;cursor:pointer;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s ease}.commerce-action:hover{background:var(--coral-dark)}.commerce-action:disabled{opacity:.55;cursor:wait}.commerce-message{min-height:18px;margin:8px 0 0;color:var(--coral-dark);font-size:12px}.field-help{display:block;margin-top:5px;color:var(--muted);font-size:10px;font-weight:400;line-height:1.4}.commerce-message.success{color:#557351}.commerce-note{margin:12px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.checkout-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:26px}.checkout-section{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:20px}.checkout-section:last-child{border-bottom:0;margin-bottom:0}.checkout-section h3{margin:0 0 14px;font:600 19px var(--display);letter-spacing:-.02em}.checkout-lines{display:grid;gap:11px}.checkout-line{display:grid;grid-template-columns:48px 1fr auto;gap:11px;align-items:center}.checkout-line img{width:48px;height:48px;object-fit:cover;background:var(--sage);border-radius:3px}.checkout-line h4{margin:0;font-size:12px;font-weight:600}.checkout-line p{margin:3px 0 0;color:var(--muted);font-size:10.5px}.checkout-totals{padding:16px 0;border-top:1px solid var(--line);display:grid;gap:8px;font-size:12px}.checkout-total-row{display:flex;justify-content:space-between;gap:20px}.checkout-total-row.discount{color:#557351;font-weight:600}.checkout-total-row.total{padding-top:11px;border-top:1px solid var(--line);font-weight:700;font-size:15px}.coupon-row{display:flex;gap:8px}.coupon-row input{margin:0}.coupon-row button{white-space:nowrap;padding:10px 14px}.coupon-help{margin:7px 0 0;color:var(--muted);font-size:10.5px}.discount-display{display:flex;align-items:center;gap:7px;margin-top:4px}.discount-display .current-price{font-weight:700}.discount-display .old-price{text-decoration:line-through;color:var(--muted);font-size:11px}.discount-display .sale-badge{color:var(--coral-dark);font:10px var(--mono);text-transform:uppercase}.product-price .discount-display{justify-content:flex-end;flex-wrap:wrap}.fulfillment-options{display:grid;gap:8px;margin:0 0 14px}.fulfillment-option{display:flex!important;gap:10px;align-items:start;padding:11px 13px;border:1px solid var(--line);background:#fbf8f3;cursor:pointer;border-radius:3px}.fulfillment-option:has(input:checked){border-color:var(--coral);background:#fff4ee}.fulfillment-option input{width:auto!important;margin:2px 0 0!important;padding:0!important;accent-color:var(--coral)}.fulfillment-option strong{display:block;font-size:12px}.fulfillment-option small{display:block;margin-top:3px;color:var(--muted);font-size:10px;font-weight:400}.location-row{display:flex;align-items:center;gap:10px;margin:0 0 16px}.location-row button{border:1px solid var(--line);background:transparent;padding:7px 11px;font-size:10.5px;cursor:pointer;border-radius:2px}.location-row button:hover{border-color:var(--coral);color:var(--coral-dark)}.location-row small{color:var(--muted);font-size:10.5px}.customer-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 13px;background:#f3eee8;font-size:11.5px;border-radius:3px;margin-bottom:18px}.customer-bar button{border:0;background:none;text-decoration:underline;color:var(--coral-dark);cursor:pointer;font-size:11px;font-weight:600}
+      .commerce-modal{position:fixed;inset:0;z-index:1400;display:grid;place-items:center;padding:20px;background:rgba(37,38,41,.56);overflow:auto}.commerce-modal[hidden]{display:none}.commerce-panel{width:min(780px,100%);max-height:calc(100vh - 40px);overflow:auto;background:var(--white,#fffdf9);padding:30px;box-shadow:0 25px 80px rgba(37,38,41,.22);border-radius:4px}.commerce-head{display:flex;justify-content:space-between;gap:20px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:20px}.commerce-head h2{margin:0;font:600 32px/1.1 var(--display,"Playfair Display",serif);letter-spacing:-.03em}.commerce-head p{margin:6px 0 0;color:var(--muted);font-size:12px}.commerce-close{border:0;background:none;font-size:28px;color:var(--muted);cursor:pointer;padding:0;line-height:1}.commerce-close:hover{color:var(--ink)}.commerce-tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-bottom:22px}.commerce-tab{border:0;border-bottom:2px solid transparent;background:none;padding:0 0 10px;color:var(--muted);font:11px var(--mono);text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.commerce-tab.active{border-color:var(--coral);color:var(--ink)}.commerce-form{display:grid;gap:14px}.commerce-form label{display:block;margin:0;font-size:11px;font-weight:600}.commerce-form input,.commerce-form select,.commerce-form textarea{width:100%;border:1px solid var(--line);background:#fbf8f3;color:var(--ink);padding:11px 12px;margin-top:6px;font:13px var(--sans);outline:0;border-radius:3px;box-sizing:border-box}.commerce-form input:focus,.commerce-form textarea:focus{border-color:var(--coral);background:#fff}.commerce-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.commerce-action{border:0;background:var(--ink);color:var(--white);padding:13px 22px;font-family:var(--font-btn,'Antonio',sans-serif)!important;font-size:1.15rem!important;font-weight:700!important;letter-spacing:0.05em!important;text-transform:uppercase!important;line-height:1!important;cursor:pointer;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s ease}.commerce-action:hover{background:var(--coral-dark)}.commerce-action:disabled{opacity:.55;cursor:wait}.commerce-message{min-height:18px;margin:8px 0 0;color:var(--coral-dark);font-size:12px}.field-help{display:block;margin-top:5px;color:var(--muted);font-size:10px;font-weight:400;line-height:1.4}.commerce-message.success{color:#557351}.commerce-note{margin:12px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.checkout-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:26px}.checkout-section{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:20px}.checkout-section:last-child{border-bottom:0;margin-bottom:0}.checkout-section h3{margin:0 0 14px;font:600 19px var(--display);letter-spacing:-.02em}.checkout-lines{display:grid;gap:11px}.checkout-line{display:grid;grid-template-columns:48px 1fr auto;gap:11px;align-items:center}.checkout-line img{width:48px;height:48px;object-fit:cover;background:var(--sage);border-radius:3px}.checkout-line h4{margin:0;font-size:12px;font-weight:600}.checkout-line p{margin:3px 0 0;color:var(--muted);font-size:10.5px}.checkout-totals{padding:16px 0;border-top:1px solid var(--line);display:grid;gap:8px;font-size:12px}.checkout-total-row{display:flex;justify-content:space-between;gap:20px}.checkout-total-row.discount{color:#557351;font-weight:600}.checkout-total-row.total{padding-top:11px;border-top:1px solid var(--line);font-weight:700;font-size:15px}.coupon-row{display:flex;gap:8px}.coupon-row input{margin:0}.coupon-row button{white-space:nowrap;padding:10px 14px}.coupon-help{margin:7px 0 0;color:var(--muted);font-size:10.5px}.discount-display{display:flex;align-items:center;gap:7px;margin-top:4px}.discount-display .current-price{font-weight:700}.discount-display .old-price{text-decoration:line-through;color:var(--muted);font-size:11px}.discount-display .sale-badge{color:var(--coral-dark);font:10px var(--mono);text-transform:uppercase}.product-price .discount-display{justify-content:flex-end;flex-wrap:wrap}.fulfillment-options{display:grid;gap:8px;margin:0 0 14px}.fulfillment-option{display:flex!important;gap:10px;align-items:start;padding:11px 13px;border:1px solid var(--line);background:#fbf8f3;cursor:pointer;border-radius:3px}.fulfillment-option:has(input:checked){border-color:var(--coral);background:#fff4ee}.fulfillment-option input{width:auto!important;margin:2px 0 0!important;padding:0!important;accent-color:var(--coral)}.fulfillment-option strong{display:block;font-size:12px}.fulfillment-option small{display:block;margin-top:3px;color:var(--muted);font-size:10px;font-weight:400}.location-row{display:flex;align-items:center;gap:10px;margin:0 0 16px}.location-row button{border:1px solid var(--line);background:transparent;padding:7px 11px;font-size:10.5px;cursor:pointer;border-radius:2px}.location-row button:hover{border-color:var(--coral);color:var(--coral-dark)}.location-row small{color:var(--muted);font-size:10.5px}.customer-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 13px;background:#f3eee8;font-size:11.5px;border-radius:3px;margin-bottom:18px}.customer-bar button{border:0;background:none;text-decoration:underline;color:var(--coral-dark);cursor:pointer;font-size:11px;font-weight:600}
       .payment-method-options{display:grid;gap:10px;margin-top:10px}
       .payment-method-card{display:block!important;border:1.5px solid var(--line);background:#fbf8f3;padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;border-radius:4px}
       .payment-method-card:hover{border-color:var(--coral);background:#fffdf9}
@@ -258,7 +258,7 @@
             <form class="commerce-form" id="loginForm">
               <label>Email address<input id="loginEmail" type="email" required autocomplete="email"></label>
               <label>Password<input id="loginPassword" type="password" required minlength="8" autocomplete="current-password"></label>
-              <button class="commerce-action" type="submit">Sign in and continue <span>→</span></button>
+              <button class="commerce-action" type="submit">Sign in and continue</button>
             </form>
             <form class="commerce-form" id="registerForm" hidden>
               <div class="commerce-grid">
@@ -267,15 +267,15 @@
               </div>
               <label>Email address<input id="registerEmail" type="email" required autocomplete="email"></label>
               <label>Password<input id="registerPassword" type="password" minlength="8" required autocomplete="new-password"><small class="commerce-note">Use at least 8 characters.</small></label>
-              <button class="commerce-action" type="submit">Create account <span>→</span></button>
+              <button class="commerce-action" type="submit">Create account</button>
             </form>
             <form class="commerce-form" id="phoneForm" hidden>
               <label>Your name <span class="commerce-note">(for a new account)</span><input id="phoneName" minlength="2" maxlength="120" autocomplete="name"></label>
               <label>Mobile number<input id="phoneNumber" required inputmode="tel" autocomplete="tel" maxlength="14" placeholder="+91 9876543210"><small class="field-help">We will send a one-time code by SMS.</small></label>
-              <button class="commerce-action" id="sendOtpButton" type="button">Send OTP <span>→</span></button>
+              <button class="commerce-action" id="sendOtpButton" type="button">Send OTP</button>
               <div id="phoneOtpSection" hidden>
                 <label>6-digit OTP<input id="phoneOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Enter the code"></label>
-                <button class="commerce-action" id="verifyOtpButton" type="button">Verify OTP <span>→</span></button>
+                <button class="commerce-action" id="verifyOtpButton" type="button">Verify OTP</button>
               </div>
               <p class="commerce-message" id="phoneMessage"></p>
             </form>
@@ -400,7 +400,7 @@
                   </div>
                   <div class="checkout-totals" id="checkoutTotals"></div>
                 </section>
-                <button class="commerce-action" id="payButton" type="button">Continue to payment <span>→</span></button>
+                <button class="commerce-action" id="payButton" type="button">Continue to payment</button>
                 <p class="commerce-message" id="paymentMessage"></p>
                 <div class="checkout-trust-badge">
                   <span class="trust-shield">🛡</span>
@@ -430,7 +430,7 @@
           </div>
           <div id="ordersLoginNote" hidden>
             <p class="commerce-note">Sign in to see your order history and custom price quotes.</p>
-            <button class="commerce-action" id="ordersLoginButton" type="button">Sign in to your account <span>→</span></button>
+            <button class="commerce-action" id="ordersLoginButton" type="button">Sign in to your account</button>
           </div>
           <div class="orders-list" id="ordersList">
             <p class="commerce-note">Loading your orders…</p>
@@ -478,9 +478,9 @@
             </div>
           </div>
           <div class="confirm-actions">
-            <button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders <span>→</span></button>
+            <button class="commerce-action" id="confirmViewOrdersBtn" type="button">Track in My Orders</button>
             <a class="confirm-whatsapp-btn" id="confirmWhatsAppBtn" target="_blank" rel="noopener noreferrer" href="#">Chat with our studio on WhatsApp</a>
-            <a class="orders-button" id="confirmReceiptLink" href="thank-you.html" style="margin-top:6px;display:block;text-align:center;text-decoration:none;">View Full Order Receipt →</a>
+            <a class="orders-button" id="confirmReceiptLink" href="thank-you.html" style="margin-top:6px;display:block;text-align:center;text-decoration:none;">View Full Order Receipt</a>
             <button class="orders-button" id="confirmCloseBtn" type="button" style="margin-top:6px">Back to Shop</button>
           </div>
         </div>
@@ -519,7 +519,7 @@
               <small class="field-help">Please describe the issue. You can also share unboxing photos/videos with Raycrafting on WhatsApp.</small>
             </label>
             <div style="display:flex;gap:10px;margin-top:6px;">
-              <button class="commerce-action" type="submit" id="submitReturnBtn" style="flex:1;">Submit Return Request <span>→</span></button>
+              <button class="commerce-action" type="submit" id="submitReturnBtn" style="flex:1;">Submit Return Request</button>
               <button class="orders-button" type="button" id="cancelReturnBtn">Cancel</button>
             </div>
             <p class="commerce-message" id="returnMessage"></p>
@@ -572,9 +572,9 @@
           </div>
           <p style="margin: 12px 0; font-size: 13px; line-height: 1.6; color: var(--muted, #666);">"I believe the smallest handmade things carry the warmest feelings — blooms that never wither, and keepsakes that make your desk feel like home."</p>
           <div class="about-links" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Raycrafting">Email Raycrafting ↗</a>
+            <a class="commerce-action" href="mailto:raywithcharm@gmail.com?subject=Hello%20Raycrafting">Email Raycrafting</a>
             <a class="commerce-action" id="aboutWhatsAppChat" href="https://wa.me/919041915832?text=Hi%20Raycrafting!%20I%20love%20your%20creations!" target="_blank" rel="noopener noreferrer">Chat with Raycrafting</a>
-            <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Custom idea? ↗</a>
+            <a class="commerce-action" href="#custom" onclick="document.querySelector('#aboutModal').hidden=true;document.body.style.overflow=''">Custom idea?</a>
           </div>
         </div>
       </div>`
@@ -646,9 +646,9 @@
       if (!lines.length) {
         payBtn.textContent = "Your bag is empty";
       } else if (method === "cod") {
-        payBtn.textContent = `Place Order · Pay ${money(total.total)} on Delivery →`;
+        payBtn.textContent = `Place Order · Pay ${money(total.total)} on Delivery`;
       } else {
-        payBtn.textContent = `Pay ${money(total.total)} via UPI / Card →`;
+        payBtn.textContent = `Pay ${money(total.total)} via UPI / Card`;
       }
     }
 
@@ -1444,7 +1444,7 @@
         <h3>Sign in to view your orders &amp; quotes</h3>
         <p>Track your handcrafted blooms, review custom price quotes from Raycrafting, or request returns.</p>
         ${errorMsg && errorMsg !== "Sign in to view your orders." ? `<p class="commerce-message" style="margin-bottom:12px;">${esc(errorMsg)}</p>` : ""}
-        <button class="commerce-action" id="ordersPromptSignInBtn" type="button">Sign in to your account <span>→</span></button>
+        <button class="commerce-action" id="ordersPromptSignInBtn" type="button">Sign in to your account</button>
       </div>
     `;
     $("#ordersPromptSignInBtn")?.addEventListener("click", () => {

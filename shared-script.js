@@ -1,5 +1,5 @@
 (function autoMigrateCatalogCache() {
-  const CURRENT_VERSION = "20261107_launch_v5";
+  const CURRENT_VERSION = "20261107_launch_v6";
   try {
     const savedVer = localStorage.getItem("raycrafting_catalog_ver");
     if (savedVer !== CURRENT_VERSION) {
@@ -8,8 +8,7 @@
         "raycrafting-products-v2",
         "raycrafting-products-v3",
         "raycrafting-products-v4",
-        "raycrafting-products-v5",
-        "raycrafting_user_prices"
+        "raycrafting-products-v5"
       ];
       keys.forEach((k) => {
         try { localStorage.removeItem(k); } catch (e) {}
@@ -62,7 +61,7 @@ function applyUserCustomPrices(list) {
 
 function loadProducts() {
   const defaults = window.RAYCRAFTING_DEFAULT_PRODUCTS || [];
-  return defaults.map((product) => ({ ...product }));
+  return applyUserCustomPrices(defaults.map((product) => ({ ...product })));
 }
 
 function optimizeCloudinaryUrl(url, width = 800) {
@@ -368,10 +367,10 @@ function productMarkup(product) {
       </div>
       <div class="product-actions-grid">
         <button class="action-btn action-btn-bag" type="button" data-action="add" aria-label="Add ${escapeHtml(product.name)} to bag">
-          <span>Add to bag +</span>
+          <span>ADD TO BAG</span>
         </button>
         <button class="action-btn action-btn-buy" type="button" data-action="buy-now" aria-label="Buy ${escapeHtml(product.name)} now">
-          <span>Buy now</span>
+          <span>BUY NOW</span>
         </button>
       </div>
     </div>
@@ -461,12 +460,13 @@ async function loadPublicProducts() {
     if (!response.ok) return;
     const data = await response.json();
     if (!Array.isArray(data.products) || !data.products.length) return;
-    products = data.products.map((p) => ({
+    const normalized = data.products.map((p) => ({
       ...p,
       price: Number(p.price) || 0,
       originalPrice: Number(p.originalPrice || p.original_price || 0),
       original_price: Number(p.original_price || p.originalPrice || 0)
     }));
+    products = applyUserCustomPrices(normalized);
     window.RAYCRAFTING_PRODUCTS = products;
     renderProducts();
     renderCart();
@@ -545,7 +545,7 @@ function openProduct(product) {
   document.querySelector("#modalDetail").textContent = product.detail;
   const buyNowModalBtn = document.querySelector("#modalBuyNow");
   if (buyNowModalBtn) {
-    buyNowModalBtn.textContent = "Buy now";
+    buyNowModalBtn.textContent = "BUY NOW";
   }
   const specs = document.querySelector("#modalSpecs");
   if (specs) {
@@ -758,7 +758,7 @@ fetch("/api/config").then((r) => r.json()).then((cfg) => {
     const footerWa = document.querySelector("#footerWhatsAppLink");
     if (footerWa) {
       footerWa.href = `https://wa.me/${waNumber}`;
-      footerWa.textContent = `WhatsApp: ${displayPhone} ↗`;
+      footerWa.textContent = `WhatsApp: ${displayPhone}`;
       footerWa.target = "_blank";
       footerWa.rel = "noopener noreferrer";
     }
@@ -1174,14 +1174,14 @@ function initStickyMobileCta() {
       document.body.classList.add("has-sticky-bar");
       const count = cartQuantity();
       if (count > 0) {
-        ctaBtn.innerHTML = `View Bag (${count})`;
+        ctaBtn.innerHTML = `VIEW BAG (${count})`;
         ctaBtn.setAttribute("href", "#bag");
         ctaBtn.onclick = function(e) {
           e.preventDefault();
           setDrawer(true);
         };
       } else {
-        ctaBtn.innerHTML = `Shop Blooms`;
+        ctaBtn.innerHTML = `SHOP BLOOMS`;
         ctaBtn.setAttribute("href", "#shop");
         ctaBtn.onclick = null;
       }
