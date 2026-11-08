@@ -1722,9 +1722,10 @@ async function api(req, res, pathname, body, url) {
       const customUpsert = db.prepare(`INSERT INTO custom_prices (product_id, price, original_price, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(product_id) DO UPDATE SET price=excluded.price, original_price=excluded.original_price, updated_at=excluded.updated_at`);
       db.exec("BEGIN");
       try {
-        if (body.pruneOthers === true && Array.isArray(body.products)) {
-          const ids = products.map((product) => String(product.id || "")).filter(Boolean);
-          if (ids.length) db.prepare(`UPDATE products SET active=0 WHERE id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
+        const ids = products.map((product) => String(product.id || "")).filter(Boolean);
+        if (ids.length >= 10) {
+          db.prepare(`DELETE FROM products WHERE id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
+          db.prepare(`DELETE FROM custom_prices WHERE product_id NOT IN (${ids.map(() => "?").join(",")})`).run(...ids);
         }
         for (const product of products) {
           const rawImgs = Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []);
@@ -1839,8 +1840,9 @@ async function api(req, res, pathname, body, url) {
       if (!requireAdmin(req)) return json(res, 401, { error: "Seller access required." });
       const productId = String(body.id || "");
       if (!productId) return json(res, 400, { error: "Product ID required." });
-      db.prepare("UPDATE products SET active=0 WHERE id=?").run(productId);
-      return json(res, 200, { ok: true, id: productId, active: 0 });
+      db.prepare("DELETE FROM products WHERE id=?").run(productId);
+      db.prepare("DELETE FROM custom_prices WHERE product_id=?").run(productId);
+      return json(res, 200, { ok: true, id: productId, deleted: true });
     }
     return json(res, 404, { error: "API route not found." });
   } catch (error) { console.error(error); return json(res, error.status || 400, { error: error.message || "Request failed." }); }
