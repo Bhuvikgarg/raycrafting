@@ -683,22 +683,31 @@
       var response = await fetch('/api/admin/products?t=' + Date.now(), { headers: { 'x-admin-token': adminToken }, cache: 'no-store' });
       var data = await response.json();
       if (!response.ok || !Array.isArray(data.products) || !data.products.length) return;
-      products = data.products.map(function(product){
+      var remoteIds = new Set(data.products.map(function(p){ return p.id; }));
+      var localOnlyProducts = (products || []).filter(function(p){
+        return p && p.id && !remoteIds.has(p.id);
+      });
+      var remoteMapped = data.products.map(function(product){
         return Object.assign({}, product, {
           price: Number(product.price) || 0,
           originalPrice: Number(product.originalPrice || product.original_price || 0),
           options: Array.isArray(product.options) ? product.options : [],
           showColors: product.showColors !== false && product.show_colors !== 0,
           show_colors: (product.showColors !== false && product.show_colors !== 0) ? 1 : 0,
-          active: product.active !== false && product.active !== 0
+          active: product.active !== false && product.active !== 0,
+          featured: Number(product.featured) || 999
         });
       });
+      products = remoteMapped.concat(localOnlyProducts);
       localStorage.setItem(key, JSON.stringify(products));
       renderList();
       resetForm();
       var timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       markSavedState(timeStr);
       el('saveStatus').textContent = 'Connected to the live backend database.';
+      if (localOnlyProducts.length > 0) {
+        try { debouncedSyncToServer(); } catch(e){}
+      }
     } catch(error) {
       el('saveStatus').textContent = 'Could not load the live catalog.';
     }
@@ -955,7 +964,11 @@
       var res = await fetch(url, { headers: headers, cache: 'no-store' });
       var data = await res.json();
       if (res.ok && Array.isArray(data.products) && data.products.length) {
-        products = data.products.map(function(product){
+        var remoteIds = new Set(data.products.map(function(p){ return p.id; }));
+        var localOnlyProducts = (products || []).filter(function(p){
+          return p && p.id && !remoteIds.has(p.id);
+        });
+        var remoteMapped = data.products.map(function(product){
           return Object.assign({}, product, {
             price: Number(product.price) || 0,
             originalPrice: Number(product.originalPrice || product.original_price || 0),
@@ -966,10 +979,14 @@
             featured: Number(product.featured) || 999
           });
         });
+        products = remoteMapped.concat(localOnlyProducts);
         localStorage.setItem(key, JSON.stringify(products));
         renderList();
         var timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         markSavedState(timeStr);
+        if (localOnlyProducts.length > 0) {
+          try { debouncedSyncToServer(); } catch(e){}
+        }
       }
     } catch(e) {
       console.warn('Could not fetch initial catalog:', e);

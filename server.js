@@ -256,17 +256,13 @@ if (fs.existsSync(seedPath)) {
     // Never overwrite customized prices, names, positions, colors, or active statuses on server restart.
     if (existingCount === 0) {
       const seedProducts = JSON.parse(fs.readFileSync(seedPath, "utf8"));
-      const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,active,badge,dimensions,materials,care) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+      const productInsert = db.prepare(`INSERT INTO products (id,name,category,price,original_price,detail,description,featured,art,image,images_json,options_json,active,badge,dimensions,materials,care,show_colors) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
       for (const p of seedProducts) {
         const imgs = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
         const opts = Array.isArray(p.options) && p.options.length ? JSON.stringify(p.options) : null;
-        productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), opts, p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""));
+        const showCol = p.showColors === false || p.show_colors === 0 ? 0 : 1;
+        productInsert.run(String(p.id), String(p.name), String(p.category), Number(p.price) || 0, Number(p.original_price || p.originalPrice) || 0, String(p.detail || ""), String(p.description || ""), Number(p.featured) || 1, String(p.art || "custom"), String(p.image || imgs[0] || ""), JSON.stringify(imgs), opts, p.active === 0 ? 0 : 1, String(p.badge || ""), String(p.dimensions || ""), String(p.materials || ""), String(p.care || ""), showCol);
       }
-    }
-    // Re-apply any user custom prices on startup so user-set prices are never lost
-    const savedCustom = db.prepare("SELECT product_id, price, original_price FROM custom_prices").all();
-    for (const cp of savedCustom) {
-      db.prepare("UPDATE products SET price=?, original_price=? WHERE id=?").run(cp.price, cp.original_price, cp.product_id);
     }
   } catch (err) {
     console.error("Failed to seed products:", err.message);
@@ -274,25 +270,7 @@ if (fs.existsSync(seedPath)) {
 }
 
 function applyCustomPriceOverrides(products) {
-  try {
-    const customList = db.prepare("SELECT product_id, price, original_price FROM custom_prices").all();
-    if (!customList.length) return products;
-    const customMap = new Map(customList.map(r => [r.product_id, r]));
-    return products.map(p => {
-      const c = customMap.get(p.id);
-      if (c) {
-        return {
-          ...p,
-          price: c.price,
-          original_price: c.original_price,
-          originalPrice: c.original_price
-        };
-      }
-      return p;
-    });
-  } catch(e) {
-    return products;
-  }
+  return products;
 }
 const couponInsert = db.prepare(`INSERT OR IGNORE INTO coupons (code,kind,amount,minimum_subtotal,active) VALUES (?,?,?,?,1)`);
 couponInsert.run("WELCOME10", "percent", 10, 0);
@@ -1236,7 +1214,7 @@ async function api(req, res, pathname, body, url) {
         };
       });
       return json(res, 200, {
-        products: applyCustomPriceOverrides(mapped)
+        products: mapped
       });
     }
     if (req.method === "GET" && pathname === "/api/admin/products") {
@@ -1260,7 +1238,7 @@ async function api(req, res, pathname, body, url) {
         };
       });
       return json(res, 200, {
-        products: applyCustomPriceOverrides(mapped)
+        products: mapped
       });
     }
     if (req.method === "POST" && pathname === "/api/admin/auth") {

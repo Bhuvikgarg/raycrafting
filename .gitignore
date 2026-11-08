@@ -3,7 +3,6 @@
 !.env.example
 node_modules/
 .vercel/
-data/*.sqlite
 data/*.sqlite-shm
 data/*.sqlite-wal
 .vercel
