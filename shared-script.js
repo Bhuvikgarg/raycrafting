@@ -520,7 +520,7 @@ async function loadPublicProducts() {
         original_price: Number(p.original_price || p.originalPrice || 0)
       };
     });
-    products = applyUserCustomPrices(normalized);
+    products = normalized;
     window.RAYCRAFTING_PRODUCTS = products;
     renderProducts();
     renderCart();
