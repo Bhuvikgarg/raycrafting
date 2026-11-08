@@ -13,6 +13,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://raycrafting-production-8b2d.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/assets/uploads/:path*",
+      "destination": "https://raycrafting-production-8b2d.up.railway.app/assets/uploads/:path*"
     }
   ],
   "headers": [
