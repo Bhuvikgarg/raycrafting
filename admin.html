@@ -63,7 +63,12 @@
 <div class="field-grid"><label>Product name<input id="productName" required placeholder="e.g. Pink Tulip Stem"></label><label>Price<input id="productPrice" required type="number" min="0" step="0.01" placeholder="18.00"></label><label>Collection<select id="productCategory"><option>Flowers</option><option>Keepsakes</option><option>Bundles</option></select></label><label>Short detail<input id="productDetail" required placeholder="one stem"></label></div>
 <label>Description<textarea id="productDescription" required rows="4" placeholder="Tell shoppers what makes this piece special..."></textarea></label>
 <label>Product pictures &amp; color variants (Upload one or more)<div class="upload-box"><input id="productImage" type="file" accept="image/*" multiple><span id="uploadLabel">Choose pictures from your device</span><small>JPG, PNG, or WebP. Select multiple pictures to set color choices &amp; angles!</small></div></label>
-<div style="display:flex;gap:8px;align-items:center;margin:6px 0 12px;"><input id="addPhotoUrlInput" type="text" placeholder="Or paste photo path/URL (e.g. assets/products/...) then click Add" style="margin:0;padding:8px 12px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:#fff;flex:1;"><button id="addPhotoUrlBtn" type="button" class="order-btn" style="padding:8px 12px!important;white-space:nowrap;font-weight:600;color:var(--coral-dark);">+ Add Photo</button></div>
+<div style="display:flex;gap:8px;align-items:center;margin:6px 0 6px;"><input id="addPhotoUrlInput" type="text" placeholder="Or paste photo path/URL (e.g. assets/products/...) then click Add" style="margin:0;padding:8px 12px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:#fff;flex:1;"><button id="addPhotoUrlBtn" type="button" class="order-btn" style="padding:8px 12px!important;white-space:nowrap;font-weight:600;color:var(--coral-dark);">+ Add Photo</button></div>
+<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:6px 10px;background:#f0f7fc;border-radius:8px;border:1px solid rgba(29,111,165,0.2);">
+  <span style="font-size:10.5px;color:#185b88;font-weight:600;">✨ Recent Asset:</span>
+  <button type="button" class="order-btn" id="quickAddBlueBouquetBtn" data-photo="assets/products/blue-tulip-lily-bouquet-1.webp" style="padding:3px 9px!important;font-size:11px!important;color:#0e5888!important;border-color:rgba(29,111,165,0.35)!important;background:#ffffff!important;" title="Click to instantly attach the optimized Blue Tulip &amp; Lily Bouquet photo">🩵 Attach Blue Tulip &amp; Lily Photo</button>
+  <button type="button" class="order-btn" id="quickTemplateBlueBouquetBtn" style="padding:3px 9px!important;font-size:11px!important;color:#7a2a43!important;border-color:rgba(122,42,67,0.35)!important;background:#ffffff!important;" title="Click to fill form with name, price, detail &amp; description for this bouquet">📝 Fill Bouquet Details</button>
+</div>
 <div class="image-gallery-preview" id="imageGalleryPreview" style="display:flex;flex-direction:column;gap:8px;margin:10px 0 16px;"></div>
 <label>Position on shop (1 = first item shoppers see)<input id="productFeatured" type="number" min="1" step="1" value="1"><small class="field-help">Lower position numbers appear first in the catalogue. (e.g. 1-7 for Flowers, 8+ for Keepsakes &amp; Clay)</small></label>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 16px;">
@@ -718,6 +723,34 @@
       e.preventDefault();
       el('addPhotoUrlBtn')?.click();
     }
+  });
+
+  el('quickAddBlueBouquetBtn')?.addEventListener('click', function(){
+    var path = this.dataset.photo;
+    if(!productImages.includes(path)){
+      productImages.push(path);
+      productColorNames.push('Sky Blue Melody');
+      renderImageGallery();
+      showToast('Attached Blue Tulip & Lily Bouquet photo!');
+    } else {
+      showToast('Photo is already attached.');
+    }
+  });
+
+  el('quickTemplateBlueBouquetBtn')?.addEventListener('click', function(){
+    el('productName').value = 'Celestial Sky Blue Tulip & Lily Bouquet';
+    el('productCategory').value = 'Flowers';
+    el('productPrice').value = '299';
+    if(el('productOriginalPrice')) el('productOriginalPrice').value = '550';
+    el('productDetail').value = '3 sky-blue tulips · Centerpiece open lily · 5 pearl mini blossoms';
+    el('productDescription').value = 'A tranquil daydream sculpted from velvety chenille wire. This everlasting bouquet brings together three graceful sky-blue tulips standing tall amidst forest-green leaves, crowned by a breathtaking centerpiece light-blue lily with dark-accented stamens. Surrounding the blooms are five dainty baby-blue and frosted-white accent florets, each centered with a lustrous faux pearl. Hand-wrapped in cascading layers of soft powder-blue florist paper, this piece captures the serene peace of a cloudless morning sky — crafted entirely by hand so it never withers and keeps its sunshine forever.';
+    var path = 'assets/products/blue-tulip-lily-bouquet-1.webp';
+    if(!productImages.includes(path)){
+      productImages.push(path);
+      productColorNames.push('Sky Blue Melody');
+      renderImageGallery();
+    }
+    showToast('Loaded Celestial Blue Tulip & Lily details! Click "Save product" when ready.');
   });
 
   el('productImage').addEventListener('change', async function(){
